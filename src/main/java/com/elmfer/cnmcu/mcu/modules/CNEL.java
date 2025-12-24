@@ -4,7 +4,8 @@ import java.nio.ByteBuffer;
 
 import com.elmfer.cnmcu.cpp.WeakNativeObject;
 
-import net.minecraft.nbt.NbtCompound;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 /**
  * Reference to a CNEL object
@@ -83,39 +84,36 @@ public class CNEL extends WeakNativeObject {
         write(address, data);
     }
     
-    public void writeNbt(NbtCompound nbt) {
+    public State getState() {
         assert isNativeObjectValid();
-        
-        NbtCompound elNbt = new NbtCompound();
         
         ByteBuffer iclRegistersData = getICLRegistersData();
         ByteBuffer iflRegistersData = getIFLRegistersData();
-        
-        byte[] iclData = new byte[iclRegistersData.remaining()];
-        byte[] iflData = new byte[iflRegistersData.remaining()];
-        
-        iclRegistersData.get(iclData);
-        iflRegistersData.get(iflData);
-        
-        elNbt.putByteArray("iclRegistersData", iclData);
-        elNbt.putByteArray("iflRegistersData", iflData);
-        
-        nbt.put("el", elNbt);
+
+        return new State(
+                iclRegistersData,
+                iflRegistersData
+        );
     }
     
-    public void readNbt(NbtCompound nbt) {
+    public void setState(State state) {
         assert isNativeObjectValid();
-
-        NbtCompound elNbt = nbt.getCompound("el");
         
-        ByteBuffer iclRegistersData = getICLRegistersData();
-        ByteBuffer iflRegistersData = getIFLRegistersData();
+        var iclRegistersData = getICLRegistersData();
+        var iflRegistersData = getIFLRegistersData();
 
-        byte[] iclData = elNbt.getByteArray("iclRegistersData");
-        byte[] iflData = elNbt.getByteArray("iflRegistersData");
+        iclRegistersData.put(state.iclData);
+        iflRegistersData.put(state.iflData);
+    }
 
-        iclRegistersData.put(iclData);
-        iflRegistersData.put(iflData);
+    public record State(
+        ByteBuffer iclData,
+        ByteBuffer iflData
+    ) {
+        public static final Codec<State> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                Codec.BYTE_BUFFER.fieldOf("iclData").forGetter(State::iclData),
+                Codec.BYTE_BUFFER.fieldOf("iflData").forGetter(State::iflData)
+        ).apply(instance, State::new));
     }
     
     // @formatter:off

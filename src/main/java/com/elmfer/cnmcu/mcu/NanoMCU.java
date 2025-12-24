@@ -9,7 +9,10 @@ import com.elmfer.cnmcu.mcu.modules.CNRAM;
 import com.elmfer.cnmcu.mcu.modules.CNROM;
 import com.elmfer.cnmcu.mcu.modules.CNUART;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.storage.ReadView;
 import net.minecraft.util.math.Direction;
 
 public class NanoMCU extends StrongNativeObject {
@@ -177,42 +180,77 @@ public class NanoMCU extends StrongNativeObject {
         return uart;
     }
 
-    public void writeNbt(NbtCompound nbt) {
-        NbtCompound mcuNbt = new NbtCompound();
+    public State getState() {
+        var romState = rom.getState();
+        var ramState = ram.getState();
+        var gpioState =  gpio.getState();
+        var cpuState = cpu.getState();
+        var elState = el.getState();
+        var uartState = uart.getState();
 
-        mcuNbt.putInt("frontOutput", frontOutput);
-        mcuNbt.putInt("rightOutput", rightOutput);
-        mcuNbt.putInt("backOutput", backOutput);
-        mcuNbt.putInt("leftOutput", leftOutput);
-        mcuNbt.putBoolean("powered", isPowered());
-        mcuNbt.putBoolean("clockPaused", isClockPaused());
-        mcuNbt.putLong("numCycles", numCycles());
-        rom.writeNbt(mcuNbt);
-        ram.writeNbt(mcuNbt);
-        gpio.writeNbt(mcuNbt);
-        cpu.writeNbt(mcuNbt);
-        el.writeNbt(mcuNbt);
-        uart.writeNbt(mcuNbt);
-
-        nbt.put("mcu", mcuNbt);
+        return new State(
+                frontOutput,
+                rightOutput,
+                backOutput,
+                leftOutput,
+                isPowered(),
+                isClockPaused(),
+                numCycles(),
+                romState,
+                ramState,
+                gpioState,
+                cpuState,
+                elState,
+                uartState
+        );
     }
 
-    public void readNbt(NbtCompound nbt) {
-        NbtCompound mcuNbt = nbt.getCompound("mcu");
+    public void setState(State state) {
+        frontOutput = state.frontOutput;
+        rightOutput = state.rightOutput;
+        backOutput = state.backOutput;
+        leftOutput = state.leftOutput;
+        setPowered(state.powered);
+        setClockPause(state.clockPaused);
+        setNumCycles(getNativePtr(), state.numCycles);
+        rom.setState(state.rom);
+        ram.setState(state.ram);
+        gpio.setState(state.gpio);
+        cpu.setState(state.cpu);
+        el.setState(state.el);
+        uart.setState(state.uart);
+    }
 
-        frontOutput = mcuNbt.getInt("frontOutput");
-        rightOutput = mcuNbt.getInt("rightOutput");
-        backOutput = mcuNbt.getInt("backOutput");
-        leftOutput = mcuNbt.getInt("leftOutput");
-        setPowered(mcuNbt.getBoolean("powered"));
-        setClockPause(mcuNbt.getBoolean("clockPaused"));
-        setNumCycles(getNativePtr(), mcuNbt.getLong("numCycles"));
-        rom.readNbt(mcuNbt);
-        ram.readNbt(mcuNbt);
-        gpio.readNbt(mcuNbt);
-        cpu.readNbt(mcuNbt);
-        el.readNbt(mcuNbt);
-        uart.readNbt(mcuNbt);
+    public record State(
+            int frontOutput,
+            int rightOutput,
+            int backOutput,
+            int leftOutput,
+            boolean powered,
+            boolean clockPaused,
+            long numCycles,
+            CNROM.State rom,
+            CNRAM.State ram,
+            CNGPIO.State gpio,
+            MOS6502.State cpu,
+            CNEL.State el,
+            CNUART.State uart
+    ) {
+        public static final Codec<State> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                Codec.INT.fieldOf("frontOutput").forGetter(State::frontOutput),
+                Codec.INT.fieldOf("rightOutput").forGetter(State::rightOutput),
+                Codec.INT.fieldOf("backOutput").forGetter(State::backOutput),
+                Codec.INT.fieldOf("leftOutput").forGetter(State::leftOutput),
+                Codec.BOOL.fieldOf("powered").forGetter(State::powered),
+                Codec.BOOL.fieldOf("clockPaused").forGetter(State::clockPaused),
+                Codec.LONG.fieldOf("numCycles").forGetter(State::numCycles),
+                CNROM.State.CODEC.fieldOf("rom").forGetter(State::rom),
+                CNRAM.State.CODEC.fieldOf("ram").forGetter(State::ram),
+                CNGPIO.State.CODEC.fieldOf("gpio").forGetter(State::gpio),
+                MOS6502.State.CODEC.fieldOf("cpu").forGetter(State::cpu),
+                CNEL.State.CODEC.fieldOf("el").forGetter(State::el),
+                CNUART.State.CODEC.fieldOf("uart").forGetter(State::uart)
+        ).apply(instance, State::new));
     }
 
     // @formatter:off

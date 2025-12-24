@@ -17,7 +17,7 @@ import net.minecraft.util.Uuids;
 public record IDEScreenMCUControlPayload(
         UUID mcuId,
         Control control) implements CustomPayload {
-    public static final Identifier RAW_ID = Identifier.of(CodeNodeMicrocontrollers.MOD_ID, "ide_screen_mcu_control");
+    public static final Identifier RAW_ID = CodeNodeMicrocontrollers.id("ide_screen_mcu_control");
     public static final Id<IDEScreenMCUControlPayload> ID = new Id<>(RAW_ID);
     public static final PacketCodec<RegistryByteBuf, IDEScreenMCUControlPayload> CODEC = PacketCodec.tuple(
             Uuids.PACKET_CODEC, IDEScreenMCUControlPayload::mcuId,

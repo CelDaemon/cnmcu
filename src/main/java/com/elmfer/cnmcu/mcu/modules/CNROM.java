@@ -4,6 +4,8 @@ import java.nio.ByteBuffer;
 
 import com.elmfer.cnmcu.cpp.WeakNativeObject;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.NbtCompound;
 
 /**
@@ -64,29 +66,32 @@ public class CNROM extends WeakNativeObject {
         return writeProtected;
     }
     
-    public void writeNbt(NbtCompound nbt) {
+    public State getState() {
         assert isNativeObjectValid();
-
-        NbtCompound romNbt = new NbtCompound();
         ByteBuffer data = getData();
-        byte[] bytes = new byte[data.remaining()];
-        data.get(bytes);
-        romNbt.putByteArray("data", bytes);
-        romNbt.putBoolean("writeProtected", isWriteProtected());
-        
-        nbt.put("rom", romNbt);
+        return new State(
+                data,
+                isWriteProtected()
+        );
     }
     
-    public void readNbt(NbtCompound nbt) {
+    public void setState(State state) {
         assert isNativeObjectValid();
 
-        NbtCompound romNbt = nbt.getCompound("rom");
-        byte[] bytes = romNbt.getByteArray("data");
         ByteBuffer data = getData();
-        data.put(bytes);
-        setWriteProtected(romNbt.getBoolean("writeProtected"));
+        data.put(state.data());
+        setWriteProtected(state.writeProtected());
     }
-    
+
+    public record State(
+            ByteBuffer data,
+            boolean writeProtected
+    ) {
+        public static final Codec<State> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                Codec.BYTE_BUFFER.fieldOf("data").forGetter(State::data),
+                Codec.BOOL.fieldOf("writeProtected").forGetter(State::writeProtected)
+        ).apply(instance, State::new));
+    }
     // @formatter:off
     
     /*JNI

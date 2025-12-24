@@ -4,7 +4,8 @@ import java.nio.ByteBuffer;
 
 import com.elmfer.cnmcu.cpp.WeakNativeObject;
 
-import net.minecraft.nbt.NbtCompound;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 /**
  * Reference to a CNGPIO object
@@ -81,63 +82,61 @@ public class CNGPIO extends WeakNativeObject {
         return shouldInterrupt(getNativePtr());
     }
     
-    public void writeNbt(NbtCompound nbt) {
+    public State getState() {
         assert isNativeObjectValid();
 
-        NbtCompound gpioNbt = new NbtCompound();
+        var pvFrontData = getPVFrontData();
 
-        ByteBuffer buffer = getPVFrontData();
-        byte[] pvFrontData = new byte[buffer.remaining()];
-        buffer.get(pvFrontData);
-        gpioNbt.putByteArray("pvFrontData", pvFrontData);
+        var pvBackData = getPVBackData();
 
-        buffer = getPVBackData();
-        byte[] pvBackData = new byte[buffer.remaining()];
-        buffer.get(pvBackData);
-        gpioNbt.putByteArray("pvBackData", pvBackData);
+        var dirData = getDirData();
 
-        buffer = getDirData();
-        byte[] dirData = new byte[buffer.remaining()];
-        buffer.get(dirData);
-        gpioNbt.putByteArray("dirData", dirData);
+        var intData = getIntData();
 
-        buffer = getIntData();
-        byte[] intData = new byte[buffer.remaining()];
-        buffer.get(intData);
-        gpioNbt.putByteArray("intData", intData);
+        var iflData = getIFLData();
 
-        buffer = getIFLData();
-        byte[] iflData = new byte[buffer.remaining()];
-        buffer.get(iflData);
-        gpioNbt.putByteArray("iflData", iflData);
-
-        nbt.put("gpio", gpioNbt);
+        return new State(
+                pvFrontData,
+                pvBackData,
+                dirData,
+                intData,
+                iflData
+        );
     }
     
-    public void readNbt(NbtCompound nbt) {
+    public void setState(State state) {
         assert isNativeObjectValid();
 
-        NbtCompound gpioNbt = nbt.getCompound("gpio");
-
         ByteBuffer buffer = getPVFrontData();
-        byte[] pvFrontData = gpioNbt.getByteArray("pvFrontData");
-        buffer.put(pvFrontData);
+        buffer.put(state.pvFrontData);
 
         buffer = getPVBackData();
-        byte[] pvBackData = gpioNbt.getByteArray("pvBackData");
-        buffer.put(pvBackData);
+        buffer.put(state.pvBackData);
 
         buffer = getDirData();
-        byte[] dirData = gpioNbt.getByteArray("dirData");
-        buffer.put(dirData);
+        buffer.put(state.dirData);
 
         buffer = getIntData();
-        byte[] intData = gpioNbt.getByteArray("intData");
-        buffer.put(intData);
+        buffer.put(state.intData);
 
         buffer = getIFLData();
-        byte[] iflData = gpioNbt.getByteArray("iflData");
-        buffer.put(iflData);
+        buffer.put(state.iflData);
+    }
+
+    public record State(
+            ByteBuffer pvFrontData,
+            ByteBuffer pvBackData,
+            ByteBuffer dirData,
+            ByteBuffer intData,
+            ByteBuffer iflData
+    ) {
+        public static final Codec<State> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                Codec.BYTE_BUFFER.fieldOf("pvFrontData").forGetter(State::pvFrontData),
+                Codec.BYTE_BUFFER.fieldOf("pvBackData").forGetter(State::pvBackData),
+                Codec.BYTE_BUFFER.fieldOf("dirData").forGetter(State::dirData),
+                Codec.BYTE_BUFFER.fieldOf("intData").forGetter(State::intData),
+                Codec.BYTE_BUFFER.fieldOf("iflData").forGetter(State::iflData)
+        ).apply(instance, State::new));
     }
     
     // @formatter:off

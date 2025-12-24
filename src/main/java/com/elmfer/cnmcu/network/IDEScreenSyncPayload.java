@@ -18,7 +18,7 @@ public record IDEScreenSyncPayload(
         CPUStatus cpuStatus,
         BusStatus busStatus,
         byte[] zeroPage) implements CustomPayload {
-    public static final Identifier RAW_ID = Identifier.of(CodeNodeMicrocontrollers.MOD_ID, "ide_screen_sync");
+    public static final Identifier RAW_ID = CodeNodeMicrocontrollers.id("ide_screen_sync");
     public static final CustomPayload.Id<IDEScreenSyncPayload> ID = new CustomPayload.Id<>(RAW_ID);
     public static final PacketCodec<RegistryByteBuf, IDEScreenSyncPayload> CODEC = PacketCodec.tuple(
             PacketCodecs.BOOLEAN, IDEScreenSyncPayload::isPowered,

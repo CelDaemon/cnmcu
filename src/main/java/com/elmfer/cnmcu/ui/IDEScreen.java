@@ -2,7 +2,12 @@ package com.elmfer.cnmcu.ui;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
+import com.elmfer.cnmcu.network.*;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.minecraft.client.input.KeyInput;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
 
@@ -12,13 +17,9 @@ import com.elmfer.cnmcu.config.Config;
 import com.elmfer.cnmcu.cpp.NativesUtils;
 import com.elmfer.cnmcu.mcu.Sketches;
 import com.elmfer.cnmcu.mcu.Toolchain;
-import com.elmfer.cnmcu.network.IDEScreenHeartbeatPayload;
-import com.elmfer.cnmcu.network.IDEScreenMCUControlPayload;
 import com.elmfer.cnmcu.network.IDEScreenMCUControlPayload.Control;
-import com.elmfer.cnmcu.network.IDEScreenSaveCodePayload;
 import com.elmfer.cnmcu.network.IDEScreenSyncPayload.BusStatus;
 import com.elmfer.cnmcu.network.IDEScreenSyncPayload.CPUStatus;
-import com.elmfer.cnmcu.network.UploadROMC2S2CPacket;
 import com.elmfer.cnmcu.ui.handler.IDEScreenHandler;
 
 import imgui.ImGui;
@@ -51,8 +52,8 @@ public class IDEScreen extends HandledScreen<IDEScreenHandler> {
 
     private boolean saved = true;
 
-    public CPUStatus cpuStatus = new CPUStatus();
-    public BusStatus busStatus = new BusStatus();
+    public CPUStatus cpuStatus = new CPUStatus(0, 0, 0, 0, 0, 0, 0);
+    public BusStatus busStatus = new BusStatus(0, 0, false);
     public boolean isPowered = false;
     public boolean isClockPaused = false;
     public ByteBuffer zeroPage = BufferUtils.createByteBuffer(256);
@@ -61,7 +62,7 @@ public class IDEScreen extends HandledScreen<IDEScreenHandler> {
     private IDEScreenHeartbeatPayload heartbeatPacket;
 
     private CompletableFuture<byte[]> compileFuture;
-    private UploadROMC2S2CPacket uploadPacket;
+    private Future<UploadROMResponsePayload> uploadPacket;
     private boolean shouldUpload = false;
 
     private boolean showAbout = false;
@@ -127,12 +128,12 @@ public class IDEScreen extends HandledScreen<IDEScreenHandler> {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyInput key) {
 
         if (IO.getWantCaptureKeyboard())
             return true;
 
-        if (keyCode == GLFW.GLFW_KEY_ESCAPE || client.options.inventoryKey.matchesKey(keyCode, scanCode)) {
+        if (key.key() == GLFW.GLFW_KEY_ESCAPE || client.options.inventoryKey.matchesKey(key)) {
             close();
             return true;
         }
@@ -368,15 +369,18 @@ public class IDEScreen extends HandledScreen<IDEScreenHandler> {
 
         if (shouldUpload && compileFuture.isDone() && uploadPacket == null) {
             try {
-                uploadPacket = new UploadROMC2S2CPacket(handler.getMcuID(), compileFuture.get());
-                uploadPacket.request();
+                uploadPacket = UploadROMRequestPayload.send(handler.getMcuID(), compileFuture.get());
             } catch (Exception e) {
                 shouldUpload = false;
             }
         }
 
-        if (uploadPacket != null && uploadPacket.isReady()) {
-            Toolchain.appendBuildStdout("Upload", uploadPacket.message);
+        if (uploadPacket != null && uploadPacket.isDone()) {
+            try {
+                Toolchain.appendBuildStdout("Upload", uploadPacket.get().message());
+            } catch (InterruptedException | ExecutionException e) {
+                throw new RuntimeException(e);
+            }
             uploadPacket = null;
             shouldUpload = false;
         }
@@ -447,20 +451,21 @@ public class IDEScreen extends HandledScreen<IDEScreenHandler> {
         ImGui.separator();
 
         if (ImGui.checkbox("Power", isPowered))
-            new IDEScreenMCUControlPayload(handler.getMcuID(), isPowered ? Control.POWER_OFF : Control.POWER_ON)
-                    .send();
+            ClientPlayNetworking.send(new IDEScreenMCUControlPayload(handler.getMcuID(),
+                    isPowered ? Control.POWER_OFF : Control.POWER_ON)
+            );
         ImGui.sameLine();
         if (ImGui.button("Reset"))
-            new IDEScreenMCUControlPayload(handler.getMcuID(), Control.RESET).send();
+            ClientPlayNetworking.send(new IDEScreenMCUControlPayload(handler.getMcuID(), Control.RESET));
         ImGui.sameLine();
         ImGui.beginDisabled(!isPowered);
         if (ImGui.checkbox("Pause", isClockPaused))
-            new IDEScreenMCUControlPayload(handler.getMcuID(),
-                    isClockPaused ? Control.RESUME_CLOCK : Control.PAUSE_CLOCK).send();
+            ClientPlayNetworking.send(new IDEScreenMCUControlPayload(handler.getMcuID(),
+                    isClockPaused ? Control.RESUME_CLOCK : Control.PAUSE_CLOCK));
         ImGui.sameLine();
         ImGui.beginDisabled(!isClockPaused);
         if (ImGui.button("Step"))
-            new IDEScreenMCUControlPayload(handler.getMcuID(), Control.CYCLE).send();
+            ClientPlayNetworking.send(new IDEScreenMCUControlPayload(handler.getMcuID(), Control.CYCLE));
         ImGui.endDisabled();
         ImGui.endDisabled();
 
@@ -477,38 +482,38 @@ public class IDEScreen extends HandledScreen<IDEScreenHandler> {
             showRegistersInHex = !showRegistersInHex;
 
         if (showRegistersInHex) {
-            ImGui.text(String.format("A: 0x%02X", cpuStatus.A));
-            ImGui.text(String.format("X: 0x%02X", cpuStatus.X));
-            ImGui.text(String.format("Y: 0x%02X", cpuStatus.Y));
+            ImGui.text(String.format("A: 0x%02X", cpuStatus.a()));
+            ImGui.text(String.format("X: 0x%02X", cpuStatus.x()));
+            ImGui.text(String.format("Y: 0x%02X", cpuStatus.y()));
         } else {
-            ImGui.text(String.format("A: %d", cpuStatus.A));
-            ImGui.text(String.format("X: %d", cpuStatus.X));
-            ImGui.text(String.format("Y: %d", cpuStatus.Y));
+            ImGui.text(String.format("A: %d", cpuStatus.a()));
+            ImGui.text(String.format("X: %d", cpuStatus.x()));
+            ImGui.text(String.format("Y: %d", cpuStatus.y()));
         }
 
-        ImGui.text(String.format("PC: 0x%04X", cpuStatus.PC));
-        ImGui.text(String.format("SP: 0x%02X", cpuStatus.SP));
-        ImGui.text(String.format("Flags: %c%c%c%c%c%c%c%c", (cpuStatus.Flags & 0x80) != 0 ? 'N' : '-',
-                (cpuStatus.Flags & 0x40) != 0 ? 'V' : '-', (cpuStatus.Flags & 0x20) != 0 ? 'U' : '-',
-                (cpuStatus.Flags & 0x10) != 0 ? 'B' : '-', (cpuStatus.Flags & 0x08) != 0 ? 'D' : '-',
-                (cpuStatus.Flags & 0x04) != 0 ? 'I' : '-', (cpuStatus.Flags & 0x02) != 0 ? 'Z' : '-',
-                (cpuStatus.Flags & 0x01) != 0 ? 'C' : '-'));
-        ImGui.text(String.format("Cycles: %d", cpuStatus.Cycles));
+        ImGui.text(String.format("PC: 0x%04X", cpuStatus.pc()));
+        ImGui.text(String.format("SP: 0x%02X", cpuStatus.sp()));
+        ImGui.text(String.format("Flags: %c%c%c%c%c%c%c%c", (cpuStatus.flags() & 0x80) != 0 ? 'N' : '-',
+                (cpuStatus.flags() & 0x40) != 0 ? 'V' : '-', (cpuStatus.flags() & 0x20) != 0 ? 'U' : '-',
+                (cpuStatus.flags() & 0x10) != 0 ? 'B' : '-', (cpuStatus.flags() & 0x08) != 0 ? 'D' : '-',
+                (cpuStatus.flags() & 0x04) != 0 ? 'I' : '-', (cpuStatus.flags() & 0x02) != 0 ? 'Z' : '-',
+                (cpuStatus.flags() & 0x01) != 0 ? 'C' : '-'));
+        ImGui.text(String.format("Cycles: %d", cpuStatus.cycles()));
 
         ImGui.text("Bus");
         ImGui.sameLine();
         ImGui.separator();
 
-        ImGui.text(String.format("Address: 0x%02X", busStatus.Address));
-        ImGui.text(String.format("Data: 0x%02X", busStatus.Data));
-        ImGui.text(String.format("RW: %s", !busStatus.RW ? "Read" : "Write"));
+        ImGui.text(String.format("Address: 0x%02X", busStatus.address()));
+        ImGui.text(String.format("Data: 0x%02X", busStatus.data()));
+        ImGui.text(String.format("RW: %s", !busStatus.rw() ? "Read" : "Write"));
 
         ImGui.end();
     }
 
     private void sendHeartbeat() {
         if (heartbeatTimer.ticksPassed() != 0)
-            heartbeatPacket.send();
+            ClientPlayNetworking.send(heartbeatPacket);
     }
 
     private void build() {
@@ -531,7 +536,7 @@ public class IDEScreen extends HandledScreen<IDEScreenHandler> {
             return;
         
         saved = true;
-        new IDEScreenSaveCodePayload(textEditor.getText(), handler.getMcuID()).send();
+        ClientPlayNetworking.send(new IDEScreenSaveCodePayload(handler.getMcuID(), textEditor.getText()));
         
         if (!textEditor.getText().isEmpty())
             Sketches.saveBackup(textEditor.getText());

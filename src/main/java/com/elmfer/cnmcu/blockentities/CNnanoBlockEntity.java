@@ -9,21 +9,22 @@ import com.elmfer.cnmcu.mcu.NanoMCU;
 import com.elmfer.cnmcu.network.IDEScreenSyncPayload;
 import com.elmfer.cnmcu.ui.handler.IDEScreenHandler;
 
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.PacketByteBuf;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 
-public class CNnanoBlockEntity extends BlockEntity implements ExtendedScreenHandlerFactory {
+public class CNnanoBlockEntity extends BlockEntity implements ExtendedScreenHandlerFactory<IDEScreenHandler.OpenData> {
 
     public static final Map<UUID, ScreenUpdates> SCREEN_UPDATES = new HashMap<>();
     
@@ -70,14 +71,14 @@ public class CNnanoBlockEntity extends BlockEntity implements ExtendedScreenHand
         
         if(blockEntity.forceUpdate) {
             blockEntity.forceUpdate = false;
-            world.updateNeighborsAlways(pos, state.getBlock());
+            world.updateNeighborsAlways(pos, state.getBlock(), null);
             return;
         }
         
         for (Direction horizontal : HORIZONTALS) {
             Direction globalDir = CNnanoBlock.getGlobalDirection(blockDir, horizontal);
             if(blockEntity.mcu.outputHasChanged(horizontal))
-                world.updateNeighbor(pos.offset(globalDir), state.getBlock(), pos);
+                world.updateNeighbor(pos.offset(globalDir), state.getBlock(), null);
         }
     }
     
@@ -105,32 +106,31 @@ public class CNnanoBlockEntity extends BlockEntity implements ExtendedScreenHand
     public void setCode(String code) {
         this.code = code;
     }
-    
     @Override
-    public void readNbt(NbtCompound nbt) {
-        super.readNbt(nbt);
+    public void readData(ReadView view) {
+        super.readData(view);
         
         if (!hasInit)
             init();
         
-        if(!nbt.contains("code"))
+        if(!view.contains("code"))
             return;
         
-        mcu.readNbt(nbt);
-        code = nbt.getString("code");
+        mcu.setState(view.read("mcu", NanoMCU.State.CODEC).orElseThrow());
+        code = view.getString("code", "");
         
         forceUpdate = true;
     }
 
     @Override
-    public void writeNbt(NbtCompound nbt) {
-        super.writeNbt(nbt);
+    public void writeData(WriteView view) {
+        super.writeData(view);
         
         if (!hasInit)
             init();
-        
-        mcu.writeNbt(nbt);
-        nbt.putString("code", code);
+
+        view.put("mcu", NanoMCU.State.CODEC, mcu.getState());
+        view.putString("code", code);
     }
 
    @Override
@@ -158,13 +158,11 @@ public class CNnanoBlockEntity extends BlockEntity implements ExtendedScreenHand
     }
 
     @Override
-    public void writeScreenOpeningData(ServerPlayerEntity player, PacketByteBuf buf) {
-        buf.writeUuid(uuid);
-        
-        byte[] codeBytes = code.getBytes();
-        
-        buf.writeInt(codeBytes.length);
-        buf.writeBytes(codeBytes);
+    public IDEScreenHandler.OpenData getScreenOpeningData(ServerPlayerEntity player) {
+        return new IDEScreenHandler.OpenData(
+                uuid,
+                code
+        );
     }
     
     public static class Listener {
@@ -182,8 +180,7 @@ public class CNnanoBlockEntity extends BlockEntity implements ExtendedScreenHand
                 shouldRemove = true;
                 return;
             }
-            
-            syncPacket.send(player);
+            ServerPlayNetworking.send(player, syncPacket);
             
             if (ticksSinceLastHeartbeat >= ScreenUpdates.NEXT_HEARTBEAT_EXPECTATION) {
                 shouldRemove = true;
@@ -228,7 +225,7 @@ public class CNnanoBlockEntity extends BlockEntity implements ExtendedScreenHand
         }
         
         public void handleScreenListeners() {
-            IDEScreenSyncPayload syncPacket = new IDEScreenSyncPayload(entity);
+            var syncPacket = IDEScreenSyncPayload.create(entity);
             
             listeners.entrySet().removeIf(entry -> {
                 Listener listener = entry.getValue();

@@ -14,7 +14,8 @@ public record UploadROMResponsePayload(
         int bytesUploaded,
         String message) implements CustomPayload {
 
-    public static final Identifier RAW_ID = Identifier.of(CodeNodeMicrocontrollers.MOD_ID, "upload_rom_response");
+    public static final Identifier RAW_ID = CodeNodeMicrocontrollers.id(
+            "upload_rom_response");
     public static final CustomPayload.Id<UploadROMResponsePayload> ID = new CustomPayload.Id<>(RAW_ID);
     public static final PacketCodec<RegistryByteBuf, UploadROMResponsePayload> CODEC = PacketCodec.tuple(
             PacketCodecs.SYNC_ID, UploadROMResponsePayload::transactionId,

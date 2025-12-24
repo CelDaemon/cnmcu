@@ -90,7 +90,7 @@ public class EventHandler {
             updateMessage.getSiblings().add(version);
             updateMessage.getSiblings().add(forMCVersions);
 
-            client.player.sendMessage(updateMessage);
+            client.player.sendMessage(updateMessage, true);
         });
     }
 }

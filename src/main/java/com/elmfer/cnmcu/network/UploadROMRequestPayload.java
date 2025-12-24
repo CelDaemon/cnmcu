@@ -12,13 +12,16 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.Uuids;
 
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Future;
 
 public record UploadROMRequestPayload(
         int transactionId,
         UUID mcuId,
         byte[] rom
 ) implements CustomPayload {
-    public static final Identifier RAW_ID = Identifier.of(CodeNodeMicrocontrollers.MOD_ID, "upload_rom_request");
+    public static final Identifier RAW_ID = CodeNodeMicrocontrollers.id("upload_rom_request");
     public static final CustomPayload.Id<UploadROMRequestPayload> ID = new CustomPayload.Id<>(RAW_ID);
 
     public static final PacketCodec<RegistryByteBuf, UploadROMRequestPayload> CODEC = PacketCodec.tuple(
@@ -27,6 +30,9 @@ public record UploadROMRequestPayload(
             PacketCodecs.BYTE_ARRAY, UploadROMRequestPayload::rom,
             UploadROMRequestPayload::new
     );
+
+    private static final ConcurrentHashMap<Integer, CompletableFuture<UploadROMResponsePayload>> TRANSACTIONS = new ConcurrentHashMap<>();
+    private static int nextTransactionId = 0;
 
     @Override
     public Id<? extends CustomPayload> getId() {
@@ -73,5 +79,19 @@ public record UploadROMRequestPayload(
                 rom.length,
                 String.format("Uploaded %d bytes.", rom.length)
         ));
+    }
+
+    public static Future<UploadROMResponsePayload> send(UUID mcuId, byte[] rom) {
+        var transactionId = nextTransactionId++;
+        var future = TRANSACTIONS.put(nextTransactionId++, new CompletableFuture<>());
+        ClientPlayNetworking.send(new UploadROMRequestPayload(transactionId, mcuId, rom));
+        return future;
+    }
+
+    public static void notifyResponse(UploadROMResponsePayload responsePayload) {
+        var transaction = TRANSACTIONS.remove(responsePayload.transactionId());
+        if(transaction == null)
+            return;
+        transaction.complete(responsePayload);
     }
 }

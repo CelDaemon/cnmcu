@@ -23,7 +23,7 @@ public record IDEScreenHeartbeatPayload(
         UUID mcuId
 ) implements CustomPayload {
 
-    public static final Identifier RAW_ID = Identifier.of(CodeNodeMicrocontrollers.MOD_ID, "ide_screen_heartbeat");
+    public static final Identifier RAW_ID = CodeNodeMicrocontrollers.id("ide_screen_heartbeat");
     public static final CustomPayload.Id<IDEScreenHeartbeatPayload> ID = new CustomPayload.Id<>(RAW_ID);
     public static final PacketCodec<RegistryByteBuf, IDEScreenHeartbeatPayload> CODEC = PacketCodec.tuple(
             Uuids.PACKET_CODEC, IDEScreenHeartbeatPayload::mcuId,

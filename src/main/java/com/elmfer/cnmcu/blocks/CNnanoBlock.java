@@ -19,7 +19,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.state.StateManager;
-import net.minecraft.state.property.DirectionProperty;
+import net.minecraft.state.property.EnumProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
@@ -35,7 +35,7 @@ import net.minecraft.world.WorldView;
 public class CNnanoBlock extends BlockWithEntity {
     public static final MapCodec<CNnanoBlock> CODEC = createCodec(CNnanoBlock::new);
 
-    public static final DirectionProperty FACING = Properties.HORIZONTAL_FACING;
+    public static final EnumProperty<Direction> FACING = Properties.HORIZONTAL_FACING;
 
     protected CNnanoBlock(Settings settings) {
         super(settings);
@@ -109,10 +109,10 @@ public class CNnanoBlock extends BlockWithEntity {
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state,
             BlockEntityType<T> type) {
-        if (world.isClient)
+        if (world.isClient())
             return null;
 
-        return CNnanoBlock.validateTicker(type, BlockEntities.CN_NANO, world.isClient ? null : CNnanoBlockEntity::tick);
+        return CNnanoBlock.validateTicker(type, BlockEntities.CN_NANO, world.isClient() ? null : CNnanoBlockEntity::tick);
     }
 
     @Override
@@ -120,10 +120,11 @@ public class CNnanoBlock extends BlockWithEntity {
         return BlockRenderType.MODEL;
     }
 
+
     @Override
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand,
+    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player,
             BlockHitResult hit) {
-        if (!world.isClient) {
+        if (!world.isClient()) {
             NamedScreenHandlerFactory screenHandlerFactory = state.createScreenHandlerFactory(world, pos);
 
             if (screenHandlerFactory != null)

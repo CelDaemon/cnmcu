@@ -16,7 +16,7 @@ import net.minecraft.util.Uuids;
 public record IDEScreenSaveCodePayload(
         UUID mcuId,
         String code) implements CustomPayload {
-    public static final Identifier RAW_ID = Identifier.of(CodeNodeMicrocontrollers.MOD_ID, "ide_screen_save_code");
+    public static final Identifier RAW_ID = CodeNodeMicrocontrollers.id("ide_screen_save_code");
     public static final CustomPayload.Id<IDEScreenSaveCodePayload> ID = new CustomPayload.Id<>(RAW_ID);
     public static final PacketCodec<RegistryByteBuf, IDEScreenSaveCodePayload> CODEC = PacketCodec.tuple(
             Uuids.PACKET_CODEC, IDEScreenSaveCodePayload::mcuId,

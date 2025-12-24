@@ -4,6 +4,8 @@ import java.nio.ByteBuffer;
 
 import com.elmfer.cnmcu.cpp.WeakNativeObject;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.NbtCompound;
 
 /**
@@ -50,27 +52,26 @@ public class CNRAM extends WeakNativeObject {
         write(getNativePtr(), address, value);
     }
     
-    public void writeNbt(NbtCompound nbt) {
+    public State getState() {
         assert isNativeObjectValid();
-
-        NbtCompound ramNbt = new NbtCompound();
         
         ByteBuffer buffer = getData();
-        byte[] data = new byte[buffer.remaining()];
-        buffer.get(data);
-        ramNbt.putByteArray("data", data);
-        
-        nbt.put("ram", ramNbt);
+        return new State(buffer);
     }
     
-    public void readNbt(NbtCompound nbt) {
+    public void setState(State state) {
         assert isNativeObjectValid();
 
-        NbtCompound ramNbt = nbt.getCompound("ram");
-
         ByteBuffer buffer = getData();
-        byte[] data = ramNbt.getByteArray("data");
-        buffer.put(data);
+        buffer.put(state.data);
+    }
+
+    public record State(
+            ByteBuffer data
+    ) {
+        public static final Codec<State> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                Codec.BYTE_BUFFER.fieldOf("data").forGetter(State::data)
+        ).apply(instance, State::new));
     }
     
     // @formatter:off

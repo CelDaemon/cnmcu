@@ -4,7 +4,8 @@ import java.nio.ByteBuffer;
 
 import com.elmfer.cnmcu.cpp.WeakNativeObject;
 
-import net.minecraft.nbt.NbtCompound;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 /*
  * Reference to a CNUART object
@@ -63,27 +64,29 @@ public class CNUART extends WeakNativeObject {
         return read(getNativePtr(), address);
     }
     
-    public void writeNbt(NbtCompound nbt) {
+    public State getState() {
         assert isNativeObjectValid();
-
-        NbtCompound uartNbt = new NbtCompound();
         
         ByteBuffer registerData = getRegisterData();
-        byte[] data = new byte[registerData.remaining()];
-        registerData.get(data);
-        uartNbt.putByteArray("registerData", data);
-        
-        nbt.put("uart", uartNbt);
+
+        return new State(
+            registerData
+        );
     }
     
-    public void readNbt(NbtCompound nbt) {
+    public void setState(State data) {
         assert isNativeObjectValid();
 
-        NbtCompound uartNbt = nbt.getCompound("uart");
-        
-        byte[] data = uartNbt.getByteArray("registerData");
-        ByteBuffer registerData = getRegisterData();
-        registerData.put(data);
+        var registerData = getRegisterData();
+        registerData.put(data.registerData);
+    }
+
+    public record State(
+            ByteBuffer registerData
+    ) {
+        public static final Codec<State> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                Codec.BYTE_BUFFER.fieldOf("registerData").forGetter(State::registerData)
+        ).apply(instance, State::new));
     }
     
     // @formatter:off
