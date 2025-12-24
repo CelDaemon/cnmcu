@@ -11,8 +11,9 @@ import imgui.flag.ImGuiConfigFlags;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
+import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.world.WorldTerrainRenderContext;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.PlainTextContent;
@@ -27,11 +28,11 @@ public class EventHandler {
     public static void registerClientEventHandlers() {
         ClientLifecycleEvents.CLIENT_STARTED.register(EventHandler::onClientStarted);
         ClientLifecycleEvents.CLIENT_STOPPING.register(EventHandler::onClientStopping);
-        WorldRenderEvents.START.register(EventHandler::onStartRenderWorld);
-        WorldRenderEvents.END.register(EventHandler::onEndRenderWorld);
+        WorldRenderEvents.START_MAIN.register(EventHandler::onStartRenderWorld);
+        WorldRenderEvents.END_MAIN.register(EventHandler::onEndRenderWorld);
     }
 
-    private static void onStartRenderWorld(WorldRenderContext context) {
+    private static void onStartRenderWorld(WorldTerrainRenderContext context) {
         if (!hasNotifiedPlayerAboutUpdate)
             notifyPlayerAboutUpdate();
 
