@@ -2,6 +2,7 @@ package com.elmfer.cnmcu.network;
 
 import java.util.UUID;
 
+import com.elmfer.cnmcu.CodeNodeMicrocontrollers;
 import com.elmfer.cnmcu.blockentities.CNnanoBlockEntity;
 import com.elmfer.cnmcu.mcu.NanoMCU;
 
@@ -12,23 +13,24 @@ import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.Identifier;
 
-public class UploadROMC2S2CPacket extends Packet.C2S2C {
+public record UploadROMC2S2CPacket(
+        int bytesUploaded,
+        String message) implements CustomPayload {
 
-    public int bytesUploaded;
-    public String message = "";
-    
     /**
      * Constructor for client to server packet
-     * 
+     *
      * @param buffer
      */
     public UploadROMC2S2CPacket(UUID mcuId, byte[] rom) {
         super(PacketByteBufs.create());
-        
+
         buffer.writeUuid(mcuId);
         buffer.writeInt(rom.length);
         buffer.writeBytes(rom);

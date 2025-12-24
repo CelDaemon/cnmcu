@@ -6,7 +6,7 @@ import java.util.UUID;
 
 import com.elmfer.cnmcu.blocks.CNnanoBlock;
 import com.elmfer.cnmcu.mcu.NanoMCU;
-import com.elmfer.cnmcu.network.IDEScreenSyncS2CPacket;
+import com.elmfer.cnmcu.network.IDEScreenSyncPayload;
 import com.elmfer.cnmcu.ui.handler.IDEScreenHandler;
 
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
@@ -176,7 +176,7 @@ public class CNnanoBlockEntity extends BlockEntity implements ExtendedScreenHand
             this.player = player;
         }
         
-        public void update(IDEScreenSyncS2CPacket syncPacket) {
+        public void update(IDEScreenSyncPayload syncPacket) {
             
             if (player.isDisconnected()) {
                 shouldRemove = true;
@@ -228,7 +228,7 @@ public class CNnanoBlockEntity extends BlockEntity implements ExtendedScreenHand
         }
         
         public void handleScreenListeners() {
-            IDEScreenSyncS2CPacket syncPacket = new IDEScreenSyncS2CPacket(entity);
+            IDEScreenSyncPayload syncPacket = new IDEScreenSyncPayload(entity);
             
             listeners.entrySet().removeIf(entry -> {
                 Listener listener = entry.getValue();

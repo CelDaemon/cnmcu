@@ -12,12 +12,12 @@ import com.elmfer.cnmcu.config.Config;
 import com.elmfer.cnmcu.cpp.NativesUtils;
 import com.elmfer.cnmcu.mcu.Sketches;
 import com.elmfer.cnmcu.mcu.Toolchain;
-import com.elmfer.cnmcu.network.IDEScreenHeartbeatC2SPacket;
-import com.elmfer.cnmcu.network.IDEScreenMCUControlC2SPacket;
-import com.elmfer.cnmcu.network.IDEScreenMCUControlC2SPacket.Control;
-import com.elmfer.cnmcu.network.IDEScreenSaveCodeC2SPacket;
-import com.elmfer.cnmcu.network.IDEScreenSyncS2CPacket.BusStatus;
-import com.elmfer.cnmcu.network.IDEScreenSyncS2CPacket.CPUStatus;
+import com.elmfer.cnmcu.network.IDEScreenHeartbeatPayload;
+import com.elmfer.cnmcu.network.IDEScreenMCUControlPayload;
+import com.elmfer.cnmcu.network.IDEScreenMCUControlPayload.Control;
+import com.elmfer.cnmcu.network.IDEScreenSaveCodePayload;
+import com.elmfer.cnmcu.network.IDEScreenSyncPayload.BusStatus;
+import com.elmfer.cnmcu.network.IDEScreenSyncPayload.CPUStatus;
 import com.elmfer.cnmcu.network.UploadROMC2S2CPacket;
 import com.elmfer.cnmcu.ui.handler.IDEScreenHandler;
 
@@ -58,7 +58,7 @@ public class IDEScreen extends HandledScreen<IDEScreenHandler> {
     public ByteBuffer zeroPage = BufferUtils.createByteBuffer(256);
 
     private ClockTimer heartbeatTimer = new ClockTimer(1);
-    private IDEScreenHeartbeatC2SPacket heartbeatPacket;
+    private IDEScreenHeartbeatPayload heartbeatPacket;
 
     private CompletableFuture<byte[]> compileFuture;
     private UploadROMC2S2CPacket uploadPacket;
@@ -76,7 +76,7 @@ public class IDEScreen extends HandledScreen<IDEScreenHandler> {
 
         textEditor = new TextEditor();
         memoryEditor = new MemoryEditor();
-        heartbeatPacket = new IDEScreenHeartbeatC2SPacket(handler.getMcuID());
+        heartbeatPacket = new IDEScreenHeartbeatPayload(handler.getMcuID());
 
         textEditor.setText(handler.getCode());
 
@@ -447,20 +447,20 @@ public class IDEScreen extends HandledScreen<IDEScreenHandler> {
         ImGui.separator();
 
         if (ImGui.checkbox("Power", isPowered))
-            new IDEScreenMCUControlC2SPacket(handler.getMcuID(), isPowered ? Control.POWER_OFF : Control.POWER_ON)
+            new IDEScreenMCUControlPayload(handler.getMcuID(), isPowered ? Control.POWER_OFF : Control.POWER_ON)
                     .send();
         ImGui.sameLine();
         if (ImGui.button("Reset"))
-            new IDEScreenMCUControlC2SPacket(handler.getMcuID(), Control.RESET).send();
+            new IDEScreenMCUControlPayload(handler.getMcuID(), Control.RESET).send();
         ImGui.sameLine();
         ImGui.beginDisabled(!isPowered);
         if (ImGui.checkbox("Pause", isClockPaused))
-            new IDEScreenMCUControlC2SPacket(handler.getMcuID(),
+            new IDEScreenMCUControlPayload(handler.getMcuID(),
                     isClockPaused ? Control.RESUME_CLOCK : Control.PAUSE_CLOCK).send();
         ImGui.sameLine();
         ImGui.beginDisabled(!isClockPaused);
         if (ImGui.button("Step"))
-            new IDEScreenMCUControlC2SPacket(handler.getMcuID(), Control.CYCLE).send();
+            new IDEScreenMCUControlPayload(handler.getMcuID(), Control.CYCLE).send();
         ImGui.endDisabled();
         ImGui.endDisabled();
 
@@ -531,7 +531,7 @@ public class IDEScreen extends HandledScreen<IDEScreenHandler> {
             return;
         
         saved = true;
-        new IDEScreenSaveCodeC2SPacket(textEditor.getText(), handler.getMcuID()).send();
+        new IDEScreenSaveCodePayload(textEditor.getText(), handler.getMcuID()).send();
         
         if (!textEditor.getText().isEmpty())
             Sketches.saveBackup(textEditor.getText());

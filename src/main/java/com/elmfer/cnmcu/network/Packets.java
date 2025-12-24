@@ -1,44 +1,30 @@
 package com.elmfer.cnmcu.network;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 
 public class Packets {
+    public static void registerPackets() {
+        var s2c = PayloadTypeRegistry.playS2C();
+        s2c.register(IDEScreenSyncPayload.ID, IDEScreenSyncPayload.CODEC);
+        s2c.register(UploadROMResponsePayload.ID, UploadROMResponsePayload.CODEC);
 
+        var c2s = PayloadTypeRegistry.playC2S();
+        c2s.register(IDEScreenSaveCodePayload.ID, IDEScreenSaveCodePayload.CODEC);
+        c2s.register(UploadROMRequestPayload.ID, UploadROMRequestPayload.CODEC);
+        c2s.register(IDEScreenHeartbeatPayload.ID, IDEScreenHeartbeatPayload.CODEC);
+        c2s.register(IDEScreenMCUControlPayload.ID, IDEScreenMCUControlPayload.CODEC);
+    }
     public static void initClientPackets() {
-        registerS2CPacket("ide_screen_sync", IDEScreenSyncS2CPacket.class);
-        
-        registerC2S2CClientPacket("upload_rom", UploadROMC2S2CPacket.class);
+        ClientPlayNetworking.registerGlobalReceiver(IDEScreenSyncPayload.ID, IDEScreenSyncPayload::receive);
+        ClientPlayNetworking.registerGlobalReceiver(UploadROMResponsePayload.ID, UploadROMResponsePayload::receive);
     }
 
     public static void initServerPackets() {
-        registerC2SPacket("ide_screen_heartbeat", IDEScreenHeartbeatC2SPacket.class);
-        registerC2SPacket("ide_screen_save_code", IDEScreenSaveCodeC2SPacket.class);
-        registerC2SPacket("ide_screen_mcu_control", IDEScreenMCUControlC2SPacket.class);
-        
-        Packet.setChannel(IDEScreenSyncS2CPacket.class, "ide_screen_sync");
-        registerC2S2CServerPacket("upload_rom", UploadROMC2S2CPacket.class);
-    }
-
-    private static void registerS2CPacket(String channelName, Class<? extends Packet.S2C> packetClass) {
-        Packet.setChannel(packetClass, channelName);
-        ClientPlayNetworking.registerGlobalReceiver(Packet.getChannel(packetClass), Packet.S2C.getHandler(packetClass));
-    }
-
-    private static void registerC2SPacket(String channelName, Class<? extends Packet.C2S> packetClass) {
-        Packet.setChannel(packetClass, channelName);
-        ServerPlayNetworking.registerGlobalReceiver(Packet.getChannel(packetClass), Packet.C2S.getHandler(packetClass));
-    }
-
-    private static void registerC2S2CServerPacket(String channelName, Class<? extends Packet.C2S2C> packetClass) {
-        Packet.setChannel(packetClass, channelName);
-        ServerPlayNetworking.registerGlobalReceiver(Packet.C2S2C.getServerChannel(packetClass),
-                Packet.C2S2C.getServerHandler(packetClass));
-    }
-
-    private static void registerC2S2CClientPacket(String channelName, Class<? extends Packet.C2S2C> packetClass) {
-        Packet.setChannel(packetClass, channelName);
-        ClientPlayNetworking.registerGlobalReceiver(Packet.C2S2C.getClientChannel(packetClass),
-                Packet.C2S2C.getClientHandler(packetClass));
+        ServerPlayNetworking.registerGlobalReceiver(IDEScreenSaveCodePayload.ID, IDEScreenSaveCodePayload::receive);
+        ServerPlayNetworking.registerGlobalReceiver(UploadROMRequestPayload.ID, UploadROMRequestPayload::receive);
+        ServerPlayNetworking.registerGlobalReceiver(IDEScreenHeartbeatPayload.ID, IDEScreenHeartbeatPayload::receive);
+        ServerPlayNetworking.registerGlobalReceiver(IDEScreenMCUControlPayload.ID, IDEScreenMCUControlPayload::receive);
     }
 }

@@ -36,6 +36,7 @@ public class CodeNodeMicrocontrollers implements ModInitializer {
         BlockEntities.init();
         ScreenHandlers.init();
 
+        Packets.registerPackets();
         Packets.initServerPackets();
     }
 

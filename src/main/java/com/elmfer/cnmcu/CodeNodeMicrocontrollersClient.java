@@ -20,7 +20,8 @@ public class CodeNodeMicrocontrollersClient implements ClientModInitializer {
         ModSetup.imguiIniFile();
         
         HandledScreens.register(ScreenHandlers.IDE_SCREEN_HANDLER, IDEScreen::new);
-        
+
+        Packets.registerPackets();
         Packets.initClientPackets();
         
         EventHandler.registerClientEventHandlers();
