@@ -25,18 +25,21 @@ public record IDEScreenSyncPayload(
             PacketCodecs.BOOLEAN, IDEScreenSyncPayload::isClockPaused,
             CPUStatus.PACKET_CODEC, IDEScreenSyncPayload::cpuStatus,
             BusStatus.PACKET_CODEC, IDEScreenSyncPayload::busStatus,
-            PacketCodecs.byteArray(256), IDEScreenSyncPayload::zeroPage,
+            PacketCodecs.byteArray(256), IDEScreenSyncPayload::zeroPage, // More than 256??
             IDEScreenSyncPayload::new
     );
 
     public static IDEScreenSyncPayload create(CNnanoBlockEntity blockEntity) {
         var mcu = blockEntity.mcu;
+        var dataBuffer = mcu.getRAM().getData();
+        var data = new byte[256];
+        dataBuffer.get(data);
         return new IDEScreenSyncPayload(
                 mcu.isPowered(),
                 mcu.isClockPaused(),
                 CPUStatus.create(mcu),
                 BusStatus.create(mcu),
-                mcu.getRAM().getData().array()
+                data
         );
     }
     

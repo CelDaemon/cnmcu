@@ -1,13 +1,13 @@
 #include <com_elmfer_cnmcu_mcu_modules_CNEL.h>
 
-//@line:123
+//@line:121
 
          #include "cnmcuJava.h"
          #include "Nano.hpp"
      JNIEXPORT jlong JNICALL Java_com_elmfer_cnmcu_mcu_modules_CNEL_size(JNIEnv* env, jclass clazz, jlong ptr) {
 
 
-//@line:128
+//@line:126
 
         CNEL<CodeNodeNano::EL_SIZE>* cnel = reinterpret_cast<CNEL<CodeNodeNano::EL_SIZE>*>(ptr);
         return cnel->size();
@@ -18,7 +18,7 @@
 JNIEXPORT jobject JNICALL Java_com_elmfer_cnmcu_mcu_modules_CNEL_iclRegistersData(JNIEnv* env, jclass clazz, jlong ptr) {
 
 
-//@line:133
+//@line:131
 
         CNEL<CodeNodeNano::EL_SIZE>* cnel = reinterpret_cast<CNEL<CodeNodeNano::EL_SIZE>*>(ptr);
         return env->NewDirectByteBuffer(cnel->iclRegistersData(), CodeNodeNano::EL_SIZE);
@@ -29,7 +29,7 @@ JNIEXPORT jobject JNICALL Java_com_elmfer_cnmcu_mcu_modules_CNEL_iclRegistersDat
 JNIEXPORT jobject JNICALL Java_com_elmfer_cnmcu_mcu_modules_CNEL_iflRegistersData(JNIEnv* env, jclass clazz, jlong ptr) {
 
 
-//@line:138
+//@line:136
 
         CNEL<CodeNodeNano::EL_SIZE>* cnel = reinterpret_cast<CNEL<CodeNodeNano::EL_SIZE>*>(ptr);
         return env->NewDirectByteBuffer(cnel->iflRegistersData(), CodeNodeNano::EL_SIZE);
@@ -40,7 +40,7 @@ JNIEXPORT jobject JNICALL Java_com_elmfer_cnmcu_mcu_modules_CNEL_iflRegistersDat
 JNIEXPORT void JNICALL Java_com_elmfer_cnmcu_mcu_modules_CNEL_triggerEvent(JNIEnv* env, jclass clazz, jlong ptr, jint event) {
 
 
-//@line:143
+//@line:141
 
         CNEL<CodeNodeNano::EL_SIZE>* cnel = reinterpret_cast<CNEL<CodeNodeNano::EL_SIZE>*>(ptr);
         cnel->triggerEvent(event);
@@ -51,7 +51,7 @@ JNIEXPORT void JNICALL Java_com_elmfer_cnmcu_mcu_modules_CNEL_triggerEvent(JNIEn
 JNIEXPORT jboolean JNICALL Java_com_elmfer_cnmcu_mcu_modules_CNEL_shouldInterrupt(JNIEnv* env, jclass clazz, jlong ptr) {
 
 
-//@line:148
+//@line:146
 
         CNEL<CodeNodeNano::EL_SIZE>* cnel = reinterpret_cast<CNEL<CodeNodeNano::EL_SIZE>*>(ptr);
         return cnel->shouldInterrupt();
@@ -62,7 +62,7 @@ JNIEXPORT jboolean JNICALL Java_com_elmfer_cnmcu_mcu_modules_CNEL_shouldInterrup
 JNIEXPORT jint JNICALL Java_com_elmfer_cnmcu_mcu_modules_CNEL_read(JNIEnv* env, jclass clazz, jlong ptr, jint address) {
 
 
-//@line:153
+//@line:151
 
         CNEL<CodeNodeNano::EL_SIZE>* cnel = reinterpret_cast<CNEL<CodeNodeNano::EL_SIZE>*>(ptr);
         return static_cast<jint>(cnel->read(address));
@@ -73,7 +73,7 @@ JNIEXPORT jint JNICALL Java_com_elmfer_cnmcu_mcu_modules_CNEL_read(JNIEnv* env, 
 JNIEXPORT void JNICALL Java_com_elmfer_cnmcu_mcu_modules_CNEL_write(JNIEnv* env, jclass clazz, jlong ptr, jint address, jint data) {
 
 
-//@line:158
+//@line:156
 
         CNEL<CodeNodeNano::EL_SIZE>* cnel = reinterpret_cast<CNEL<CodeNodeNano::EL_SIZE>*>(ptr);
         uint16_t addr = static_cast<uint16_t>(address);

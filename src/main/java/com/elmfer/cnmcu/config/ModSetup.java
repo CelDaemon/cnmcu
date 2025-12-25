@@ -235,7 +235,10 @@ public class ModSetup {
         CodeNodeMicrocontrollers.LOGGER.info("Listing assets from GitHub...");
 
         HTTPSFetcher fetcher = new HTTPSFetcher(
-                GITHUB_REPO_URL + "/releases/tags/" + CodeNodeMicrocontrollers.MOD_VERSION);
+                GITHUB_REPO_URL + "/releases/tags/" + "0.0.10a-1.20.4");
+        // TODO: Include natives in jar by default.
+//        HTTPSFetcher fetcher = new HTTPSFetcher(
+//                GITHUB_REPO_URL + "/releases/tags/" + CodeNodeMicrocontrollers.MOD_VERSION;
         fetcher.addHeader("Accept", "application/vnd.github.v3+json");
         fetcher.start();
         fetcher.waitForCompletion();

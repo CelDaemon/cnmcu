@@ -1,13 +1,13 @@
 #include <com_elmfer_cnmcu_mcu_NanoMCU.h>
 
-//@line:220
+//@line:258
 
         #include "cnmcuJava.h"
         #include "Nano.hpp"
      JNIEXPORT jlong JNICALL Java_com_elmfer_cnmcu_mcu_NanoMCU_createMCU(JNIEnv* env, jclass clazz) {
 
 
-//@line:225
+//@line:263
 
         cnmcuJava::init(env);
         CodeNodeNano* nano = new CodeNodeNano();
@@ -19,7 +19,7 @@
 JNIEXPORT void JNICALL Java_com_elmfer_cnmcu_mcu_NanoMCU_deleteMCU(JNIEnv* env, jclass clazz, jlong ptr) {
 
 
-//@line:231
+//@line:269
 
         CodeNodeNano* nano = reinterpret_cast<CodeNodeNano*>(ptr);
         delete nano;
@@ -32,7 +32,7 @@ JNIEXPORT void JNICALL Java_com_elmfer_cnmcu_mcu_NanoMCU_tick(JNIEnv* env, jclas
 	int* outputs = (int*)env->GetPrimitiveArrayCritical(obj_outputs, 0);
 
 
-//@line:236
+//@line:274
 
         CodeNodeNano* nano = reinterpret_cast<CodeNodeNano*>(ptr);
         
@@ -64,7 +64,7 @@ JNIEXPORT void JNICALL Java_com_elmfer_cnmcu_mcu_NanoMCU_tick(JNIEnv* env, jclas
 JNIEXPORT void JNICALL Java_com_elmfer_cnmcu_mcu_NanoMCU_cycle(JNIEnv* env, jclass clazz, jlong ptr) {
 
 
-//@line:260
+//@line:298
 
         CodeNodeNano* nano = reinterpret_cast<CodeNodeNano*>(ptr);
         nano->cycle();
@@ -75,7 +75,7 @@ JNIEXPORT void JNICALL Java_com_elmfer_cnmcu_mcu_NanoMCU_cycle(JNIEnv* env, jcla
 JNIEXPORT void JNICALL Java_com_elmfer_cnmcu_mcu_NanoMCU_reset(JNIEnv* env, jclass clazz, jlong ptr) {
 
 
-//@line:265
+//@line:303
 
         CodeNodeNano* nano = reinterpret_cast<CodeNodeNano*>(ptr);
         nano->reset();
@@ -86,7 +86,7 @@ JNIEXPORT void JNICALL Java_com_elmfer_cnmcu_mcu_NanoMCU_reset(JNIEnv* env, jcla
 JNIEXPORT void JNICALL Java_com_elmfer_cnmcu_mcu_NanoMCU_setPowered(JNIEnv* env, jclass clazz, jlong ptr, jboolean powered) {
 
 
-//@line:270
+//@line:308
 
         CodeNodeNano* nano = reinterpret_cast<CodeNodeNano*>(ptr);
         if(powered)
@@ -100,7 +100,7 @@ JNIEXPORT void JNICALL Java_com_elmfer_cnmcu_mcu_NanoMCU_setPowered(JNIEnv* env,
 JNIEXPORT jboolean JNICALL Java_com_elmfer_cnmcu_mcu_NanoMCU_isPowered(JNIEnv* env, jclass clazz, jlong ptr) {
 
 
-//@line:278
+//@line:316
 
         CodeNodeNano* nano = reinterpret_cast<CodeNodeNano*>(ptr);
         return static_cast<jboolean>(nano->isPoweredOn());
@@ -111,7 +111,7 @@ JNIEXPORT jboolean JNICALL Java_com_elmfer_cnmcu_mcu_NanoMCU_isPowered(JNIEnv* e
 JNIEXPORT void JNICALL Java_com_elmfer_cnmcu_mcu_NanoMCU_setClockPause(JNIEnv* env, jclass clazz, jlong ptr, jboolean paused) {
 
 
-//@line:282
+//@line:320
 
         CodeNodeNano* nano = reinterpret_cast<CodeNodeNano*>(ptr);
         if(paused)
@@ -125,7 +125,7 @@ JNIEXPORT void JNICALL Java_com_elmfer_cnmcu_mcu_NanoMCU_setClockPause(JNIEnv* e
 JNIEXPORT jboolean JNICALL Java_com_elmfer_cnmcu_mcu_NanoMCU_isClockPaused(JNIEnv* env, jclass clazz, jlong ptr) {
 
 
-//@line:290
+//@line:328
 
         CodeNodeNano* nano = reinterpret_cast<CodeNodeNano*>(ptr);
         return static_cast<jboolean>(nano->isClockPaused());
@@ -136,7 +136,7 @@ JNIEXPORT jboolean JNICALL Java_com_elmfer_cnmcu_mcu_NanoMCU_isClockPaused(JNIEn
 JNIEXPORT jlong JNICALL Java_com_elmfer_cnmcu_mcu_NanoMCU_numCycles(JNIEnv* env, jclass clazz, jlong ptr) {
 
 
-//@line:295
+//@line:333
 
         CodeNodeNano* nano = reinterpret_cast<CodeNodeNano*>(ptr);
         return static_cast<jlong>(nano->numCycles());
@@ -147,7 +147,7 @@ JNIEXPORT jlong JNICALL Java_com_elmfer_cnmcu_mcu_NanoMCU_numCycles(JNIEnv* env,
 JNIEXPORT void JNICALL Java_com_elmfer_cnmcu_mcu_NanoMCU_setNumCycles(JNIEnv* env, jclass clazz, jlong ptr, jlong cycles) {
 
 
-//@line:300
+//@line:338
 
         CodeNodeNano* nano = reinterpret_cast<CodeNodeNano*>(ptr);
         uint64_t numCycles = static_cast<uint64_t>(cycles);
@@ -159,7 +159,7 @@ JNIEXPORT void JNICALL Java_com_elmfer_cnmcu_mcu_NanoMCU_setNumCycles(JNIEnv* en
 JNIEXPORT jint JNICALL Java_com_elmfer_cnmcu_mcu_NanoMCU_busAddress(JNIEnv* env, jclass clazz, jlong ptr) {
 
 
-//@line:306
+//@line:344
 
         CodeNodeNano* nano = reinterpret_cast<CodeNodeNano*>(ptr);
         return static_cast<jint>(nano->busAddress());
@@ -170,7 +170,7 @@ JNIEXPORT jint JNICALL Java_com_elmfer_cnmcu_mcu_NanoMCU_busAddress(JNIEnv* env,
 JNIEXPORT jint JNICALL Java_com_elmfer_cnmcu_mcu_NanoMCU_busData(JNIEnv* env, jclass clazz, jlong ptr) {
 
 
-//@line:311
+//@line:349
 
         CodeNodeNano* nano = reinterpret_cast<CodeNodeNano*>(ptr);
         return static_cast<jint>(nano->busData());
@@ -181,7 +181,7 @@ JNIEXPORT jint JNICALL Java_com_elmfer_cnmcu_mcu_NanoMCU_busData(JNIEnv* env, jc
 JNIEXPORT jboolean JNICALL Java_com_elmfer_cnmcu_mcu_NanoMCU_busRW(JNIEnv* env, jclass clazz, jlong ptr) {
 
 
-//@line:316
+//@line:354
 
         CodeNodeNano* nano = reinterpret_cast<CodeNodeNano*>(ptr);
         return static_cast<jboolean>(nano->busRw());
@@ -192,7 +192,7 @@ JNIEXPORT jboolean JNICALL Java_com_elmfer_cnmcu_mcu_NanoMCU_busRW(JNIEnv* env, 
 JNIEXPORT jobject JNICALL Java_com_elmfer_cnmcu_mcu_NanoMCU_CPU(JNIEnv* env, jclass clazz, jlong ptr) {
 
 
-//@line:321
+//@line:359
 
         CodeNodeNano* nano = reinterpret_cast<CodeNodeNano*>(ptr);
         mos6502* cpu = &nano->CPU();
@@ -205,7 +205,7 @@ JNIEXPORT jobject JNICALL Java_com_elmfer_cnmcu_mcu_NanoMCU_CPU(JNIEnv* env, jcl
 JNIEXPORT jobject JNICALL Java_com_elmfer_cnmcu_mcu_NanoMCU_GPIO(JNIEnv* env, jclass clazz, jlong ptr) {
 
 
-//@line:328
+//@line:366
 
         CodeNodeNano* nano = reinterpret_cast<CodeNodeNano*>(ptr);
         CNGPIO<CodeNodeNano::GPIO_NUM_PINS>* gpio = &nano->GPIO();
@@ -218,7 +218,7 @@ JNIEXPORT jobject JNICALL Java_com_elmfer_cnmcu_mcu_NanoMCU_GPIO(JNIEnv* env, jc
 JNIEXPORT jobject JNICALL Java_com_elmfer_cnmcu_mcu_NanoMCU_RAM(JNIEnv* env, jclass clazz, jlong ptr) {
 
 
-//@line:335
+//@line:373
 
         CodeNodeNano* nano = reinterpret_cast<CodeNodeNano*>(ptr);
         CNRAM<CodeNodeNano::RAM_SIZE>* ram = &nano->RAM();
@@ -231,7 +231,7 @@ JNIEXPORT jobject JNICALL Java_com_elmfer_cnmcu_mcu_NanoMCU_RAM(JNIEnv* env, jcl
 JNIEXPORT jobject JNICALL Java_com_elmfer_cnmcu_mcu_NanoMCU_ROM(JNIEnv* env, jclass clazz, jlong ptr) {
 
 
-//@line:341
+//@line:379
 
         CodeNodeNano* nano = reinterpret_cast<CodeNodeNano*>(ptr);
         CNROM<CodeNodeNano::ROM_SIZE>* rom = &nano->ROM();
@@ -244,7 +244,7 @@ JNIEXPORT jobject JNICALL Java_com_elmfer_cnmcu_mcu_NanoMCU_ROM(JNIEnv* env, jcl
 JNIEXPORT jobject JNICALL Java_com_elmfer_cnmcu_mcu_NanoMCU_EL(JNIEnv* env, jclass clazz, jlong ptr) {
 
 
-//@line:348
+//@line:386
 
         CodeNodeNano* nano = reinterpret_cast<CodeNodeNano*>(ptr);
         CNEL<CodeNodeNano::EL_SIZE>* el = &nano->EL();
@@ -257,7 +257,7 @@ JNIEXPORT jobject JNICALL Java_com_elmfer_cnmcu_mcu_NanoMCU_EL(JNIEnv* env, jcla
 JNIEXPORT jobject JNICALL Java_com_elmfer_cnmcu_mcu_NanoMCU_UART(JNIEnv* env, jclass clazz, jlong ptr) {
 
 
-//@line:355
+//@line:393
 
         CodeNodeNano* nano = reinterpret_cast<CodeNodeNano*>(ptr);
         CNUART* uart = &nano->UART();

@@ -1,13 +1,13 @@
 #include <com_elmfer_cnmcu_mcu_modules_CNRAM.h>
 
-//@line:78
+//@line:79
 
          #include "cnmcuJava.h"
          #include "Nano.hpp"
      JNIEXPORT jlong JNICALL Java_com_elmfer_cnmcu_mcu_modules_CNRAM_size(JNIEnv* env, jclass clazz, jlong ptr) {
 
 
-//@line:83
+//@line:84
 
         return static_cast<jlong>(CodeNodeNano::RAM_SIZE);
     
@@ -17,7 +17,7 @@
 JNIEXPORT jobject JNICALL Java_com_elmfer_cnmcu_mcu_modules_CNRAM_data(JNIEnv* env, jclass clazz, jlong ptr) {
 
 
-//@line:87
+//@line:88
 
         CNRAM<CodeNodeNano::RAM_SIZE>* ram = reinterpret_cast<CNRAM<CodeNodeNano::RAM_SIZE>*>(ptr);
         return env->NewDirectByteBuffer(ram->data(), CodeNodeNano::RAM_SIZE);
@@ -28,7 +28,7 @@ JNIEXPORT jobject JNICALL Java_com_elmfer_cnmcu_mcu_modules_CNRAM_data(JNIEnv* e
 JNIEXPORT jbyte JNICALL Java_com_elmfer_cnmcu_mcu_modules_CNRAM_read(JNIEnv* env, jclass clazz, jlong ptr, jint address) {
 
 
-//@line:92
+//@line:93
 
         CNRAM<CodeNodeNano::RAM_SIZE>* ram = reinterpret_cast<CNRAM<CodeNodeNano::RAM_SIZE>*>(ptr);
         uint16_t addr = static_cast<uint16_t>(address);
@@ -40,7 +40,7 @@ JNIEXPORT jbyte JNICALL Java_com_elmfer_cnmcu_mcu_modules_CNRAM_read(JNIEnv* env
 JNIEXPORT void JNICALL Java_com_elmfer_cnmcu_mcu_modules_CNRAM_write(JNIEnv* env, jclass clazz, jlong ptr, jint address, jbyte value) {
 
 
-//@line:98
+//@line:99
 
         CNRAM<CodeNodeNano::RAM_SIZE>* ram = reinterpret_cast<CNRAM<CodeNodeNano::RAM_SIZE>*>(ptr);
         uint16_t addr = static_cast<uint16_t>(address);

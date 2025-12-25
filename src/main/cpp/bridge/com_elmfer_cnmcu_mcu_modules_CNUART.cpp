@@ -1,13 +1,13 @@
 #include <com_elmfer_cnmcu_mcu_modules_CNUART.h>
 
-//@line:91
+//@line:94
 
          #include "cnmcuJava.h"
          #include "Nano.hpp"
      JNIEXPORT jlong JNICALL Java_com_elmfer_cnmcu_mcu_modules_CNUART_size(JNIEnv* env, jclass clazz, jlong ptr) {
 
 
-//@line:96
+//@line:99
 
         CNUART* uart = reinterpret_cast<CNUART*>(ptr);
         return uart->size();
@@ -18,7 +18,7 @@
 JNIEXPORT void JNICALL Java_com_elmfer_cnmcu_mcu_modules_CNUART_reset(JNIEnv* env, jclass clazz, jlong ptr) {
 
 
-//@line:101
+//@line:104
 
         CNUART* uart = reinterpret_cast<CNUART*>(ptr);
         uart->reset();
@@ -29,7 +29,7 @@ JNIEXPORT void JNICALL Java_com_elmfer_cnmcu_mcu_modules_CNUART_reset(JNIEnv* en
 JNIEXPORT jboolean JNICALL Java_com_elmfer_cnmcu_mcu_modules_CNUART_shouldInterrupt(JNIEnv* env, jclass clazz, jlong ptr) {
 
 
-//@line:106
+//@line:109
 
         CNUART* uart = reinterpret_cast<CNUART*>(ptr);
         return uart->shouldInterrupt();
@@ -40,7 +40,7 @@ JNIEXPORT jboolean JNICALL Java_com_elmfer_cnmcu_mcu_modules_CNUART_shouldInterr
 JNIEXPORT jobject JNICALL Java_com_elmfer_cnmcu_mcu_modules_CNUART_registerData(JNIEnv* env, jclass clazz, jlong ptr) {
 
 
-//@line:111
+//@line:114
 
         CNUART* uart = reinterpret_cast<CNUART*>(ptr);
         return env->NewDirectByteBuffer(uart->registerData(), uart->size());
@@ -51,7 +51,7 @@ JNIEXPORT jobject JNICALL Java_com_elmfer_cnmcu_mcu_modules_CNUART_registerData(
 JNIEXPORT void JNICALL Java_com_elmfer_cnmcu_mcu_modules_CNUART_write(JNIEnv* env, jclass clazz, jlong ptr, jint address, jint data) {
 
 
-//@line:116
+//@line:119
 
         CNUART* uart = reinterpret_cast<CNUART*>(ptr);
         uint16_t addr = address;
@@ -64,7 +64,7 @@ JNIEXPORT void JNICALL Java_com_elmfer_cnmcu_mcu_modules_CNUART_write(JNIEnv* en
 JNIEXPORT jint JNICALL Java_com_elmfer_cnmcu_mcu_modules_CNUART_read(JNIEnv* env, jclass clazz, jlong ptr, jint address) {
 
 
-//@line:123
+//@line:126
 
         CNUART* uart = reinterpret_cast<CNUART*>(ptr);
         uint16_t addr = address;

@@ -3,15 +3,12 @@ package com.elmfer.cnmcu;
 import com.elmfer.cnmcu.config.Config;
 import com.elmfer.cnmcu.config.ModSetup;
 import com.elmfer.cnmcu.mcu.Toolchain;
-import com.elmfer.cnmcu.ui.UIRender;
-
 import imgui.ImGui;
 import imgui.ImGuiIO;
 import imgui.flag.ImGuiConfigFlags;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldTerrainRenderContext;
 import net.minecraft.client.MinecraftClient;
@@ -29,20 +26,13 @@ public class EventHandler {
         ClientLifecycleEvents.CLIENT_STARTED.register(EventHandler::onClientStarted);
         ClientLifecycleEvents.CLIENT_STOPPING.register(EventHandler::onClientStopping);
         WorldRenderEvents.START_MAIN.register(EventHandler::onStartRenderWorld);
-        WorldRenderEvents.END_MAIN.register(EventHandler::onEndRenderWorld);
     }
 
     private static void onStartRenderWorld(WorldTerrainRenderContext context) {
         if (!hasNotifiedPlayerAboutUpdate)
             notifyPlayerAboutUpdate();
 
-        UIRender.newFrame();
-
         EventHandler.IMGUI_GLFW.newFrame();
-    }
-
-    private static void onEndRenderWorld(WorldRenderContext context) {
-        UIRender.renderBatch();
     }
 
     private static void onClientStarted(MinecraftClient client) {

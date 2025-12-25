@@ -1,12 +1,12 @@
 #include <com_elmfer_cnmcu_mcu_cpu_MOS6502.h>
 
-//@line:103
+//@line:121
 
         #include "mos6502.h"
     JNIEXPORT void JNICALL Java_com_elmfer_cnmcu_mcu_cpu_MOS6502_NMI(JNIEnv* env, jclass clazz, jlong ptr) {
 
 
-//@line:107
+//@line:125
 
         mos6502* cpu = reinterpret_cast<mos6502*>(ptr);
         cpu->NMI();
@@ -17,7 +17,7 @@
 JNIEXPORT void JNICALL Java_com_elmfer_cnmcu_mcu_cpu_MOS6502_IRQ(JNIEnv* env, jclass clazz, jlong ptr) {
 
 
-//@line:112
+//@line:130
 
         mos6502* cpu = reinterpret_cast<mos6502*>(ptr);
         cpu->IRQ();
@@ -28,7 +28,7 @@ JNIEXPORT void JNICALL Java_com_elmfer_cnmcu_mcu_cpu_MOS6502_IRQ(JNIEnv* env, jc
 JNIEXPORT void JNICALL Java_com_elmfer_cnmcu_mcu_cpu_MOS6502_Reset(JNIEnv* env, jclass clazz, jlong ptr) {
 
 
-//@line:117
+//@line:135
 
         mos6502* cpu = reinterpret_cast<mos6502*>(ptr);
         cpu->Reset();
@@ -39,7 +39,7 @@ JNIEXPORT void JNICALL Java_com_elmfer_cnmcu_mcu_cpu_MOS6502_Reset(JNIEnv* env, 
 JNIEXPORT jint JNICALL Java_com_elmfer_cnmcu_mcu_cpu_MOS6502_GetPC(JNIEnv* env, jclass clazz, jlong ptr) {
 
 
-//@line:122
+//@line:140
 
         mos6502* cpu = reinterpret_cast<mos6502*>(ptr);
         return static_cast<jint>(cpu->GetPC());
@@ -50,7 +50,7 @@ JNIEXPORT jint JNICALL Java_com_elmfer_cnmcu_mcu_cpu_MOS6502_GetPC(JNIEnv* env, 
 JNIEXPORT jint JNICALL Java_com_elmfer_cnmcu_mcu_cpu_MOS6502_GetS(JNIEnv* env, jclass clazz, jlong ptr) {
 
 
-//@line:127
+//@line:145
 
         mos6502* cpu = reinterpret_cast<mos6502*>(ptr);
         return static_cast<jint>(cpu->GetS());
@@ -61,7 +61,7 @@ JNIEXPORT jint JNICALL Java_com_elmfer_cnmcu_mcu_cpu_MOS6502_GetS(JNIEnv* env, j
 JNIEXPORT jint JNICALL Java_com_elmfer_cnmcu_mcu_cpu_MOS6502_GetP(JNIEnv* env, jclass clazz, jlong ptr) {
 
 
-//@line:132
+//@line:150
 
         mos6502* cpu = reinterpret_cast<mos6502*>(ptr);
         return static_cast<jint>(cpu->GetP());
@@ -72,7 +72,7 @@ JNIEXPORT jint JNICALL Java_com_elmfer_cnmcu_mcu_cpu_MOS6502_GetP(JNIEnv* env, j
 JNIEXPORT jint JNICALL Java_com_elmfer_cnmcu_mcu_cpu_MOS6502_GetA(JNIEnv* env, jclass clazz, jlong ptr) {
 
 
-//@line:137
+//@line:155
 
         mos6502* cpu = reinterpret_cast<mos6502*>(ptr);
         return static_cast<jint>(cpu->GetA());
@@ -83,7 +83,7 @@ JNIEXPORT jint JNICALL Java_com_elmfer_cnmcu_mcu_cpu_MOS6502_GetA(JNIEnv* env, j
 JNIEXPORT jint JNICALL Java_com_elmfer_cnmcu_mcu_cpu_MOS6502_GetX(JNIEnv* env, jclass clazz, jlong ptr) {
 
 
-//@line:142
+//@line:160
 
         mos6502* cpu = reinterpret_cast<mos6502*>(ptr);
         return static_cast<jint>(cpu->GetX());
@@ -94,7 +94,7 @@ JNIEXPORT jint JNICALL Java_com_elmfer_cnmcu_mcu_cpu_MOS6502_GetX(JNIEnv* env, j
 JNIEXPORT jint JNICALL Java_com_elmfer_cnmcu_mcu_cpu_MOS6502_GetY(JNIEnv* env, jclass clazz, jlong ptr) {
 
 
-//@line:147
+//@line:165
 
         mos6502* cpu = reinterpret_cast<mos6502*>(ptr);
         return static_cast<jint>(cpu->GetY());
@@ -106,7 +106,7 @@ JNIEXPORT void JNICALL Java_com_elmfer_cnmcu_mcu_cpu_MOS6502_SetState(JNIEnv* en
 	int* state = (int*)env->GetPrimitiveArrayCritical(obj_state, 0);
 
 
-//@line:152
+//@line:170
 
         mos6502* cpu = reinterpret_cast<mos6502*>(ptr);
         cpu->SetState(state);

@@ -6,8 +6,12 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import com.elmfer.cnmcu.network.*;
+import com.mojang.blaze3d.opengl.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.minecraft.client.gl.GlBackend;
 import net.minecraft.client.input.KeyInput;
+import net.minecraft.client.texture.GlTexture;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
 
@@ -37,6 +41,7 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.text.Text;
+import org.lwjgl.opengl.*;
 
 public class IDEScreen extends HandledScreen<IDEScreenHandler> {
 
@@ -44,11 +49,11 @@ public class IDEScreen extends HandledScreen<IDEScreenHandler> {
     private static final String CODE_EDITOR_NAME = "Code Editor";
     private static final String CONSOLE_NAME = "Console";
 
-    private static ImGuiIO IO = ImGui.getIO();
+    private static final ImGuiIO IO = ImGui.getIO();
 
-    private TextEditor textEditor;
-    private MemoryEditor memoryEditor;
-    private IDEScreenHandler handler;
+    private final TextEditor textEditor;
+    private final MemoryEditor memoryEditor;
+    private final IDEScreenHandler handler;
 
     private boolean saved = true;
 
@@ -58,8 +63,8 @@ public class IDEScreen extends HandledScreen<IDEScreenHandler> {
     public boolean isClockPaused = false;
     public ByteBuffer zeroPage = BufferUtils.createByteBuffer(256);
 
-    private ClockTimer heartbeatTimer = new ClockTimer(1);
-    private IDEScreenHeartbeatPayload heartbeatPacket;
+    private final ClockTimer heartbeatTimer = new ClockTimer(1);
+    private final IDEScreenHeartbeatPayload heartbeatPacket;
 
     private CompletableFuture<byte[]> compileFuture;
     private Future<UploadROMResponsePayload> uploadPacket;
@@ -86,13 +91,10 @@ public class IDEScreen extends HandledScreen<IDEScreenHandler> {
 
     @Override
     public void render(DrawContext stack, int mouseX, int mouseY, float delta) {
+        // TODO: Port to render layer, to ensure the screen is drawn above other UI elements.
         sendHeartbeat();
 
-        float height = UIRender.getUIheight();
-        int width = UIRender.getUIwidth();
-        UIRender.drawGradientRect(0, height * 0.66f, width, height, 0x00, 0x7D000000);
-
-        ImGui.newFrame();
+        ImGui.newFrame(); // TODO: Fix incorrect cursor when exiting screen with resize cursor.
 
         ImGui.setNextWindowPos(0, 0, ImGuiCond.Always);
         ImGui.setNextWindowSize(IO.getDisplaySizeX(), IO.getDisplaySizeY(), ImGuiCond.Always);
@@ -124,7 +126,23 @@ public class IDEScreen extends HandledScreen<IDEScreenHandler> {
         ImGui.end();
 
         ImGui.render();
+
+        final var framebuffer = client.getFramebuffer();
+        GlStateManager._glBindFramebuffer(GL30C.GL_FRAMEBUFFER, ((GlTexture) framebuffer.getColorAttachment())
+                .getOrCreateFramebuffer(((GlBackend) RenderSystem.getDevice()).getBufferManager(), null));
+        GL11C.glViewport(0, 0, framebuffer.textureWidth, framebuffer.textureHeight);
         EventHandler.IMGUI_GL3.renderDrawData(ImGui.getDrawData());
+        GlStateManager._glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0);
+    }
+
+    @Override
+    public void renderMain(DrawContext context, int mouseX, int mouseY, float deltaTicks) {
+        super.renderMain(context, mouseX, mouseY, deltaTicks);
+    }
+
+    @Override
+    public void renderBackground(DrawContext context, int mouseX, int mouseY, float deltaTicks) {
+
     }
 
     @Override

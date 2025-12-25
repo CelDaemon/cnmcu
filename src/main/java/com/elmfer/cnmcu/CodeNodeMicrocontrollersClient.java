@@ -21,7 +21,6 @@ public class CodeNodeMicrocontrollersClient implements ClientModInitializer {
         
         HandledScreens.register(ScreenHandlers.IDE_SCREEN_HANDLER, IDEScreen::new);
 
-        Packets.registerPackets();
         Packets.initClientPackets();
         
         EventHandler.registerClientEventHandlers();

@@ -8,19 +8,25 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKey;
+
+import java.util.function.Function;
 
 public class Blocks {
-    public static final CNnanoBlock CN_NANO_BLOCK = new CNnanoBlock(AbstractBlock.Settings.create().strength(0.5f));
+    public static final CNnanoBlock CN_NANO_BLOCK = register("nano", CNnanoBlock::new, AbstractBlock.Settings.create().strength(0.5f));
 
-    public static <T extends Block> T register(String name, T block) {
-        T b = Registry.register(Registries.BLOCK, CodeNodeMicrocontrollers.id(name), block);
-        BlockItem item = new BlockItem(b, new Item.Settings());
-        item.appendBlocks(Item.BLOCK_ITEMS, item);
-        Registry.register(Registries.ITEM, CodeNodeMicrocontrollers.id(name), item);
-        return b;
+    public static <T extends Block> T register(String name, Function<AbstractBlock.Settings, T> blockFactory, AbstractBlock.Settings blockSettings) {
+        var blockKey = RegistryKey.of(Registries.BLOCK.getKey(), CodeNodeMicrocontrollers.id(name));
+        var block = blockFactory.apply(blockSettings.registryKey(blockKey));
+        var itemKey = RegistryKey.of(Registries.ITEM.getKey(), CodeNodeMicrocontrollers.id(name));
+        var blockItem = new BlockItem(block, new Item.Settings().registryKey(itemKey).useBlockPrefixedTranslationKey());
+        Registry.register(Registries.ITEM, itemKey, blockItem);
+        Registry.register(Registries.BLOCK, blockKey, block);
+
+        return block;
     }
 
     public static void init() {
-        register("nano", CN_NANO_BLOCK);
+        // DUMMY
     }
 }

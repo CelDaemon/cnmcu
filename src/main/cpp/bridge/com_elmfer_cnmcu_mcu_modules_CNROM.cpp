@@ -1,13 +1,13 @@
 #include <com_elmfer_cnmcu_mcu_modules_CNROM.h>
 
-//@line:92
+//@line:97
 
         #include "cnmcuJava.h"
         #include "Nano.hpp"
      JNIEXPORT jlong JNICALL Java_com_elmfer_cnmcu_mcu_modules_CNROM_size(JNIEnv* env, jclass clazz, jlong ptr) {
 
 
-//@line:97
+//@line:102
 
         return static_cast<jlong>(CodeNodeNano::ROM_SIZE);
     
@@ -17,7 +17,7 @@
 JNIEXPORT jobject JNICALL Java_com_elmfer_cnmcu_mcu_modules_CNROM_data(JNIEnv* env, jclass clazz, jlong ptr) {
 
 
-//@line:101
+//@line:106
 
         CNROM<CodeNodeNano::ROM_SIZE>* rom = reinterpret_cast<CNROM<CodeNodeNano::ROM_SIZE>*>(ptr);
         return env->NewDirectByteBuffer(rom->data(), CodeNodeNano::ROM_SIZE);
@@ -28,7 +28,7 @@ JNIEXPORT jobject JNICALL Java_com_elmfer_cnmcu_mcu_modules_CNROM_data(JNIEnv* e
 JNIEXPORT jbyte JNICALL Java_com_elmfer_cnmcu_mcu_modules_CNROM_read(JNIEnv* env, jclass clazz, jlong ptr, jint address) {
 
 
-//@line:106
+//@line:111
 
         CNROM<CodeNodeNano::ROM_SIZE>* rom = reinterpret_cast<CNROM<CodeNodeNano::ROM_SIZE>*>(ptr);
         uint16_t addr = static_cast<uint16_t>(address);
@@ -40,7 +40,7 @@ JNIEXPORT jbyte JNICALL Java_com_elmfer_cnmcu_mcu_modules_CNROM_read(JNIEnv* env
 JNIEXPORT void JNICALL Java_com_elmfer_cnmcu_mcu_modules_CNROM_write(JNIEnv* env, jclass clazz, jlong ptr, jint address, jbyte value) {
 
 
-//@line:112
+//@line:117
 
         CNROM<CodeNodeNano::ROM_SIZE>* rom = reinterpret_cast<CNROM<CodeNodeNano::ROM_SIZE>*>(ptr);
         uint16_t addr = static_cast<uint16_t>(address);
@@ -53,7 +53,7 @@ JNIEXPORT void JNICALL Java_com_elmfer_cnmcu_mcu_modules_CNROM_write(JNIEnv* env
 JNIEXPORT jboolean JNICALL Java_com_elmfer_cnmcu_mcu_modules_CNROM_isWriteProtected(JNIEnv* env, jclass clazz, jlong ptr) {
 
 
-//@line:119
+//@line:124
 
         CNROM<CodeNodeNano::ROM_SIZE>* rom = reinterpret_cast<CNROM<CodeNodeNano::ROM_SIZE>*>(ptr);
         return static_cast<jboolean>(rom->isWriteProtected());
@@ -64,7 +64,7 @@ JNIEXPORT jboolean JNICALL Java_com_elmfer_cnmcu_mcu_modules_CNROM_isWriteProtec
 JNIEXPORT void JNICALL Java_com_elmfer_cnmcu_mcu_modules_CNROM_setWriteProtected(JNIEnv* env, jclass clazz, jlong ptr, jboolean writeProtected) {
 
 
-//@line:123
+//@line:128
 
         CNROM<CodeNodeNano::ROM_SIZE>* rom = reinterpret_cast<CNROM<CodeNodeNano::ROM_SIZE>*>(ptr);
         rom->setWriteProtect(static_cast<bool>(writeProtected));
