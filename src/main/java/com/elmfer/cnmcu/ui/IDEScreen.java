@@ -561,11 +561,6 @@ public class IDEScreen extends HandledScreen<IDEScreenHandler> {
     }
 
     @Override
-    public boolean shouldPause() {
-        return false;
-    }
-
-    @Override
     protected void drawBackground(DrawContext var1, float var2, int var3, int var4) {
         // TODO Auto-generated method stub
 
