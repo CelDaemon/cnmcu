@@ -467,7 +467,7 @@ public class IDEScreen extends HandledScreen<IDEScreenHandler> {
         ImGui.text("Controls");
         ImGui.sameLine();
         ImGui.separator();
-
+        // TODO: Fix power immediately turning off when clicking power after an upload.
         if (ImGui.checkbox("Power", isPowered))
             ClientPlayNetworking.send(new IDEScreenMCUControlPayload(handler.getMcuID(),
                     isPowered ? Control.POWER_OFF : Control.POWER_ON)
