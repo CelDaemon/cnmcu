@@ -119,7 +119,7 @@ public class MOS6502 extends WeakNativeObject {
     // @formatter:off
     
     /*JNI
-        #include "mos6502.h"
+        #include "mos6502.hpp"
     */
     
     private static native void NMI(long ptr); /*

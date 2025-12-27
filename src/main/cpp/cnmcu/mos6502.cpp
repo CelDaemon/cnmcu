@@ -1,4 +1,4 @@
-#include "mos6502.h"
+#include "mos6502.hpp"
 
 #define NEGATIVE  0x80
 #define OVERFLOW  0x40

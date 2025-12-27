@@ -1,4 +1,4 @@
-#include <Nano.hpp>
+#include "Nano.hpp"
 
 CodeNodeNano::CodeNodeNano()
     : cpu(read, write, cycle)

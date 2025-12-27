@@ -55,15 +55,6 @@ public:
     static jmethodID PrintStream_print;
 
 
-    // For mesh loading
-    static jclass Mesh;
-    static jmethodID Mesh_loadPositions;
-    static jmethodID Mesh_loadNormals;
-    static jmethodID Mesh_loadIndices;
-    static jmethodID Mesh_loadColors;
-    static jmethodID Mesh_loadUvs;
-
-
     // For CNMCU
     static jclass NanoMCU;
 

@@ -81,6 +81,8 @@ sourceSets.main.java {
 clean.doFirst {
 	delete fileTree("src/main/cpp/bridge") {
 		include "*.h"
+		include "*.cpp"
+		exclude "cnmcuJava.cpp"
 		exclude "cnmcuJava.h"
 	}
 }

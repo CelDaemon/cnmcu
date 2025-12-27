@@ -1,4 +1,4 @@
-#include <cnmcuJava.h>
+#include "cnmcuJava.h"
 
 JNIEnv* cnmcuJava::env;
 JavaVM* cnmcuJava::vm;
@@ -16,15 +16,6 @@ jobject cnmcuJava::System_out;
 
 jclass cnmcuJava::PrintStream;
 jmethodID cnmcuJava::PrintStream_print;
-
-
-
-jclass cnmcuJava::Mesh;
-jmethodID cnmcuJava::Mesh_loadPositions;
-jmethodID cnmcuJava::Mesh_loadNormals;
-jmethodID cnmcuJava::Mesh_loadIndices;
-jmethodID cnmcuJava::Mesh_loadColors;
-jmethodID cnmcuJava::Mesh_loadUvs;
 
 
 
@@ -74,15 +65,6 @@ void cnmcuJava::init(JNIEnv* env)
 
     GET_CLASS(PrintStream, "java/io/PrintStream");
     GET_METHOD_ID(PrintStream_print, PrintStream, "print", "(Ljava/lang/String;)V");
-
-
-    // For mesh loading
-    GET_CLASS(Mesh, "com/elmfer/cnmcu/mesh/Mesh");
-    GET_METHOD_ID(Mesh_loadPositions, Mesh, "loadPositions", "(Ljava/nio/ByteBuffer;I)V");
-    GET_METHOD_ID(Mesh_loadNormals, Mesh, "loadNormals", "(Ljava/nio/ByteBuffer;I)V");
-    GET_METHOD_ID(Mesh_loadIndices, Mesh, "loadIndices", "(Ljava/nio/ByteBuffer;I)V");
-    GET_METHOD_ID(Mesh_loadColors, Mesh, "loadColors", "(Ljava/nio/ByteBuffer;I)V");
-    GET_METHOD_ID(Mesh_loadUvs, Mesh, "loadUvs", "(Ljava/nio/ByteBuffer;I)V");
 
 
     // For CNMCU

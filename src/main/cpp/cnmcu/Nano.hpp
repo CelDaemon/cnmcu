@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mos6502.h>
+#include "mos6502.hpp"
 #include "CNGPIO.hpp"
 #include "CNRAM.hpp"
 #include "CNROM.hpp"

@@ -19,11 +19,9 @@ file(GLOB JNI_BRIDGE_SOURCES "bridge/*.cpp")
 set(PROJECT_SOURCES 
   cnmcu/mos6502.cpp
   cnmcu/Nano.cpp
-  cnmcu/MeshLoader.cpp
   cnmcu/CNUART.cpp
 
   ${JNI_BRIDGE_SOURCES}
-  bridge/cnmcuJava.cpp
 )
 
 set(PROJECT_INCLUDES
