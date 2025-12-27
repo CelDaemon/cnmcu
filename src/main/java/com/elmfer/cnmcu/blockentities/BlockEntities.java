@@ -10,10 +10,10 @@ import net.minecraft.registry.Registry;
 
 public class BlockEntities {
     public static void init() {
-        
+        // DUMMY
     }
     
     public static final BlockEntityType<CNnanoBlockEntity> CN_NANO = Registry.register(Registries.BLOCK_ENTITY_TYPE,
             CodeNodeMicrocontrollers.id("nano"),
-            FabricBlockEntityTypeBuilder.create(CNnanoBlockEntity::new, Blocks.CN_NANO_BLOCK).build(null));
+            FabricBlockEntityTypeBuilder.create(CNnanoBlockEntity::new, Blocks.CN_NANO_BLOCK).build());
 }

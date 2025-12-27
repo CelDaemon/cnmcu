@@ -1,10 +1,9 @@
 package com.elmfer.cnmcu.util;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -24,7 +23,7 @@ public class HTTPSFetcher {
 
     public HTTPSFetcher(String url) {
         try {
-            worker = new FetcherWorker(this, new URL(url));
+            worker = new FetcherWorker(this, URI.create(url).toURL());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }

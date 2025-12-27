@@ -1,6 +1,6 @@
 package com.elmfer.cnmcu.ui;
 
-import java.net.URL;
+import java.net.URI;
 
 import com.elmfer.cnmcu.CodeNodeMicrocontrollers;
 import com.elmfer.cnmcu.animation.Timer;
@@ -918,7 +918,7 @@ public class QuickReferences {
 
     public static boolean openWebpage(String page) {
         try {
-            URL url = new URL(page);
+            var url = URI.create(page).toURL();
 
             String shell = NativesLoader.NATIVES_OS.equals("windows") ? "cmd" : "sh";
             String shellFlag = NativesLoader.NATIVES_OS.equals("windows") ? "/c" : "-c";
