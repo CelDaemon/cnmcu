@@ -8,11 +8,11 @@ repositories {
 }
 
 ext {
-	jnigenVersion = '2.4.0'
+	jnigenVersion = '3.1.1'
 }
 
 dependencies {
 	implementation gradleApi()
 	
-	implementation "com.badlogicgames.gdx:gdx-jnigen:$jnigenVersion"
+	implementation "com.badlogicgames.jnigen:jnigen-core:$jnigenVersion"
 }

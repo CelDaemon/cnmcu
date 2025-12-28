@@ -53,26 +53,27 @@ public abstract class CompileNativesTask extends DefaultTask {
         if (!buildDir.isPresent())
             throw new RuntimeException("You must specify build directory for generating native source files!");
 
-        executeCmake("--version", "CMake is not installed on your system!");
+        if(!executeCommand("cmake", "--version"))
+            throw new RuntimeException("CMake is not installed on your system!");
 
         final var absSourceDir = project.file(sourceDir).getAbsolutePath();
         final var absBuildDir = project.file(buildDir).getAbsolutePath();
 
-        executeCmake("-S " + absSourceDir + " -B " + absBuildDir + " -DCMAKE_BUILD_TYPE=" + buildType.get(),
-                "Error configuring CMake project!");
+        if(!executeCommand("cmake", "-S", absSourceDir, "-B", absBuildDir, "-DCMAKE_BUILD_TYPE=" + buildType.get()))
+            throw new RuntimeException("Error configuring CMake project!");
 
-        executeCmake("--build " + absBuildDir + " --parallel 4 --target " + cmakeTarget.get() + " --config " + buildType.get(),
-                "Error compiling native source files!");
+        if(!executeCommand("cmake", "--build", absBuildDir, "--parallel", "4", "--target", cmakeTarget.get(), "--config", buildType.get()))
+                throw new RuntimeException("Error compiling native source files!");
 
         final var inProduction = System.getenv("PRODUCTION") != null;
         if (!inProduction && getTargetDir().isPresent())
             copyBinaries();
     }
 
-    private void executeCmake(String args, String failMessage) throws Exception {
+    private boolean executeCommand(String ...args) throws Exception {
         final var logger = getLogger();
 
-        final var builder = new ProcessBuilder("cmake", args);
+        final var builder = new ProcessBuilder(args);
         builder.redirectErrorStream(true);
 
         final var process = builder.start();
@@ -91,8 +92,7 @@ public abstract class CompileNativesTask extends DefaultTask {
         final var exitCode = process.waitFor();
         outThread.join();
 
-        if (exitCode != 0)
-            throw new RuntimeException(failMessage);
+        return exitCode == 0;
     }
 
     /**
