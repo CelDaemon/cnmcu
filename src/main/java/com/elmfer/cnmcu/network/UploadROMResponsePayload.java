@@ -2,7 +2,7 @@ package com.elmfer.cnmcu.network;
 
 import com.elmfer.cnmcu.CodeNodeMicrocontrollers;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 
 import net.minecraft.network.codec.PacketCodecs;
@@ -17,7 +17,7 @@ public record UploadROMResponsePayload(
     public static final Identifier RAW_ID = CodeNodeMicrocontrollers.id(
             "upload_rom_response");
     public static final CustomPayload.Id<UploadROMResponsePayload> ID = new CustomPayload.Id<>(RAW_ID);
-    public static final PacketCodec<RegistryByteBuf, UploadROMResponsePayload> CODEC = PacketCodec.tuple(
+    public static final PacketCodec<PacketByteBuf, UploadROMResponsePayload> CODEC = PacketCodec.tuple(
             PacketCodecs.SYNC_ID, UploadROMResponsePayload::transactionId,
             PacketCodecs.INTEGER, UploadROMResponsePayload::bytesUploaded,
             PacketCodecs.STRING, UploadROMResponsePayload::message,
@@ -29,7 +29,7 @@ public record UploadROMResponsePayload(
         return ID;
     }
 
-    public static void receive(UploadROMResponsePayload payload, ClientPlayNetworking.Context context) {
-        // DO NOTHING.
+    public static void receive(UploadROMResponsePayload payload, @SuppressWarnings("unused") ClientPlayNetworking.Context context) {
+        UploadROMRequestPayload.notifyResponse(payload);
     }
 }

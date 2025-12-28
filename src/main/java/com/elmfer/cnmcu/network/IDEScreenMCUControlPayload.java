@@ -7,7 +7,7 @@ import com.elmfer.cnmcu.blockentities.CNnanoBlockEntity;
 
 import io.netty.buffer.ByteBuf;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.codec.PacketCodecs;
 import net.minecraft.network.packet.CustomPayload;
@@ -19,7 +19,7 @@ public record IDEScreenMCUControlPayload(
         Control control) implements CustomPayload {
     public static final Identifier RAW_ID = CodeNodeMicrocontrollers.id("ide_screen_mcu_control");
     public static final Id<IDEScreenMCUControlPayload> ID = new Id<>(RAW_ID);
-    public static final PacketCodec<RegistryByteBuf, IDEScreenMCUControlPayload> CODEC = PacketCodec.tuple(
+    public static final PacketCodec<PacketByteBuf, IDEScreenMCUControlPayload> CODEC = PacketCodec.tuple(
             Uuids.PACKET_CODEC, IDEScreenMCUControlPayload::mcuId,
             Control.PACKET_CODEC, IDEScreenMCUControlPayload::control,
             IDEScreenMCUControlPayload::new
@@ -30,7 +30,7 @@ public record IDEScreenMCUControlPayload(
         return ID;
     }
 
-    public static void receive(IDEScreenMCUControlPayload payload, ServerPlayNetworking.Context context) {
+    public static void receive(IDEScreenMCUControlPayload payload, @SuppressWarnings("unused") ServerPlayNetworking.Context context) {
         var mcuId = payload.mcuId();
         
         if (!CNnanoBlockEntity.SCREEN_UPDATES.containsKey(mcuId))

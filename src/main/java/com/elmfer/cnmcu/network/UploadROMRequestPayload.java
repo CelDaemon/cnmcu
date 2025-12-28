@@ -4,12 +4,14 @@ import com.elmfer.cnmcu.CodeNodeMicrocontrollers;
 import com.elmfer.cnmcu.blockentities.CNnanoBlockEntity;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.codec.PacketCodecs;
 import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Uuids;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -21,10 +23,11 @@ public record UploadROMRequestPayload(
         UUID mcuId,
         byte[] rom
 ) implements CustomPayload {
+    private static final Logger LOGGER = LoggerFactory.getLogger(UploadROMRequestPayload.class);
     public static final Identifier RAW_ID = CodeNodeMicrocontrollers.id("upload_rom_request");
     public static final CustomPayload.Id<UploadROMRequestPayload> ID = new CustomPayload.Id<>(RAW_ID);
 
-    public static final PacketCodec<RegistryByteBuf, UploadROMRequestPayload> CODEC = PacketCodec.tuple(
+    public static final PacketCodec<PacketByteBuf, UploadROMRequestPayload> CODEC = PacketCodec.tuple(
             PacketCodecs.SYNC_ID, UploadROMRequestPayload::transactionId,
             Uuids.PACKET_CODEC, UploadROMRequestPayload::mcuId,
             PacketCodecs.BYTE_ARRAY, UploadROMRequestPayload::rom,
@@ -67,7 +70,8 @@ public record UploadROMRequestPayload(
             return;
         }
 
-        context.server().execute(() -> {
+        @SuppressWarnings("resource") var server = context.server();
+        server.execute(() -> {
             mcu.setPowered(false);
             var data = mcu.getROM().getData();
             data.clear();
@@ -83,12 +87,14 @@ public record UploadROMRequestPayload(
 
     public static Future<UploadROMResponsePayload> send(UUID mcuId, byte[] rom) {
         var transactionId = nextTransactionId++;
-        var future = TRANSACTIONS.put(nextTransactionId++, new CompletableFuture<>());
+        var future = new CompletableFuture<UploadROMResponsePayload>();
+        TRANSACTIONS.put(transactionId, future);
         ClientPlayNetworking.send(new UploadROMRequestPayload(transactionId, mcuId, rom));
         return future;
     }
 
     public static void notifyResponse(UploadROMResponsePayload responsePayload) {
+        LOGGER.info("Received response for transaction: {}", responsePayload.transactionId());
         var transaction = TRANSACTIONS.remove(responsePayload.transactionId());
         if(transaction == null)
             return;

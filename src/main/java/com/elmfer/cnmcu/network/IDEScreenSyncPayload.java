@@ -6,7 +6,7 @@ import com.elmfer.cnmcu.mcu.NanoMCU;
 import com.elmfer.cnmcu.ui.IDEScreen;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.codec.PacketCodecs;
 import net.minecraft.network.packet.CustomPayload;
@@ -20,7 +20,7 @@ public record IDEScreenSyncPayload(
         byte[] zeroPage) implements CustomPayload {
     public static final Identifier RAW_ID = CodeNodeMicrocontrollers.id("ide_screen_sync");
     public static final CustomPayload.Id<IDEScreenSyncPayload> ID = new CustomPayload.Id<>(RAW_ID);
-    public static final PacketCodec<RegistryByteBuf, IDEScreenSyncPayload> CODEC = PacketCodec.tuple(
+    public static final PacketCodec<PacketByteBuf, IDEScreenSyncPayload> CODEC = PacketCodec.tuple(
             PacketCodecs.BOOLEAN, IDEScreenSyncPayload::isPowered,
             PacketCodecs.BOOLEAN, IDEScreenSyncPayload::isClockPaused,
             CPUStatus.PACKET_CODEC, IDEScreenSyncPayload::cpuStatus,
@@ -44,7 +44,7 @@ public record IDEScreenSyncPayload(
     }
     
     public static void receive(IDEScreenSyncPayload payload, ClientPlayNetworking.Context context) {
-        var client = context.client();
+        @SuppressWarnings("resource") var client = context.client();
         if(!(client.currentScreen instanceof IDEScreen screen))
             return;
 
@@ -73,7 +73,7 @@ public record IDEScreenSyncPayload(
             int sp,
             int flags,
             long cycles) {
-        public static final PacketCodec<RegistryByteBuf, CPUStatus> PACKET_CODEC = PacketCodec.tuple(
+        public static final PacketCodec<PacketByteBuf, CPUStatus> PACKET_CODEC = PacketCodec.tuple(
                 PacketCodecs.INTEGER, CPUStatus::a,
                 PacketCodecs.INTEGER, CPUStatus::x,
                 PacketCodecs.INTEGER, CPUStatus::y,
@@ -99,7 +99,7 @@ public record IDEScreenSyncPayload(
     }
     
     public record BusStatus(int address, int data, boolean rw) {
-        public static final PacketCodec<RegistryByteBuf, BusStatus> PACKET_CODEC = PacketCodec.tuple(
+        public static final PacketCodec<PacketByteBuf, BusStatus> PACKET_CODEC = PacketCodec.tuple(
                 PacketCodecs.INTEGER, BusStatus::address,
                 PacketCodecs.INTEGER, BusStatus::data,
                 PacketCodecs.BOOLEAN, BusStatus::rw,

@@ -6,7 +6,7 @@ import com.elmfer.cnmcu.CodeNodeMicrocontrollers;
 
 import com.elmfer.cnmcu.blockentities.CNnanoBlockEntity;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.codec.PacketCodecs;
 import net.minecraft.network.packet.CustomPayload;
@@ -18,7 +18,7 @@ public record IDEScreenSaveCodePayload(
         String code) implements CustomPayload {
     public static final Identifier RAW_ID = CodeNodeMicrocontrollers.id("ide_screen_save_code");
     public static final CustomPayload.Id<IDEScreenSaveCodePayload> ID = new CustomPayload.Id<>(RAW_ID);
-    public static final PacketCodec<RegistryByteBuf, IDEScreenSaveCodePayload> CODEC = PacketCodec.tuple(
+    public static final PacketCodec<PacketByteBuf, IDEScreenSaveCodePayload> CODEC = PacketCodec.tuple(
             Uuids.PACKET_CODEC, IDEScreenSaveCodePayload::mcuId,
             PacketCodecs.STRING, IDEScreenSaveCodePayload::code,
             IDEScreenSaveCodePayload::new
@@ -29,7 +29,7 @@ public record IDEScreenSaveCodePayload(
         return ID;
     }
 
-    public static void receive(IDEScreenSaveCodePayload payload, ServerPlayNetworking.Context context) {
+    public static void receive(IDEScreenSaveCodePayload payload, @SuppressWarnings("unused") ServerPlayNetworking.Context context) {
         UUID mcuId = payload.mcuId();
 
         String codeStr = payload.code();

@@ -11,6 +11,7 @@ import com.mojang.blaze3d.opengl.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.AddressMode;
 import com.mojang.blaze3d.textures.FilterMode;
+import imgui.flag.*;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.gl.*;
 import net.minecraft.client.input.KeyInput;
@@ -34,12 +35,6 @@ import imgui.ImGuiIO;
 import imgui.extension.imguifiledialog.ImGuiFileDialog;
 import imgui.extension.memedit.MemoryEditor;
 import imgui.extension.texteditor.TextEditor;
-import imgui.flag.ImGuiCol;
-import imgui.flag.ImGuiCond;
-import imgui.flag.ImGuiDockNodeFlags;
-import imgui.flag.ImGuiFocusedFlags;
-import imgui.flag.ImGuiStyleVar;
-import imgui.flag.ImGuiWindowFlags;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.entity.player.PlayerInventory;
@@ -369,8 +364,8 @@ public class IDEScreen extends HandledScreen<IDEScreenHandler> {
     }
 
     private void genDocs() {
-        float centerX = UIRender.getWindowWidth() / 2;
-        float centerY = UIRender.getWindowHeight() / 2;
+        var centerX = UIRender.getWindowWidth() / 2;
+        var centerY = UIRender.getWindowHeight() / 2;
 
         ImGui.setNextWindowPos(centerX, centerY, ImGuiCond.FirstUseEver, 0.5f, 0.5f);
         ImGui.setNextWindowSize(800, 400, ImGuiCond.FirstUseEver);
@@ -391,7 +386,7 @@ public class IDEScreen extends HandledScreen<IDEScreenHandler> {
             return;
         }
 
-        if (ctrlKeyCombo('S'))
+        if (isSaveKeybind())
             save();
 
         ImGui.beginDisabled(shouldUpload || compileFuture != null);
@@ -405,7 +400,7 @@ public class IDEScreen extends HandledScreen<IDEScreenHandler> {
         if (compileFuture != null && compileFuture.isDone() && !shouldUpload)
             compileFuture = null;
 
-        if (shouldUpload && compileFuture.isDone() && uploadPacket == null) {
+        if (shouldUpload && compileFuture != null && compileFuture.isDone() && uploadPacket == null) {
             try {
                 uploadPacket = UploadROMRequestPayload.send(handler.getMcuID(), compileFuture.get());
             } catch (Exception e) {
@@ -487,7 +482,6 @@ public class IDEScreen extends HandledScreen<IDEScreenHandler> {
         ImGui.text("Controls");
         ImGui.sameLine();
         ImGui.separator();
-        // TODO: Fix power immediately turning off when clicking power after an upload.
         if (ImGui.checkbox("Power", isPowered))
             ClientPlayNetworking.send(new IDEScreenMCUControlPayload(handler.getMcuID(),
                     isPowered ? Control.POWER_OFF : Control.POWER_ON)
@@ -582,7 +576,6 @@ public class IDEScreen extends HandledScreen<IDEScreenHandler> {
 
     @Override
     protected void drawBackground(DrawContext var1, float var2, int var3, int var4) {
-        // TODO Auto-generated method stub
 
     }
 
@@ -600,9 +593,9 @@ public class IDEScreen extends HandledScreen<IDEScreenHandler> {
             compileFuture.cancel(true);
     }
 
-    private boolean ctrlKeyCombo(char key) {
-        boolean ctrl = IO.getConfigMacOSXBehaviors() ? IO.getKeySuper() : IO.getKeyCtrl();
-        return ctrl && ImGui.isKeyPressed(key);
+    private boolean isSaveKeybind() {
+        var mod = IO.getConfigMacOSXBehaviors() ? IO.getKeySuper() : IO.getKeyCtrl();
+        return mod && ImGui.isKeyPressed('S');
     }
 
     @Override
