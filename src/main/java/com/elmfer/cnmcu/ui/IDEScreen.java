@@ -147,13 +147,18 @@ public class IDEScreen extends HandledScreen<IDEScreenHandler> {
 
         prepareFramebuffer();
 
-        GlStateManager._glBindFramebuffer(GL30C.GL_FRAMEBUFFER, ((GlTexture) framebuffer.getColorAttachment())
-                .getOrCreateFramebuffer(((GlBackend) RenderSystem.getDevice()).getBufferManager(), null));
-        GlStateManager._colorMask(true, true, true, true);
-        GL11C.glClearColor(0.f, 0.f, 0.f, 0.f);
-        GlStateManager._clear(GL11C.GL_COLOR_BUFFER_BIT);
+        final var backend = (GlBackend) RenderSystem.getDevice();
+        backend.getDebugLabelManager().pushDebugGroup(() -> "ImGui render");
+        final var framebufferTexture = (GlTexture) framebuffer.getColorAttachment();
+        assert framebufferTexture != null;
+
+        final var bufferManager = backend.getBufferManager();
+        GlStateManager._glBindFramebuffer(GL30C.GL_FRAMEBUFFER, framebufferTexture
+                .getOrCreateFramebuffer(bufferManager, null));
         GlStateManager._viewport(0, 0, framebuffer.textureWidth, framebuffer.textureHeight);
         EventHandler.IMGUI_GL3.renderDrawData(ImGui.getDrawData());
+        GlStateManager._glBindFramebuffer(GL30C.GL_FRAMEBUFFER, 0);
+        backend.getDebugLabelManager().popDebugGroup();
         var stackInvoker = (DrawContextInvoker) stack;
         stackInvoker.cnmcu$drawTexturedQuad(RenderPipelines.GUI_TEXTURED, framebuffer.getColorAttachmentView(),
                 RenderSystem.getSamplerCache().get(AddressMode.REPEAT, AddressMode.REPEAT, FilterMode.NEAREST, FilterMode.LINEAR, false),
