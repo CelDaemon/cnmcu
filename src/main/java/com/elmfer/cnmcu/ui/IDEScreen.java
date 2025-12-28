@@ -5,11 +5,14 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import com.elmfer.cnmcu.mixins.DrawContextInvoker;
 import com.elmfer.cnmcu.network.*;
 import com.mojang.blaze3d.opengl.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.textures.AddressMode;
+import com.mojang.blaze3d.textures.FilterMode;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.client.gl.GlBackend;
+import net.minecraft.client.gl.*;
 import net.minecraft.client.input.KeyInput;
 import net.minecraft.client.texture.GlTexture;
 import org.lwjgl.BufferUtils;
@@ -54,6 +57,7 @@ public class IDEScreen extends HandledScreen<IDEScreenHandler> {
     private final TextEditor textEditor;
     private final MemoryEditor memoryEditor;
     private final IDEScreenHandler handler;
+    private final Framebuffer framebuffer;
 
     private boolean saved = true;
 
@@ -87,11 +91,25 @@ public class IDEScreen extends HandledScreen<IDEScreenHandler> {
         textEditor.setText(handler.getCode());
 
         this.handler = handler;
+
+        final var factory = getFramebufferFactory();
+        this.framebuffer = factory.create();
+    }
+
+    private SimpleFramebufferFactory getFramebufferFactory() {
+        final var window = client.getFramebuffer();
+        return new SimpleFramebufferFactory(window.textureWidth, window.textureHeight, false, 0);
+    }
+    private void prepareFramebuffer() {
+        final var factory = getFramebufferFactory();
+        if(this.framebuffer.textureWidth != factory.width() || this.framebuffer.textureHeight != factory.height()) {
+            this.framebuffer.resize(factory.width(), factory.height());
+        }
+        factory.prepare(framebuffer);
     }
 
     @Override
     public void render(DrawContext stack, int mouseX, int mouseY, float delta) {
-        // TODO: Port to render layer, to ensure the screen is drawn above other UI elements.
         sendHeartbeat();
 
         ImGui.newFrame(); // TODO: Fix incorrect cursor when exiting screen with resize cursor.
@@ -127,22 +145,19 @@ public class IDEScreen extends HandledScreen<IDEScreenHandler> {
 
         ImGui.render();
 
-        final var framebuffer = client.getFramebuffer();
+        prepareFramebuffer();
+
         GlStateManager._glBindFramebuffer(GL30C.GL_FRAMEBUFFER, ((GlTexture) framebuffer.getColorAttachment())
                 .getOrCreateFramebuffer(((GlBackend) RenderSystem.getDevice()).getBufferManager(), null));
-        GL11C.glViewport(0, 0, framebuffer.textureWidth, framebuffer.textureHeight);
+        GlStateManager._colorMask(true, true, true, true);
+        GL11C.glClearColor(0.f, 0.f, 0.f, 0.f);
+        GlStateManager._clear(GL11C.GL_COLOR_BUFFER_BIT);
+        GlStateManager._viewport(0, 0, framebuffer.textureWidth, framebuffer.textureHeight);
         EventHandler.IMGUI_GL3.renderDrawData(ImGui.getDrawData());
-        GlStateManager._glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0);
-    }
-
-    @Override
-    public void renderMain(DrawContext context, int mouseX, int mouseY, float deltaTicks) {
-        super.renderMain(context, mouseX, mouseY, deltaTicks);
-    }
-
-    @Override
-    public void renderBackground(DrawContext context, int mouseX, int mouseY, float deltaTicks) {
-
+        var stackInvoker = (DrawContextInvoker) stack;
+        stackInvoker.cnmcu$drawTexturedQuad(RenderPipelines.GUI_TEXTURED, framebuffer.getColorAttachmentView(),
+                RenderSystem.getSamplerCache().get(AddressMode.REPEAT, AddressMode.REPEAT, FilterMode.NEAREST, FilterMode.LINEAR, false),
+                0, 0, width, height, .0f, 1.0f, 1.f, 0.f, -1);
     }
 
     @Override
@@ -583,5 +598,12 @@ public class IDEScreen extends HandledScreen<IDEScreenHandler> {
     private boolean ctrlKeyCombo(char key) {
         boolean ctrl = IO.getConfigMacOSXBehaviors() ? IO.getKeySuper() : IO.getKeyCtrl();
         return ctrl && ImGui.isKeyPressed(key);
+    }
+
+    @Override
+    public void close() {
+        framebuffer.delete();
+
+        super.close();
     }
 }
