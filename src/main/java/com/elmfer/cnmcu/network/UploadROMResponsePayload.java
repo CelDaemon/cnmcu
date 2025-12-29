@@ -29,7 +29,7 @@ public record UploadROMResponsePayload(
         return ID;
     }
 
-    public static void receive(UploadROMResponsePayload payload, @SuppressWarnings("unused") ClientPlayNetworking.Context context) {
+    public static void receive(UploadROMResponsePayload payload, ClientPlayNetworking.Context ignoredContext) {
         UploadROMRequestPayload.notifyResponse(payload);
     }
 }

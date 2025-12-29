@@ -39,11 +39,6 @@ public abstract class GenNativeSourcesTask extends DefaultTask {
                     project.getExtensions().getByType(JavaPluginExtension.class)
                             .getSourceSets().getByName("main").getOutput().getFiles());
 
-            getLogger().warn("Paths: {}", classPath.getFiles().size());
-            for (final var path : classPath) {
-                getLogger().warn("Path: {}", path);
-            }
-
             return classPath.getAsPath();
         }));
     }
@@ -59,6 +54,8 @@ public abstract class GenNativeSourcesTask extends DefaultTask {
         
         if (!bridgeDir.isPresent())
             throw new RuntimeException("You must specify bridge directory for generating native source files!");
+
+        logger.warn("PATH: {}", System.getenv("PATH"));
         final var builder = new ProcessBuilder("javac", "--version");
         builder.redirectErrorStream(true);
 

@@ -29,7 +29,7 @@ public record IDEScreenSaveCodePayload(
         return ID;
     }
 
-    public static void receive(IDEScreenSaveCodePayload payload, @SuppressWarnings("unused") ServerPlayNetworking.Context context) {
+    public static void receive(IDEScreenSaveCodePayload payload, ServerPlayNetworking.Context ignoredContext) {
         UUID mcuId = payload.mcuId();
 
         String codeStr = payload.code();

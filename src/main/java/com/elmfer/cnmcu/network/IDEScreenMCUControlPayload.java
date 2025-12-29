@@ -30,7 +30,7 @@ public record IDEScreenMCUControlPayload(
         return ID;
     }
 
-    public static void receive(IDEScreenMCUControlPayload payload, @SuppressWarnings("unused") ServerPlayNetworking.Context context) {
+    public static void receive(IDEScreenMCUControlPayload payload, ServerPlayNetworking.Context ignoredContext) {
         var mcuId = payload.mcuId();
         
         if (!CNnanoBlockEntity.SCREEN_UPDATES.containsKey(mcuId))
