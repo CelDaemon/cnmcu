@@ -14,7 +14,6 @@ base {
 }
 
 repositories {
-
 	mavenCentral()
 }
 
@@ -36,23 +35,11 @@ dependencies {
 	runtimeOnly shadow("io.github.spair:imgui-java-natives-macos:${imgui_version}")
 }
 
-processResources {
-	inputs.property "version", version
-
-	filesMatching("fabric.mod.json") {
-		expand "version": version
-	}
-}
-
 tasks.withType(JavaCompile).configureEach {
 	options.release = 21
 }
 
 java {
-	// toolchain {
-	// 	languageVersion = JavaLanguageVersion.of(21)
-	// }
-
 	withSourcesJar()
 
 	sourceCompatibility = JavaVersion.VERSION_21
@@ -77,14 +64,25 @@ var genNativeSources = tasks.register("genNativeSources", GenNativeSourcesTask) 
 	sourceDir = sourceSets.main.java.sourceDirectories.first()
 }
 
-tasks.register("compileNatives", CompileNativesTask) {
+var compileNatives = tasks.register("compileNatives", CompileNativesTask) {
 	inputs.property "mod_version", mod_version
 	sourceDir = file("src/main/cpp")
 	bridgeDir.set(genNativeSources.<Directory>flatMap {it.bridgeDir })
-	buildDir = layout.buildDirectory.dir("natives")
+	buildDir = layout.buildDirectory.dir("tmp/${name}")
+	outputDir = layout.buildDirectory.dir("natives")
 	targetDir = layout.projectDirectory.dir(loom.runs.client.runDir)
 			.dir("cnmcu/natives/${mod_version}")
 
+}
+
+processResources {
+	inputs.property "version", version
+
+	filesMatching("fabric.mod.json") {
+		expand "version": version
+	}
+
+	from(compileNatives.map { it.outputDir})
 }
 
 tasks.register("saveVersion", SaveVersionTask)

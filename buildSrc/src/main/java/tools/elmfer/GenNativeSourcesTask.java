@@ -26,10 +26,12 @@ public abstract class GenNativeSourcesTask extends DefaultTask {
 
         final var project = getProject();
 
-        getClassPath().convention(project.provider(() -> project.files(
-                project.getConfigurations().getByName("compileClasspath"),
-                project.getExtensions().getByType(JavaPluginExtension.class)
-                        .getSourceSets().getByName("main").getOutput())));
+        final var mainSourceSet = project.getExtensions().getByType(JavaPluginExtension.class)
+                .getSourceSets()
+                .getByName(SourceSet.MAIN_SOURCE_SET_NAME);
+
+        getClassPath().convention(project.files(mainSourceSet.getCompileClasspath(),
+                mainSourceSet.getOutput().getClassesDirs()));
 
         getBridgeDir().convention(project.getLayout().getBuildDirectory().dir("generated/sources/cpp"));
     }

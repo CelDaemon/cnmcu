@@ -14,6 +14,8 @@ import com.elmfer.cnmcu.ui.handler.ScreenHandlers;
 import net.fabricmc.api.ModInitializer;
 import net.minecraft.util.Identifier;
 
+import java.io.IOException;
+
 public class CodeNodeMicrocontrollers implements ModInitializer {
 
     public static final String MOD_NAME = "CodeNode Microcontrollers";
@@ -24,6 +26,15 @@ public class CodeNodeMicrocontrollers implements ModInitializer {
 
     @Override
     public void onInitialize() {
+        try(var a = this.getClass().getClassLoader().getResourceAsStream("libcnmcu-linux-x64.so")) {
+            if(a == null)
+                throw new IOException("No such resource");
+
+            LOGGER.info("Loaded resource!");
+        } catch (IOException e) {
+            LOGGER.error("Failed to load resource", e);
+        }
+
         ModSetup.createDirectories();
         ModSetup.downloadNatives();
         ModSetup.downloadToolchain();
@@ -47,9 +58,9 @@ public class CodeNodeMicrocontrollers implements ModInitializer {
         ModSetup.checkForUpdates();
 
         if (ModSetup.isUpdateAvailable()) {
-            String latestForMCVersions = String.join(", ", ModSetup.getLatestForMinecraftVersions());
-            LOGGER.info("An update is available for CodeNode Microcontrollers: " + ModSetup.getLatestVersion()
-                    + " for Minecraft " + latestForMCVersions);
+            var latestForMCVersions = String.join(", ", ModSetup.getLatestForMinecraftVersions());
+            LOGGER.info("An update is available for CodeNode Microcontrollers: {} for Minecraft {}",
+                    ModSetup.getLatestVersion(), latestForMCVersions);
         } else if (!ModSetup.wasAbleToCheckForUpdates()) {
             LOGGER.info("CodeNode Microcontrollers was unable to check for updates.");
         } else {
