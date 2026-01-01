@@ -14,20 +14,24 @@ set(JAVA_AWT_LIBRARY NotNeeded)
 set(JAVA_JVM_LIBRARY NotNeeded)
 find_package(JNI REQUIRED)
 
-file(GLOB JNI_BRIDGE_SOURCES "bridge/*.cpp")
+file(TO_CMAKE_PATH "${GENERATED_SOURCES_DIR}" GENERATED_SOURCES_DIR)
+
+file(GLOB GENERATED_SOURCES "${GENERATED_SOURCES_DIR}/*.cpp")
 
 set(PROJECT_SOURCES 
   cnmcu/mos6502.cpp
   cnmcu/Nano.cpp
   cnmcu/CNUART.cpp
+  bridge/cnmcuJava.cpp
 
-  ${JNI_BRIDGE_SOURCES}
+  ${GENERATED_SOURCES}
 )
 
 set(PROJECT_INCLUDES
   bridge
   cnmcu
   ${JNI_INCLUDE_DIRS}
+  ${GENERATED_SOURCES_DIR}
 )
 
 add_library(${PROJECT_NAME} SHARED ${PROJECT_SOURCES})

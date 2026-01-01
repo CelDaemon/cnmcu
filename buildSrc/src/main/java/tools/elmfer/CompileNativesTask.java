@@ -1,5 +1,13 @@
 package tools.elmfer;
 
+import org.gradle.api.DefaultTask;
+import org.gradle.api.file.DirectoryProperty;
+import org.gradle.api.provider.Property;
+import org.gradle.api.tasks.Input;
+import org.gradle.api.tasks.InputDirectory;
+import org.gradle.api.tasks.OutputDirectory;
+import org.gradle.api.tasks.TaskAction;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -8,11 +16,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
-
-import org.gradle.api.DefaultTask;
-import org.gradle.api.file.DirectoryProperty;
-import org.gradle.api.provider.Property;
-import org.gradle.api.tasks.*;
 
 public abstract class CompileNativesTask extends DefaultTask {
 
@@ -25,6 +28,8 @@ public abstract class CompileNativesTask extends DefaultTask {
     public abstract DirectoryProperty getSourceDir();
     @OutputDirectory
     public abstract DirectoryProperty getBuildDir();
+    @InputDirectory
+    public abstract DirectoryProperty getBridgeDir();
     @Input
     public abstract Property<String> getCmakeTarget();
     @OutputDirectory
@@ -45,6 +50,7 @@ public abstract class CompileNativesTask extends DefaultTask {
         final var project = getProject();
         final var sourceDir = getSourceDir();
         final var buildDir = getBuildDir();
+        final var bridgeDir = getBridgeDir();
         final var buildType = getBuildType();
         final var cmakeTarget = getCmakeTarget();
         if (!sourceDir.isPresent())
@@ -58,8 +64,9 @@ public abstract class CompileNativesTask extends DefaultTask {
 
         final var absSourceDir = project.file(sourceDir).getAbsolutePath();
         final var absBuildDir = project.file(buildDir).getAbsolutePath();
+        final var absBridgeDir = project.file(bridgeDir).getAbsolutePath();
 
-        if(!executeCommand("cmake", "-S", absSourceDir, "-B", absBuildDir, "-DCMAKE_BUILD_TYPE=" + buildType.get()))
+        if(!executeCommand("cmake", "-S", absSourceDir, "-B", absBuildDir, "-DCMAKE_BUILD_TYPE=" + buildType.get(), "-DGENERATED_SOURCES_DIR=" + absBridgeDir))
             throw new RuntimeException("Error configuring CMake project!");
 
         if(!executeCommand("cmake", "--build", absBuildDir, "--parallel", "4", "--target", cmakeTarget.get(), "--config", buildType.get()))
