@@ -92,8 +92,7 @@ public class CNUART extends WeakNativeObject {
     // @formatter:off
     
     /*JNI
-         #include "cnmcuJava.h"
-         #include "Nano.hpp"
+         #include "CNUART.hpp"
      */
     
     private static native long size(long ptr); /*

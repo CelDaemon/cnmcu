@@ -15,12 +15,12 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
  */
 public class CNEL extends WeakNativeObject {
     
-    public static enum EventType {
+    public enum EventType {
         GAME_TICK(0);
 
         private final int value;
 
-        private EventType(int value) {
+        EventType(int value) {
             this.value = value;
         }
 
@@ -119,7 +119,6 @@ public class CNEL extends WeakNativeObject {
     // @formatter:off
     
     /*JNI
-         #include "cnmcuJava.h"
          #include "Nano.hpp"
      */
     

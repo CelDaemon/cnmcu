@@ -6,7 +6,6 @@ import com.elmfer.cnmcu.cpp.WeakNativeObject;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.nbt.NbtCompound;
 
 /**
  * Reference to a CNROM object it is a weak reference, so it will be invalidated
@@ -95,7 +94,6 @@ public class CNROM extends WeakNativeObject {
     // @formatter:off
     
     /*JNI
-        #include "cnmcuJava.h"
         #include "Nano.hpp"
      */
     

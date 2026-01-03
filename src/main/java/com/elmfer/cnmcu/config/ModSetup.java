@@ -2,12 +2,10 @@ package com.elmfer.cnmcu.config;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.attribute.FileAttribute;
-import java.nio.file.attribute.PosixFilePermission;
-import java.nio.file.attribute.PosixFilePermissions;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -21,10 +19,13 @@ import com.elmfer.cnmcu.util.ResourceLoader;
 import com.google.gson.JsonArray;
 
 import net.minecraft.util.Identifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class ModSetup {
+public final class ModSetup {
 
     public static final String IMGUI_INI_FILE = CodeNodeMicrocontrollers.MOD_ID + "/imgui.ini";
+    private static final Logger LOGGER = LoggerFactory.getLogger(ModSetup.class);
 
     private static final String GITHUB_REPO_URL = "https://api.github.com/repos/elmfrain/cnmcu";
     private static final Set<String> LATEST_FOR_MINECRAFT_VERSIONS = new HashSet<>();
@@ -258,27 +259,21 @@ public class ModSetup {
 
     private static void ensureInstall(String moduleName, Path localPath, String assetName) {
         if (Files.exists(localPath)) {
-            CodeNodeMicrocontrollers.LOGGER.info("{} is already installed! Skipping download...", moduleName);
+            LOGGER.info("{} is already installed! Skipping extract...", moduleName);
             return;
         }
 
-        CodeNodeMicrocontrollers.LOGGER.info("{} is not installed! Downloading...", moduleName);
+        LOGGER.info("{} is not installed! Extracting...", moduleName);
 
-        byte rawBinary[] = getGitHubAsset(assetName);
-
-        if (rawBinary == null)
-            throw new RuntimeException("Failed to download " + moduleName + "!");
+        var resourceUrl = ModSetup.class.getResource(assetName);
+        if(resourceUrl == null)
+            throw new RuntimeException("Asset: '%s' was not found".formatted(assetName));
 
         try {
-            if (NativesLoader.NATIVES_OS != "windows") {
-                Set<PosixFilePermission> perms = PosixFilePermissions.fromString("rwxr-xr-x");
-                FileAttribute<Set<PosixFilePermission>> attr = PosixFilePermissions.asFileAttribute(perms);
-                Files.createFile(localPath, attr);
-            }
-            
-            Files.write(localPath, rawBinary);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to write " + moduleName + " to disk!", e);
+            var path = Paths.get(resourceUrl.toURI());
+            Files.copy(path, localPath);
+        } catch (URISyntaxException | IOException e) {
+            throw new RuntimeException(e);
         }
     }
     

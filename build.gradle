@@ -82,7 +82,9 @@ processResources {
 		expand "version": version
 	}
 
-	from(compileNatives.map { it.outputDir})
+	from(compileNatives.map { it.outputDir}) {
+		into("com/elmfer/cnmcu/cpp")
+	}
 }
 
 tasks.register("saveVersion", SaveVersionTask)

@@ -2,6 +2,8 @@ package com.elmfer.cnmcu.cpp;
 
 import com.elmfer.cnmcu.CodeNodeMicrocontrollers;
 
+import java.nio.file.Paths;
+
 public class NativesLoader {
 
     private NativesLoader() {
@@ -25,12 +27,11 @@ public class NativesLoader {
         if (NATIVES_OS.equals("unknown") || NATIVES_PLATFORM.equals("unknown") || NATIVES_BITS.equals("unknown"))
             throw new RuntimeException("Unable to use " + CodeNodeMicrocontrollers.MOD_NAME + " on this platform!");
 
-        String libName = getBinaryFilename();
-        String workingDir = System.getProperty("user.dir") + "/";
-        String libPath = workingDir + BINARIES_PATH + "/" + libName;
+        var libName = getBinaryFilename();
+        var libPath = Paths.get(System.getProperty("user.dir"), BINARIES_PATH, libName);
 
         try {
-            System.load(libPath);
+            System.load(libPath.toString());
             loaded = true;
         } catch (Exception e) {
             throw new RuntimeException("Failed to load native library: " + libPath, e);

@@ -142,7 +142,6 @@ public class CNGPIO extends WeakNativeObject {
     // @formatter:off
     
     /*JNI
-        #include "cnmcuJava.h"
         #include "Nano.hpp"
     */
     
