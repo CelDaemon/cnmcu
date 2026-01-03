@@ -2,10 +2,12 @@ package com.elmfer.cnmcu.config;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.FileAttribute;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -174,22 +176,22 @@ public final class ModSetup {
     }
 
     public static void downloadNatives() {
-        ensureInstall("Native library", Paths.get(NativesLoader.BINARIES_PATH, NativesLoader.getBinaryFilename()),
+        ensureInstallExtract("Native library", Paths.get(NativesLoader.BINARIES_PATH, NativesLoader.getBinaryFilename()),
                 NativesLoader.getBinaryFilename());
     }
 
     public static void downloadToolchain() {
         final String vasmFilename = "vasm6502_oldstyle";
-        ensureInstall("vasm", Paths.get(Toolchain.TOOLCHAIN_PATH, vasmFilename + NativesLoader.EXE_EXT),
+        ensureInstallDownload("vasm", Paths.get(Toolchain.TOOLCHAIN_PATH, vasmFilename + NativesLoader.EXE_EXT),
                 NativesLoader.getExecutableFilename(vasmFilename));
 
         final String vobjFilename = "vobjdump";
-        ensureInstall("vobjdump", Paths.get(Toolchain.TOOLCHAIN_PATH, vobjFilename + NativesLoader.EXE_EXT),
+        ensureInstallDownload("vobjdump", Paths.get(Toolchain.TOOLCHAIN_PATH, vobjFilename + NativesLoader.EXE_EXT),
                 NativesLoader.getExecutableFilename(vobjFilename));
 
         final String cygFilename = "cygwin1.dll";
         if (NativesLoader.NATIVES_OS.equals("windows"))
-            ensureInstall("cygwin1.dll", Paths.get(Toolchain.TOOLCHAIN_PATH, cygFilename),
+            ensureInstallDownload("cygwin1.dll", Paths.get(Toolchain.TOOLCHAIN_PATH, cygFilename),
                     "cygwin1.dll");
     }
 
@@ -257,7 +259,7 @@ public final class ModSetup {
         }
     }
 
-    private static void ensureInstall(String moduleName, Path localPath, String assetName) {
+    private static void ensureInstallExtract(String moduleName, Path localPath, String assetName) {
         if (Files.exists(localPath)) {
             LOGGER.info("{} is already installed! Skipping extract...", moduleName);
             return;
@@ -265,15 +267,39 @@ public final class ModSetup {
 
         LOGGER.info("{} is not installed! Extracting...", moduleName);
 
-        var resourceUrl = ModSetup.class.getResource(assetName);
-        if(resourceUrl == null)
-            throw new RuntimeException("Asset: '%s' was not found".formatted(assetName));
+        try(var inputStream = ModSetup.class.getResourceAsStream(assetName)) {
+            if(inputStream == null)
+                throw new RuntimeException("Asset: '%s' was not found".formatted(assetName));
+
+            Files.copy(inputStream, localPath);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static void ensureInstallDownload(String moduleName, Path localPath, String assetName) {
+        if (Files.exists(localPath)) {
+            CodeNodeMicrocontrollers.LOGGER.info("{} is already installed! Skipping download...", moduleName);
+            return;
+        }
+
+        CodeNodeMicrocontrollers.LOGGER.info("{} is not installed! Downloading...", moduleName);
+
+        byte rawBinary[] = getGitHubAsset(assetName);
+
+        if (rawBinary == null)
+            throw new RuntimeException("Failed to download " + moduleName + "!");
 
         try {
-            var path = Paths.get(resourceUrl.toURI());
-            Files.copy(path, localPath);
-        } catch (URISyntaxException | IOException e) {
-            throw new RuntimeException(e);
+            if (NativesLoader.NATIVES_OS != "windows") {
+                Set<PosixFilePermission> perms = PosixFilePermissions.fromString("rwxr-xr-x");
+                FileAttribute<Set<PosixFilePermission>> attr = PosixFilePermissions.asFileAttribute(perms);
+                Files.createFile(localPath, attr);
+            }
+
+            Files.write(localPath, rawBinary);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to write " + moduleName + " to disk!", e);
         }
     }
     
