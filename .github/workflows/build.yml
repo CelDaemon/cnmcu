@@ -5,6 +5,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    needs: natives
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -18,8 +19,23 @@ jobs:
       - name: Setup gradle
         uses: gradle/actions/setup-gradle@v5
 
+      - name: Download natives
+        uses: actions/download-artifact@v7
+        with:
+          path: natives
+          pattern: natives-*
+          merge-multiple: true
+
       - name: Build project
-        run: ./gradlew --no-daemon build
+        run: ./gradlew --no-daemon -P prebuilt_natives=natives build
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v6
+        with:
+          path: |
+            build/libs/
+            !build/libs/*-sources.jar
+            !build/libs/*-all.jar
 
   natives:
     strategy:
@@ -43,3 +59,9 @@ jobs:
 
       - name: Build project
         run: ./gradlew --no-daemon compileNatives
+
+      - name: Upload natives
+        uses: actions/upload-artifact@v6
+        with:
+          path: build/natives/*
+          name: natives-${{ matrix.os }}
