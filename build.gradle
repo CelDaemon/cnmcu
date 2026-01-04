@@ -1,12 +1,12 @@
 import tools.elmfer.*
 
 plugins {
-	id "fabric-loom" version "1.14-SNAPSHOT"
+	id "fabric-loom" version "${loom_version}"
 	id "maven-publish"
 	id "com.gradleup.shadow" version "9.3.0"
 }
 
-version = mod_version
+version = "${mod_version}+${minecraft_version}"
 group = maven_group
 
 base {
@@ -65,13 +65,13 @@ var genNativeSources = tasks.register("genNativeSources", GenNativeSourcesTask) 
 }
 
 var compileNatives = tasks.register("compileNatives", CompileNativesTask) {
-	inputs.property "mod_version", mod_version
+	inputs.property "version", version
 	sourceDir = file("src/main/cpp")
 	bridgeDir.set(genNativeSources.<Directory>flatMap {it.bridgeDir })
 	buildDir = layout.buildDirectory.dir("tmp/${name}")
 	outputDir = layout.buildDirectory.dir("natives")
 	targetDir = layout.projectDirectory.dir(loom.runs.client.runDir)
-			.dir("cnmcu/natives/${mod_version}")
+			.dir("cnmcu/natives/${version}")
 
 }
 
@@ -83,9 +83,13 @@ var nativesProvider = project.hasProperty("prebuilt_natives") ? prebuiltProvider
 processResources {
 	inputs.files "natives", nativesProvider
 	inputs.property "version", version
+	inputs.property "minecraft_version", minecraft_version
+	inputs.property "loader_version", loader_version
 
 	filesMatching("fabric.mod.json") {
-		expand "version": version
+		expand "version": version,
+				"minecraft_version": minecraft_version,
+				"loader_version": loader_version
 	}
 
 	from(nativesProvider) {
