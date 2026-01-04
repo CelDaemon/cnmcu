@@ -51,15 +51,6 @@ jar {
 	}
 }
 
-clean {
-	delete fileTree("src/main/cpp/bridge") {
-		include "*.h"
-		include "*.cpp"
-		exclude "cnmcuJava.cpp"
-		exclude "cnmcuJava.h"
-	}
-}
-
 var genNativeSources = tasks.register("genNativeSources", GenNativeSourcesTask) {
 	sourceDir = sourceSets.main.java.sourceDirectories.first()
 }
@@ -75,7 +66,7 @@ var compileNatives = tasks.register("compileNatives", CompileNativesTask) {
 
 }
 
-var prebuiltProvider = project.provider { layout.projectDirectory.dir(project.property("prebuilt_natives") as String) };
+var prebuiltProvider = project.provider { layout.projectDirectory.dir(project.property("prebuilt_natives") as String) }
 var compiledProvider = compileNatives.<Directory>flatMap { it.outputDir }
 
 var nativesProvider = project.hasProperty("prebuilt_natives") ? prebuiltProvider : compiledProvider
