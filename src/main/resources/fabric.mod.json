@@ -7,9 +7,12 @@
 	"authors": [
 		"elmfer"
 	],
+	"contributors": [
+		"CelDaemon"
+	],
 	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"sources": "https://github.com/CelDaemon/cnmcu",
+		"issues": "https://github.com/CelDaemon/cnmcu/issues"
 	},
 	"license": "GPL-3.0-only",
 	"icon": "assets/cnmcu/icon.png",
