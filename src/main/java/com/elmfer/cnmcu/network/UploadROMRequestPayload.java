@@ -10,20 +10,19 @@ import net.minecraft.network.codec.PacketCodecs;
 import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Uuids;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 
+import static com.elmfer.cnmcu.CodeNodeMicrocontrollers.LOGGER;
+
 public record UploadROMRequestPayload(
         int transactionId,
         UUID mcuId,
         byte[] rom
 ) implements CustomPayload {
-    private static final Logger LOGGER = LoggerFactory.getLogger(UploadROMRequestPayload.class);
     public static final Identifier RAW_ID = CodeNodeMicrocontrollers.id("upload_rom_request");
     public static final CustomPayload.Id<UploadROMRequestPayload> ID = new CustomPayload.Id<>(RAW_ID);
 
@@ -94,7 +93,7 @@ public record UploadROMRequestPayload(
     }
 
     public static void notifyResponse(UploadROMResponsePayload responsePayload) {
-        LOGGER.info("Received response for transaction: {}", responsePayload.transactionId());
+        LOGGER.debug("Received response for transaction: {}", responsePayload.transactionId());
         var transaction = TRANSACTIONS.remove(responsePayload.transactionId());
         if(transaction == null)
             return;

@@ -10,7 +10,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 
 import com.elmfer.cnmcu.CodeNodeMicrocontrollers;
-import com.elmfer.cnmcu.CodeNodeMicrocontrollersClient;
 import com.elmfer.cnmcu.cpp.NativesLoader;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -20,6 +19,8 @@ import com.google.gson.JsonParser;
 
 import imgui.ImGui;
 import imgui.type.ImString;
+
+import static com.elmfer.cnmcu.CodeNodeMicrocontrollers.LOGGER;
 
 public class Toolchain {
 
@@ -221,7 +222,7 @@ public class Toolchain {
 
                 Files.write(CONFIG_FILE.toPath(), json.getBytes());
             } catch (Exception e) {
-                CodeNodeMicrocontrollersClient.LOGGER.error("Failed to save toolchain config", e);
+                LOGGER.error("Failed to save toolchain config", e);
             }
             saveOperation = null;
         });

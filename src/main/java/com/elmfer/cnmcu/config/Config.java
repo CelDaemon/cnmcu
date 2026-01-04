@@ -16,6 +16,8 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import static com.elmfer.cnmcu.CodeNodeMicrocontrollers.LOGGER;
+
 public class Config {
     public static final File CONFIG_FILE = new File("config/" + CodeNodeMicrocontrollers.MOD_ID + ".json");
 
@@ -29,7 +31,7 @@ public class Config {
 
             config = JsonParser.parseReader(reader).getAsJsonObject();
         } catch (FileNotFoundException e) {
-            CodeNodeMicrocontrollers.LOGGER.warn("Config file not found, creating new one...");
+            LOGGER.warn("Config file not found, creating new one...");
 
             config.addProperty("adviseUpdates", adviseUpdates());
             config.addProperty("showRegistersInHex", showRegistersInHex());
@@ -119,7 +121,7 @@ public class Config {
             try {
                 Files.write(CONFIG_FILE.toPath(), json.getBytes());
             } catch (IOException e) {
-                CodeNodeMicrocontrollers.LOGGER.error("Failed to save config file", e);
+                LOGGER.error("Failed to save config file", e);
             }
             saveTask = null;
         });

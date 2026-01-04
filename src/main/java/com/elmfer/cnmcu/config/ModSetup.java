@@ -21,13 +21,12 @@ import com.elmfer.cnmcu.util.ResourceLoader;
 import com.google.gson.JsonArray;
 
 import net.minecraft.util.Identifier;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import static com.elmfer.cnmcu.CodeNodeMicrocontrollers.LOGGER;
 
 public final class ModSetup {
 
     public static final String IMGUI_INI_FILE = CodeNodeMicrocontrollers.MOD_ID + "/imgui.ini";
-    private static final Logger LOGGER = LoggerFactory.getLogger(ModSetup.class);
 
     private static final String GITHUB_REPO_URL = "https://api.github.com/repos/elmfrain/cnmcu";
     private static final Set<String> LATEST_FOR_MINECRAFT_VERSIONS = new HashSet<>();
@@ -196,7 +195,7 @@ public final class ModSetup {
     }
 
     private static byte[] getGitHubAsset(String assetNameTarget) {
-        CodeNodeMicrocontrollers.LOGGER.info("Downloading asset from GitHub... {}", assetNameTarget);
+        LOGGER.info("Downloading asset from GitHub... {}", assetNameTarget);
 
         listGitHubAssets();
 
@@ -235,7 +234,7 @@ public final class ModSetup {
         if (githubAssets != null)
             return;
 
-        CodeNodeMicrocontrollers.LOGGER.info("Listing assets from GitHub...");
+        LOGGER.debug("Listing assets from GitHub...");
 
         HTTPSFetcher fetcher = new HTTPSFetcher(
                 GITHUB_REPO_URL + "/releases/tags/" + "0.0.10a-1.20.4");
@@ -261,7 +260,7 @@ public final class ModSetup {
 
     private static void ensureInstallExtract(String moduleName, Path localPath, String assetName) {
         if (Files.exists(localPath)) {
-            LOGGER.info("{} is already installed! Skipping extract...", moduleName);
+            LOGGER.debug("{} is already installed! Skipping extract...", moduleName);
             return;
         }
 
@@ -279,11 +278,11 @@ public final class ModSetup {
 
     private static void ensureInstallDownload(String moduleName, Path localPath, String assetName) {
         if (Files.exists(localPath)) {
-            CodeNodeMicrocontrollers.LOGGER.info("{} is already installed! Skipping download...", moduleName);
+            LOGGER.debug("{} is already installed! Skipping download...", moduleName);
             return;
         }
 
-        CodeNodeMicrocontrollers.LOGGER.info("{} is not installed! Downloading...", moduleName);
+        LOGGER.info("{} is not installed! Downloading...", moduleName);
 
         byte rawBinary[] = getGitHubAsset(assetName);
 

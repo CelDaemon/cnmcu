@@ -18,6 +18,7 @@ import net.minecraft.util.Identifier;
 public class CodeNodeMicrocontrollers implements ModInitializer {
 
     public static final String MOD_ID = "cnmcu";
+    public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
     public static final String MOD_NAME;
     public static final String MOD_VERSION;
     static {
@@ -25,8 +26,6 @@ public class CodeNodeMicrocontrollers implements ModInitializer {
         MOD_VERSION = metadata.getVersion().getFriendlyString();
         MOD_NAME = metadata.getName();
     }
-
-    public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
     @Override
     public void onInitialize() {

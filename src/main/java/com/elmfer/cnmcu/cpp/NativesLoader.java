@@ -4,7 +4,9 @@ import com.elmfer.cnmcu.CodeNodeMicrocontrollers;
 
 import java.nio.file.Paths;
 
-public class NativesLoader {
+import static com.elmfer.cnmcu.CodeNodeMicrocontrollers.LOGGER;
+
+public final class NativesLoader {
 
     private NativesLoader() {
     }
@@ -22,7 +24,7 @@ public class NativesLoader {
         if (loaded)
             return;
 
-        CodeNodeMicrocontrollers.LOGGER.info("Loading native library...");
+        LOGGER.debug("Loading native library...");
 
         if (NATIVES_OS.equals("unknown") || NATIVES_PLATFORM.equals("unknown") || NATIVES_BITS.equals("unknown"))
             throw new RuntimeException("Unable to use " + CodeNodeMicrocontrollers.MOD_NAME + " on this platform!");
