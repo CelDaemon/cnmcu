@@ -1,5 +1,6 @@
 package com.elmfer.cnmcu;
 
+import net.fabricmc.loader.api.FabricLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,9 +17,14 @@ import net.minecraft.util.Identifier;
 
 public class CodeNodeMicrocontrollers implements ModInitializer {
 
-    public static final String MOD_NAME = "CodeNode Microcontrollers";
     public static final String MOD_ID = "cnmcu";
-    public static final String MOD_VERSION = "0.0.10a-1.21.11";
+    public static final String MOD_NAME;
+    public static final String MOD_VERSION;
+    static {
+        var metadata = FabricLoader.getInstance().getModContainer(MOD_ID).orElseThrow().getMetadata();
+        MOD_VERSION = metadata.getVersion().getFriendlyString();
+        MOD_NAME = metadata.getName();
+    }
 
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
