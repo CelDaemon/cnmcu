@@ -2,7 +2,7 @@ import tools.elmfer.*
 
 plugins {
 	id "fabric-loom" version "${loom_version}"
-	id "com.gradleup.shadow" version "9.3.0"
+	id "com.gradleup.shadow" version "${shadow_version}"
 }
 
 version = "${mod_version}+${minecraft_version}"
@@ -88,8 +88,6 @@ processResources {
 		into("com/elmfer/cnmcu/config")
 	}
 }
-
-tasks.register("saveVersion", SaveVersionTask)
 
 shadowJar {
 	configurations = [project.configurations.shadow]

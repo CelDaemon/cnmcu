@@ -7,12 +7,8 @@ repositories {
 	mavenCentral()
 }
 
-ext {
-	jnigenVersion = '3.1.1'
-}
-
 dependencies {
 	implementation gradleApi()
 	
-	implementation "com.badlogicgames.jnigen:jnigen-core:$jnigenVersion"
+	implementation "com.badlogicgames.jnigen:jnigen-core:${jnigen_version}"
 }
