@@ -1,8 +1,6 @@
 package com.elmfer.cnmcu.blockentities;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import com.elmfer.cnmcu.blocks.CNnanoBlock;
 import com.elmfer.cnmcu.mcu.NanoMCU;
@@ -21,65 +19,72 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.redstone.ExperimentalRedstoneUtils;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import org.jetbrains.annotations.NotNull;
 
 public class CNnanoBlockEntity extends BlockEntity implements ExtendedScreenHandlerFactory<IDEScreenHandler.OpenData> {
 
     public static final Map<UUID, ScreenUpdates> SCREEN_UPDATES = new HashMap<>();
     
-    private static final Direction HORIZONTALS[] = new Direction[] { Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST };
-    private static int inputs[] = new int[4];
-    
     public NanoMCU mcu;
     private UUID uuid;
     private boolean hasInit = false;
-    private boolean forceUpdate = false;
-    
+
     private String code = "";
     
     public CNnanoBlockEntity(BlockPos pos, BlockState state) {
         super(BlockEntities.CN_NANO, pos, state);
     }
 
-    public static void tick(Level world, BlockPos pos, BlockState state, CNnanoBlockEntity blockEntity) {
+    public static void tick(@NotNull Level level, @NotNull BlockPos pos, @NotNull BlockState state, @NotNull CNnanoBlockEntity blockEntity) {
         if(!blockEntity.hasInit)
             blockEntity.init();
-        
-        Direction blockDir = state.getValue(CNnanoBlock.FACING);
-        
-        int i = 0;
-        for (Direction horizontal : HORIZONTALS) {
-            Direction globalDir = CNnanoBlock.getGlobalDirection(blockDir, horizontal);
-            BlockPos neighborPos = pos.relative(globalDir);
-            BlockState neighborState = world.getBlockState(neighborPos);
-            
-            inputs[i] = neighborState.getSignal(world, neighborPos, globalDir);
-            inputs[i++] |= world.getSignal(neighborPos, globalDir);
-        }
-        
-        blockEntity.mcu.frontInput = inputs[0];
-        blockEntity.mcu.rightInput = inputs[1];
-        blockEntity.mcu.backInput = inputs[2];
-        blockEntity.mcu.leftInput = inputs[3];
-        
-        blockEntity.mcu.tick();
-        if(blockEntity.mcu.isPowered())
-            blockEntity.setChanged();
-        
+
         SCREEN_UPDATES.get(blockEntity.uuid).handleScreenListeners();
-        
-        if(blockEntity.forceUpdate) {
-            blockEntity.forceUpdate = false;
-            world.updateNeighborsAt(pos, state.getBlock(), null);
+
+        var mcu = blockEntity.mcu;
+
+        if(!mcu.isPowered())
             return;
-        }
         
-        for (Direction horizontal : HORIZONTALS) {
-            Direction globalDir = CNnanoBlock.getGlobalDirection(blockDir, horizontal);
-            if(blockEntity.mcu.outputHasChanged(horizontal))
-                world.neighborChanged(pos.relative(globalDir), state.getBlock(), null);
+        var front = state.getValue(CNnanoBlock.FACING);
+        var right = front.getClockWise();
+        var back = front.getOpposite();
+        var left = front.getCounterClockWise();
+        
+        mcu.frontInput = level.getSignal(pos.relative(front), front);
+        mcu.rightInput = level.getSignal(pos.relative(right), right);
+        mcu.backInput = level.getSignal(pos.relative(back), back);
+        mcu.leftInput = level.getSignal(pos.relative(left), left);
+
+        mcu.tick();
+        blockEntity.setChanged();
+
+        var block = state.getBlock();
+        
+        for (var localDirection : Direction.Plane.HORIZONTAL) {
+            if(!blockEntity.mcu.outputHasChanged(localDirection))
+                continue;
+            var globalDirection = CNnanoBlock.getGlobalDirection(front, localDirection);
+            var neighborPosition = pos.relative(globalDirection);
+            var orientation = ExperimentalRedstoneUtils.initialOrientation(level, globalDirection, null);
+            level.neighborChanged(neighborPosition, state.getBlock(), orientation);
+            level.updateNeighborsAtExceptFromFacing(neighborPosition, block, globalDirection, orientation);
         }
+    }
+
+    public void setPowered(boolean powered) {
+        mcu.setPowered(powered);
+        setChanged();
+        if(level != null)
+            level.updateNeighborsAt(worldPosition, getBlockState().getBlock());
+    }
+
+    public void reset() {
+        mcu.reset();
+        setChanged();
     }
     
     protected void init() {
@@ -105,7 +110,9 @@ public class CNnanoBlockEntity extends BlockEntity implements ExtendedScreenHand
     
     public void setCode(String code) {
         this.code = code;
+        setChanged();
     }
+
     @Override
     public void loadAdditional(ValueInput view) {
         super.loadAdditional(view);
@@ -118,8 +125,7 @@ public class CNnanoBlockEntity extends BlockEntity implements ExtendedScreenHand
         
         mcu.setState(view.read("mcu", NanoMCU.State.CODEC).orElseThrow());
         code = view.getStringOr("code", "");
-        
-        forceUpdate = true;
+
     }
 
     @Override
@@ -147,8 +153,7 @@ public class CNnanoBlockEntity extends BlockEntity implements ExtendedScreenHand
     
     @Override
     public Component getDisplayName() {
-        // TODO Auto-generated method stub
-        return Component.nullToEmpty("Code Node Nano");
+        return Component.literal("Code Node Nano");
     }
 
     @Override

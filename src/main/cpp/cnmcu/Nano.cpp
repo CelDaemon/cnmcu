@@ -47,6 +47,8 @@ void CodeNodeNano::cycle()
     currentInstance = this;
     cpu.Run(1, cyclesCounter);
     cyclesTarget = cyclesCounter;
+
+    memcpy(pinOutputs, gpio.pvFrontData(), GPIO_NUM_PINS);
 }
 
 void CodeNodeNano::reset()

@@ -56,7 +56,9 @@ public record UploadROMRequestPayload(
 
         var rom = payload.rom();
 
-        var mcu = CNnanoBlockEntity.SCREEN_UPDATES.get(mcuId).getEntity().mcu;
+        var entity = CNnanoBlockEntity.SCREEN_UPDATES.get(mcuId).getEntity();
+
+        var mcu = entity.mcu;
 
         var mcuRomSize = mcu.getROM().getSize();
         if(mcuRomSize != rom.length) {
@@ -70,7 +72,7 @@ public record UploadROMRequestPayload(
 
         @SuppressWarnings("resource") var server = context.server();
         server.execute(() -> {
-            mcu.setPowered(false);
+            entity.setPowered(false);
             var data = mcu.getROM().getData();
             data.clear();
             data.put(rom);

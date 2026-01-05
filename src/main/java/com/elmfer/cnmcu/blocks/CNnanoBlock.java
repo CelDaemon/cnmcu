@@ -16,7 +16,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.SupportType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
@@ -82,7 +81,7 @@ public class CNnanoBlock extends BaseEntityBlock {
             return 0;
 
         CNnanoBlockEntity entity = (CNnanoBlockEntity) blockEntity;
-        
+
         if (entity.mcu == null || !entity.mcu.isPowered())
             return 0;
         
@@ -110,12 +109,7 @@ public class CNnanoBlock extends BaseEntityBlock {
         if (world.isClientSide())
             return null;
 
-        return CNnanoBlock.createTickerHelper(type, BlockEntities.CN_NANO, world.isClientSide() ? null : CNnanoBlockEntity::tick);
-    }
-
-    @Override
-    public RenderShape getRenderShape(BlockState state) {
-        return RenderShape.MODEL;
+        return CNnanoBlock.createTickerHelper(type, BlockEntities.CN_NANO, CNnanoBlockEntity::tick);
     }
 
 
@@ -138,28 +132,20 @@ public class CNnanoBlock extends BaseEntityBlock {
     }
     
     public static Direction getGlobalDirection(Direction facing, Direction direction) {
-        switch (facing) {
-        case EAST:
-            return direction.getClockWise();
-        case SOUTH:
-            return direction.getOpposite();
-        case WEST:
-            return direction.getCounterClockWise();
-        default:
-            return direction;
-        }
+        return switch (facing) {
+            case EAST -> direction.getClockWise();
+            case SOUTH -> direction.getOpposite();
+            case WEST -> direction.getCounterClockWise();
+            default -> direction;
+        };
     }
     
     public static Direction getLocalDirection(Direction facing, Direction direction) {
-        switch (facing) {
-        case WEST:
-            return direction.getCounterClockWise();
-        case NORTH:
-            return direction.getOpposite();
-        case EAST:
-            return direction.getClockWise();
-        default:
-            return direction;
-        }
+        return switch (facing) {
+            case WEST -> direction.getCounterClockWise();
+            case NORTH -> direction.getOpposite();
+            case EAST -> direction.getClockWise();
+            default -> direction;
+        };
     }
 }

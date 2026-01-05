@@ -1,5 +1,6 @@
 package com.elmfer.cnmcu.mcu;
 
+import com.elmfer.cnmcu.CodeNodeMicrocontrollers;
 import com.elmfer.cnmcu.cpp.StrongNativeObject;
 import com.elmfer.cnmcu.mcu.cpu.MOS6502;
 import com.elmfer.cnmcu.mcu.modules.CNEL;
@@ -12,6 +13,8 @@ import com.elmfer.cnmcu.mcu.modules.CNUART;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.Direction;
+
+import java.nio.ByteBuffer;
 
 public class NanoMCU extends StrongNativeObject {
     public int frontInput, rightInput, backInput, leftInput;
@@ -194,6 +197,7 @@ public class NanoMCU extends StrongNativeObject {
                 isPowered(),
                 isClockPaused(),
                 numCycles(),
+                getPinOutputDrivers(),
                 romState,
                 ramState,
                 gpioState,
@@ -208,9 +212,14 @@ public class NanoMCU extends StrongNativeObject {
         rightOutput = state.rightOutput;
         backOutput = state.backOutput;
         leftOutput = state.leftOutput;
+
         setPowered(state.powered);
         setClockPause(state.clockPaused);
         setNumCycles(getNativePtr(), state.numCycles);
+
+        var pinOutputDrivers = getPinOutputDrivers();
+        pinOutputDrivers.put(state.pinOutputDrivers);
+
         rom.setState(state.rom);
         ram.setState(state.ram);
         gpio.setState(state.gpio);
@@ -227,6 +236,7 @@ public class NanoMCU extends StrongNativeObject {
             boolean powered,
             boolean clockPaused,
             long numCycles,
+            ByteBuffer pinOutputDrivers,
             CNROM.State rom,
             CNRAM.State ram,
             CNGPIO.State gpio,
@@ -242,6 +252,7 @@ public class NanoMCU extends StrongNativeObject {
                 Codec.BOOL.fieldOf("powered").forGetter(State::powered),
                 Codec.BOOL.fieldOf("clockPaused").forGetter(State::clockPaused),
                 Codec.LONG.fieldOf("numCycles").forGetter(State::numCycles),
+                Codec.BYTE_BUFFER.fieldOf("pinOutputDrivers").forGetter(State::pinOutputDrivers),
                 CNROM.State.CODEC.fieldOf("rom").forGetter(State::rom),
                 CNRAM.State.CODEC.fieldOf("ram").forGetter(State::ram),
                 CNGPIO.State.CODEC.fieldOf("gpio").forGetter(State::gpio),
@@ -249,6 +260,10 @@ public class NanoMCU extends StrongNativeObject {
                 CNEL.State.CODEC.fieldOf("el").forGetter(State::el),
                 CNUART.State.CODEC.fieldOf("uart").forGetter(State::uart)
         ).apply(instance, State::new));
+    }
+
+    public ByteBuffer getPinOutputDrivers() {
+        return pinOutputDrivers(getNativePtr());
     }
 
     // @formatter:off
@@ -352,6 +367,10 @@ public class NanoMCU extends StrongNativeObject {
     private static native boolean busRW(long ptr); /*
         CodeNodeNano* nano = reinterpret_cast<CodeNodeNano*>(ptr);
         return static_cast<jboolean>(nano->busRw());
+    */
+    private static native ByteBuffer pinOutputDrivers(long ptr); /*
+        CodeNodeNano* nano = reinterpret_cast<CodeNodeNano*>(ptr);
+        return env->NewDirectByteBuffer(nano->pinOutputDrivers(), CodeNodeNano::GPIO_NUM_PINS);
     */
     
     private static native MOS6502 CPU(long ptr); /*

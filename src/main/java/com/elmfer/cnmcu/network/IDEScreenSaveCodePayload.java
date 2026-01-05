@@ -38,7 +38,6 @@ public record IDEScreenSaveCodePayload(
         if (CNnanoBlockEntity.SCREEN_UPDATES.containsKey(mcuId)) {
             CNnanoBlockEntity entity = CNnanoBlockEntity.SCREEN_UPDATES.get(mcuId).getEntity();
             entity.setCode(codeStr);
-            entity.setChanged();
         }
 
     }

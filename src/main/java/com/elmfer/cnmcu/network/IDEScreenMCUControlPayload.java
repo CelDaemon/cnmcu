@@ -41,13 +41,13 @@ public record IDEScreenMCUControlPayload(
         
         switch (control) {
         case POWER_ON:
-            entity.mcu.setPowered(true);
+            entity.setPowered(true);
             break;
         case POWER_OFF:
-            entity.mcu.setPowered(false);
+            entity.setPowered(false);
             break;
         case RESET:
-            entity.mcu.reset();
+            entity.reset();
             break;
         case PAUSE_CLOCK:
             if (entity.mcu.isPowered())
