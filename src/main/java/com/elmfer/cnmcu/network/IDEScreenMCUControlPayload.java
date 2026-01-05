@@ -7,26 +7,26 @@ import com.elmfer.cnmcu.blockentities.CNnanoBlockEntity;
 
 import io.netty.buffer.ByteBuf;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Uuids;
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.Identifier;
 
 public record IDEScreenMCUControlPayload(
         UUID mcuId,
-        Control control) implements CustomPayload {
+        Control control) implements CustomPacketPayload {
     public static final Identifier RAW_ID = CodeNodeMicrocontrollers.id("ide_screen_mcu_control");
-    public static final Id<IDEScreenMCUControlPayload> ID = new Id<>(RAW_ID);
-    public static final PacketCodec<PacketByteBuf, IDEScreenMCUControlPayload> CODEC = PacketCodec.tuple(
-            Uuids.PACKET_CODEC, IDEScreenMCUControlPayload::mcuId,
+    public static final Type<IDEScreenMCUControlPayload> ID = new Type<>(RAW_ID);
+    public static final StreamCodec<FriendlyByteBuf, IDEScreenMCUControlPayload> CODEC = StreamCodec.composite(
+            UUIDUtil.STREAM_CODEC, IDEScreenMCUControlPayload::mcuId,
             Control.PACKET_CODEC, IDEScreenMCUControlPayload::control,
             IDEScreenMCUControlPayload::new
     );
 
     @Override
-    public Id<? extends CustomPayload> getId() {
+    public Type<? extends CustomPacketPayload> type() {
         return ID;
     }
 
@@ -72,7 +72,7 @@ public record IDEScreenMCUControlPayload(
         RESUME_CLOCK(4),
         CYCLE(5);
 
-        public static final PacketCodec<ByteBuf, Control> PACKET_CODEC = PacketCodecs.indexed(Control::fromId, Control::getId);
+        public static final StreamCodec<ByteBuf, Control> PACKET_CODEC = ByteBufCodecs.idMapper(Control::fromId, Control::getId);
         private final int id;
         
         Control(int id) {

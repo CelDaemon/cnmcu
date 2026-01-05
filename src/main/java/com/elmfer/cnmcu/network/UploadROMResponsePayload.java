@@ -2,30 +2,29 @@ package com.elmfer.cnmcu.network;
 
 import com.elmfer.cnmcu.CodeNodeMicrocontrollers;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.Identifier;
 
 public record UploadROMResponsePayload(
         int transactionId,
         int bytesUploaded,
-        String message) implements CustomPayload {
+        String message) implements CustomPacketPayload {
 
     public static final Identifier RAW_ID = CodeNodeMicrocontrollers.id(
             "upload_rom_response");
-    public static final CustomPayload.Id<UploadROMResponsePayload> ID = new CustomPayload.Id<>(RAW_ID);
-    public static final PacketCodec<PacketByteBuf, UploadROMResponsePayload> CODEC = PacketCodec.tuple(
-            PacketCodecs.SYNC_ID, UploadROMResponsePayload::transactionId,
-            PacketCodecs.INTEGER, UploadROMResponsePayload::bytesUploaded,
-            PacketCodecs.STRING, UploadROMResponsePayload::message,
+    public static final CustomPacketPayload.Type<UploadROMResponsePayload> ID = new CustomPacketPayload.Type<>(RAW_ID);
+    public static final StreamCodec<FriendlyByteBuf, UploadROMResponsePayload> CODEC = StreamCodec.composite(
+            ByteBufCodecs.CONTAINER_ID, UploadROMResponsePayload::transactionId,
+            ByteBufCodecs.INT, UploadROMResponsePayload::bytesUploaded,
+            ByteBufCodecs.STRING_UTF8, UploadROMResponsePayload::message,
             UploadROMResponsePayload::new
     );
 
     @Override
-    public Id<? extends CustomPayload> getId() {
+    public Type<? extends CustomPacketPayload> type() {
         return ID;
     }
 

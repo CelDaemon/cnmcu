@@ -5,79 +5,77 @@ import org.jetbrains.annotations.Nullable;
 import com.elmfer.cnmcu.blockentities.BlockEntities;
 import com.elmfer.cnmcu.blockentities.CNnanoBlockEntity;
 import com.mojang.serialization.MapCodec;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.SupportType;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockRenderType;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.BlockWithEntity;
-import net.minecraft.block.ShapeContext;
-import net.minecraft.block.SideShapeType;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.BlockEntityTicker;
-import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.screen.NamedScreenHandlerFactory;
-import net.minecraft.state.StateManager;
-import net.minecraft.state.property.EnumProperty;
-import net.minecraft.state.property.Properties;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.util.shape.VoxelShapes;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldView;
+public class CNnanoBlock extends BaseEntityBlock {
+    public static final MapCodec<CNnanoBlock> CODEC = simpleCodec(CNnanoBlock::new);
 
-public class CNnanoBlock extends BlockWithEntity {
-    public static final MapCodec<CNnanoBlock> CODEC = createCodec(CNnanoBlock::new);
+    public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
 
-    public static final EnumProperty<Direction> FACING = Properties.HORIZONTAL_FACING;
-
-    protected CNnanoBlock(Settings settings) {
+    protected CNnanoBlock(Properties settings) {
         super(settings);
     }
 
     @Override
-    public MapCodec<CNnanoBlock> getCodec() {
+    public MapCodec<CNnanoBlock> codec() {
         return CODEC;
     }
 
     @Override
-    public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new CNnanoBlockEntity(pos, state);
     }
 
     @Override
-    public boolean canPlaceAt(BlockState state, WorldView world, BlockPos pos) {
-        BlockPos blockPos = pos.down();
+    public boolean canSurvive(BlockState state, LevelReader world, BlockPos pos) {
+        BlockPos blockPos = pos.below();
         return this.canPlaceAbove(world, blockPos, world.getBlockState(blockPos));
     }
 
-    protected boolean canPlaceAbove(WorldView world, BlockPos pos, BlockState state) {
-        return state.isSideSolid(world, pos, Direction.UP, SideShapeType.RIGID);
+    protected boolean canPlaceAbove(LevelReader world, BlockPos pos, BlockState state) {
+        return state.isFaceSturdy(world, pos, Direction.UP, SupportType.RIGID);
     }
 
     @Override
-    public BlockState getPlacementState(ItemPlacementContext context) {
-        return getDefaultState().with(FACING, context.getHorizontalPlayerFacing());
+    public BlockState getStateForPlacement(BlockPlaceContext context) {
+        return defaultBlockState().setValue(FACING, context.getHorizontalDirection());
     }
 
     @Override
-    protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(FACING);
     }
 
     @Override
-    public boolean emitsRedstonePower(BlockState state) {
+    public boolean isSignalSource(BlockState state) {
         return true;
     }
 
     @Override
-    public int getWeakRedstonePower(BlockState state, BlockView world, BlockPos pos, Direction direction) {
+    public int getSignal(BlockState state, BlockGetter world, BlockPos pos, Direction direction) {
         BlockEntity blockEntity = world.getBlockEntity(pos);
 
         if (!(blockEntity instanceof CNnanoBlockEntity))
@@ -88,7 +86,7 @@ public class CNnanoBlock extends BlockWithEntity {
         if (entity.mcu == null || !entity.mcu.isPowered())
             return 0;
         
-        Direction blockDir = state.get(FACING);
+        Direction blockDir = state.getValue(FACING);
         Direction localDir = getLocalDirection(blockDir, direction);
 
         switch (localDir) {
@@ -107,46 +105,46 @@ public class CNnanoBlock extends BlockWithEntity {
 
     @Nullable
     @Override
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state,
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level world, BlockState state,
             BlockEntityType<T> type) {
-        if (world.isClient())
+        if (world.isClientSide())
             return null;
 
-        return CNnanoBlock.validateTicker(type, BlockEntities.CN_NANO, world.isClient() ? null : CNnanoBlockEntity::tick);
+        return CNnanoBlock.createTickerHelper(type, BlockEntities.CN_NANO, world.isClientSide() ? null : CNnanoBlockEntity::tick);
     }
 
     @Override
-    public BlockRenderType getRenderType(BlockState state) {
-        return BlockRenderType.MODEL;
+    public RenderShape getRenderShape(BlockState state) {
+        return RenderShape.MODEL;
     }
 
 
     @Override
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player,
+    public InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player,
             BlockHitResult hit) {
-        if (!world.isClient()) {
-            NamedScreenHandlerFactory screenHandlerFactory = state.createScreenHandlerFactory(world, pos);
+        if (!world.isClientSide()) {
+            MenuProvider screenHandlerFactory = state.getMenuProvider(world, pos);
 
             if (screenHandlerFactory != null)
-                player.openHandledScreen(screenHandlerFactory);
+                player.openMenu(screenHandlerFactory);
         }
 
-        return ActionResult.SUCCESS;
+        return InteractionResult.SUCCESS;
     }
 
     @Override
-    public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-        return VoxelShapes.cuboid(0.0, 0.0, 0.0, 1.0, 0.125, 1.0);
+    public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
+        return Shapes.box(0.0, 0.0, 0.0, 1.0, 0.125, 1.0);
     }
     
     public static Direction getGlobalDirection(Direction facing, Direction direction) {
         switch (facing) {
         case EAST:
-            return direction.rotateYClockwise();
+            return direction.getClockWise();
         case SOUTH:
             return direction.getOpposite();
         case WEST:
-            return direction.rotateYCounterclockwise();
+            return direction.getCounterClockWise();
         default:
             return direction;
         }
@@ -155,11 +153,11 @@ public class CNnanoBlock extends BlockWithEntity {
     public static Direction getLocalDirection(Direction facing, Direction direction) {
         switch (facing) {
         case WEST:
-            return direction.rotateYCounterclockwise();
+            return direction.getCounterClockWise();
         case NORTH:
             return direction.getOpposite();
         case EAST:
-            return direction.rotateYClockwise();
+            return direction.getClockWise();
         default:
             return direction;
         }

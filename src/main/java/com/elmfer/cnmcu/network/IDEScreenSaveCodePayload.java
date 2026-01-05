@@ -6,26 +6,26 @@ import com.elmfer.cnmcu.CodeNodeMicrocontrollers;
 
 import com.elmfer.cnmcu.blockentities.CNnanoBlockEntity;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Uuids;
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.Identifier;
 
 public record IDEScreenSaveCodePayload(
         UUID mcuId,
-        String code) implements CustomPayload {
+        String code) implements CustomPacketPayload {
     public static final Identifier RAW_ID = CodeNodeMicrocontrollers.id("ide_screen_save_code");
-    public static final CustomPayload.Id<IDEScreenSaveCodePayload> ID = new CustomPayload.Id<>(RAW_ID);
-    public static final PacketCodec<PacketByteBuf, IDEScreenSaveCodePayload> CODEC = PacketCodec.tuple(
-            Uuids.PACKET_CODEC, IDEScreenSaveCodePayload::mcuId,
-            PacketCodecs.STRING, IDEScreenSaveCodePayload::code,
+    public static final CustomPacketPayload.Type<IDEScreenSaveCodePayload> ID = new CustomPacketPayload.Type<>(RAW_ID);
+    public static final StreamCodec<FriendlyByteBuf, IDEScreenSaveCodePayload> CODEC = StreamCodec.composite(
+            UUIDUtil.STREAM_CODEC, IDEScreenSaveCodePayload::mcuId,
+            ByteBufCodecs.STRING_UTF8, IDEScreenSaveCodePayload::code,
             IDEScreenSaveCodePayload::new
     );
 
     @Override
-    public Id<? extends CustomPayload> getId() {
+    public Type<? extends CustomPacketPayload> type() {
         return ID;
     }
 
@@ -38,7 +38,7 @@ public record IDEScreenSaveCodePayload(
         if (CNnanoBlockEntity.SCREEN_UPDATES.containsKey(mcuId)) {
             CNnanoBlockEntity entity = CNnanoBlockEntity.SCREEN_UPDATES.get(mcuId).getEntity();
             entity.setCode(codeStr);
-            entity.markDirty();
+            entity.setChanged();
         }
 
     }

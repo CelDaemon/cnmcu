@@ -11,18 +11,18 @@ import com.elmfer.cnmcu.ui.handler.IDEScreenHandler;
 
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 public class CNnanoBlockEntity extends BlockEntity implements ExtendedScreenHandlerFactory<IDEScreenHandler.OpenData> {
 
@@ -42,20 +42,20 @@ public class CNnanoBlockEntity extends BlockEntity implements ExtendedScreenHand
         super(BlockEntities.CN_NANO, pos, state);
     }
 
-    public static void tick(World world, BlockPos pos, BlockState state, CNnanoBlockEntity blockEntity) {
+    public static void tick(Level world, BlockPos pos, BlockState state, CNnanoBlockEntity blockEntity) {
         if(!blockEntity.hasInit)
             blockEntity.init();
         
-        Direction blockDir = state.get(CNnanoBlock.FACING);
+        Direction blockDir = state.getValue(CNnanoBlock.FACING);
         
         int i = 0;
         for (Direction horizontal : HORIZONTALS) {
             Direction globalDir = CNnanoBlock.getGlobalDirection(blockDir, horizontal);
-            BlockPos neighborPos = pos.offset(globalDir);
+            BlockPos neighborPos = pos.relative(globalDir);
             BlockState neighborState = world.getBlockState(neighborPos);
             
-            inputs[i] = neighborState.getWeakRedstonePower(world, neighborPos, globalDir);
-            inputs[i++] |= world.getEmittedRedstonePower(neighborPos, globalDir);
+            inputs[i] = neighborState.getSignal(world, neighborPos, globalDir);
+            inputs[i++] |= world.getSignal(neighborPos, globalDir);
         }
         
         blockEntity.mcu.frontInput = inputs[0];
@@ -65,20 +65,20 @@ public class CNnanoBlockEntity extends BlockEntity implements ExtendedScreenHand
         
         blockEntity.mcu.tick();
         if(blockEntity.mcu.isPowered())
-            blockEntity.markDirty();
+            blockEntity.setChanged();
         
         SCREEN_UPDATES.get(blockEntity.uuid).handleScreenListeners();
         
         if(blockEntity.forceUpdate) {
             blockEntity.forceUpdate = false;
-            world.updateNeighborsAlways(pos, state.getBlock(), null);
+            world.updateNeighborsAt(pos, state.getBlock(), null);
             return;
         }
         
         for (Direction horizontal : HORIZONTALS) {
             Direction globalDir = CNnanoBlock.getGlobalDirection(blockDir, horizontal);
             if(blockEntity.mcu.outputHasChanged(horizontal))
-                world.updateNeighbor(pos.offset(globalDir), state.getBlock(), null);
+                world.neighborChanged(pos.relative(globalDir), state.getBlock(), null);
         }
     }
     
@@ -107,8 +107,8 @@ public class CNnanoBlockEntity extends BlockEntity implements ExtendedScreenHand
         this.code = code;
     }
     @Override
-    public void readData(ReadView view) {
-        super.readData(view);
+    public void loadAdditional(ValueInput view) {
+        super.loadAdditional(view);
         
         if (!hasInit)
             init();
@@ -117,25 +117,25 @@ public class CNnanoBlockEntity extends BlockEntity implements ExtendedScreenHand
             return;
         
         mcu.setState(view.read("mcu", NanoMCU.State.CODEC).orElseThrow());
-        code = view.getString("code", "");
+        code = view.getStringOr("code", "");
         
         forceUpdate = true;
     }
 
     @Override
-    public void writeData(WriteView view) {
-        super.writeData(view);
+    public void saveAdditional(ValueOutput view) {
+        super.saveAdditional(view);
         
         if (!hasInit)
             init();
 
-        view.put("mcu", NanoMCU.State.CODEC, mcu.getState());
+        view.store("mcu", NanoMCU.State.CODEC, mcu.getState());
         view.putString("code", code);
     }
 
    @Override
-   public void markRemoved() {
-       super.markRemoved();
+   public void setRemoved() {
+       super.setRemoved();
        
        if(mcu != null) {
            mcu.deleteNativeObject();
@@ -146,19 +146,19 @@ public class CNnanoBlockEntity extends BlockEntity implements ExtendedScreenHand
    }
     
     @Override
-    public Text getDisplayName() {
+    public Component getDisplayName() {
         // TODO Auto-generated method stub
-        return Text.of("Code Node Nano");
+        return Component.nullToEmpty("Code Node Nano");
     }
 
     @Override
-    public ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
-        SCREEN_UPDATES.get(uuid).addListener((ServerPlayerEntity) player);
+    public AbstractContainerMenu createMenu(int syncId, Inventory playerInventory, Player player) {
+        SCREEN_UPDATES.get(uuid).addListener((ServerPlayer) player);
         return new IDEScreenHandler(syncId, uuid);
     }
 
     @Override
-    public IDEScreenHandler.OpenData getScreenOpeningData(ServerPlayerEntity player) {
+    public IDEScreenHandler.OpenData getScreenOpeningData(ServerPlayer player) {
         return new IDEScreenHandler.OpenData(
                 uuid,
                 code
@@ -166,17 +166,17 @@ public class CNnanoBlockEntity extends BlockEntity implements ExtendedScreenHand
     }
     
     public static class Listener {
-        ServerPlayerEntity player;
+        ServerPlayer player;
         int ticksSinceLastHeartbeat = 0;
         boolean shouldRemove = false;
         
-        public Listener(ServerPlayerEntity player) {
+        public Listener(ServerPlayer player) {
             this.player = player;
         }
         
         public void update(IDEScreenSyncPayload syncPacket) {
             
-            if (player.isDisconnected()) {
+            if (player.hasDisconnected()) {
                 shouldRemove = true;
                 return;
             }
@@ -202,11 +202,11 @@ public class CNnanoBlockEntity extends BlockEntity implements ExtendedScreenHand
             
         }
         
-        public void addListener(ServerPlayerEntity player) {
-            if(listeners.containsKey(player.getUuid()))
+        public void addListener(ServerPlayer player) {
+            if(listeners.containsKey(player.getUUID()))
                 return;
             
-            listeners.put(player.getUuid(), new Listener(player));
+            listeners.put(player.getUUID(), new Listener(player));
         }
         
         public void removeListener(UUID playerUuid) {
@@ -232,7 +232,7 @@ public class CNnanoBlockEntity extends BlockEntity implements ExtendedScreenHand
                 listener.update(syncPacket);
                 
                 if (listener.shouldRemove)
-                    listener.player.closeHandledScreen();
+                    listener.player.closeContainer();
                 
                 return listener.shouldRemove;
             });

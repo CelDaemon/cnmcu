@@ -5,7 +5,7 @@
   "compatibilityLevel": "JAVA_21",
   "mixins": [],
   "client": [
-    "DrawContextInvoker",
+    "GuiContextInvoker",
     "ImGuiImplGl3Mixin"
   ],
   "server": [],

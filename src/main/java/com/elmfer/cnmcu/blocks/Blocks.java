@@ -1,27 +1,25 @@
 package com.elmfer.cnmcu.blocks;
 
 import com.elmfer.cnmcu.CodeNodeMicrocontrollers;
-
-import net.minecraft.block.AbstractBlock;
-import net.minecraft.block.Block;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.Item;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-
 import java.util.function.Function;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 
 public class Blocks {
-    public static final CNnanoBlock CN_NANO_BLOCK = register("nano", CNnanoBlock::new, AbstractBlock.Settings.create().strength(0.5f));
+    public static final CNnanoBlock CN_NANO_BLOCK = register("nano", CNnanoBlock::new, BlockBehaviour.Properties.of().strength(0.5f));
 
-    public static <T extends Block> T register(String name, Function<AbstractBlock.Settings, T> blockFactory, AbstractBlock.Settings blockSettings) {
-        var blockKey = RegistryKey.of(Registries.BLOCK.getKey(), CodeNodeMicrocontrollers.id(name));
-        var block = blockFactory.apply(blockSettings.registryKey(blockKey));
-        var itemKey = RegistryKey.of(Registries.ITEM.getKey(), CodeNodeMicrocontrollers.id(name));
-        var blockItem = new BlockItem(block, new Item.Settings().registryKey(itemKey).useBlockPrefixedTranslationKey());
-        Registry.register(Registries.ITEM, itemKey, blockItem);
-        Registry.register(Registries.BLOCK, blockKey, block);
+    public static <T extends Block> T register(String name, Function<BlockBehaviour.Properties, T> blockFactory, BlockBehaviour.Properties blockSettings) {
+        var blockKey = ResourceKey.create(BuiltInRegistries.BLOCK.key(), CodeNodeMicrocontrollers.id(name));
+        var block = blockFactory.apply(blockSettings.setId(blockKey));
+        var itemKey = ResourceKey.create(BuiltInRegistries.ITEM.key(), CodeNodeMicrocontrollers.id(name));
+        var blockItem = new BlockItem(block, new Item.Properties().setId(itemKey).useBlockDescriptionPrefix());
+        Registry.register(BuiltInRegistries.ITEM, itemKey, blockItem);
+        Registry.register(BuiltInRegistries.BLOCK, blockKey, block);
 
         return block;
     }

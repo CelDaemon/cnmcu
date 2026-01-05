@@ -6,26 +6,26 @@ import com.elmfer.cnmcu.mcu.NanoMCU;
 import com.elmfer.cnmcu.ui.IDEScreen;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.Identifier;
 
 public record IDEScreenSyncPayload(
         boolean isPowered,
         boolean isClockPaused,
         CPUStatus cpuStatus,
         BusStatus busStatus,
-        byte[] zeroPage) implements CustomPayload {
+        byte[] zeroPage) implements CustomPacketPayload {
     public static final Identifier RAW_ID = CodeNodeMicrocontrollers.id("ide_screen_sync");
-    public static final CustomPayload.Id<IDEScreenSyncPayload> ID = new CustomPayload.Id<>(RAW_ID);
-    public static final PacketCodec<PacketByteBuf, IDEScreenSyncPayload> CODEC = PacketCodec.tuple(
-            PacketCodecs.BOOLEAN, IDEScreenSyncPayload::isPowered,
-            PacketCodecs.BOOLEAN, IDEScreenSyncPayload::isClockPaused,
+    public static final CustomPacketPayload.Type<IDEScreenSyncPayload> ID = new CustomPacketPayload.Type<>(RAW_ID);
+    public static final StreamCodec<FriendlyByteBuf, IDEScreenSyncPayload> CODEC = StreamCodec.composite(
+            ByteBufCodecs.BOOL, IDEScreenSyncPayload::isPowered,
+            ByteBufCodecs.BOOL, IDEScreenSyncPayload::isClockPaused,
             CPUStatus.PACKET_CODEC, IDEScreenSyncPayload::cpuStatus,
             BusStatus.PACKET_CODEC, IDEScreenSyncPayload::busStatus,
-            PacketCodecs.byteArray(256), IDEScreenSyncPayload::zeroPage, // More than 256??
+            ByteBufCodecs.byteArray(256), IDEScreenSyncPayload::zeroPage, // More than 256??
             IDEScreenSyncPayload::new
     );
 
@@ -45,7 +45,7 @@ public record IDEScreenSyncPayload(
     
     public static void receive(IDEScreenSyncPayload payload, ClientPlayNetworking.Context context) {
         @SuppressWarnings("resource") var client = context.client();
-        if(!(client.currentScreen instanceof IDEScreen screen))
+        if(!(client.screen instanceof IDEScreen screen))
             return;
 
         CPUStatus cpuStatus = payload.cpuStatus();
@@ -61,7 +61,7 @@ public record IDEScreenSyncPayload(
     }
 
     @Override
-    public Id<? extends CustomPayload> getId() {
+    public Type<? extends CustomPacketPayload> type() {
         return ID;
     }
 
@@ -73,14 +73,14 @@ public record IDEScreenSyncPayload(
             int sp,
             int flags,
             long cycles) {
-        public static final PacketCodec<PacketByteBuf, CPUStatus> PACKET_CODEC = PacketCodec.tuple(
-                PacketCodecs.INTEGER, CPUStatus::a,
-                PacketCodecs.INTEGER, CPUStatus::x,
-                PacketCodecs.INTEGER, CPUStatus::y,
-                PacketCodecs.INTEGER, CPUStatus::pc,
-                PacketCodecs.INTEGER, CPUStatus::sp,
-                PacketCodecs.INTEGER, CPUStatus::flags,
-                PacketCodecs.LONG, CPUStatus::cycles,
+        public static final StreamCodec<FriendlyByteBuf, CPUStatus> PACKET_CODEC = StreamCodec.composite(
+                ByteBufCodecs.INT, CPUStatus::a,
+                ByteBufCodecs.INT, CPUStatus::x,
+                ByteBufCodecs.INT, CPUStatus::y,
+                ByteBufCodecs.INT, CPUStatus::pc,
+                ByteBufCodecs.INT, CPUStatus::sp,
+                ByteBufCodecs.INT, CPUStatus::flags,
+                ByteBufCodecs.LONG, CPUStatus::cycles,
                 CPUStatus::new
         );
 
@@ -99,10 +99,10 @@ public record IDEScreenSyncPayload(
     }
     
     public record BusStatus(int address, int data, boolean rw) {
-        public static final PacketCodec<PacketByteBuf, BusStatus> PACKET_CODEC = PacketCodec.tuple(
-                PacketCodecs.INTEGER, BusStatus::address,
-                PacketCodecs.INTEGER, BusStatus::data,
-                PacketCodecs.BOOLEAN, BusStatus::rw,
+        public static final StreamCodec<FriendlyByteBuf, BusStatus> PACKET_CODEC = StreamCodec.composite(
+                ByteBufCodecs.INT, BusStatus::address,
+                ByteBufCodecs.INT, BusStatus::data,
+                ByteBufCodecs.BOOL, BusStatus::rw,
                 BusStatus::new
         );
 

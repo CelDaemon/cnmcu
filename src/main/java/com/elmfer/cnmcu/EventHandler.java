@@ -11,9 +11,9 @@ import imgui.glfw.ImGuiImplGlfw;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldTerrainRenderContext;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.PlainTextContent;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.contents.PlainTextContents;
 
 public class EventHandler {
 
@@ -35,20 +35,20 @@ public class EventHandler {
         EventHandler.IMGUI_GLFW.newFrame();
     }
 
-    private static void onClientStarted(MinecraftClient client) {
+    private static void onClientStarted(Minecraft client) {
         ImGui.createContext();
 
-        IMGUI_GLFW.init(client.getWindow().getHandle(), true);
+        IMGUI_GLFW.init(client.getWindow().handle(), true);
         IMGUI_GL3.init("#version 150");
 
         ImGuiIO io = ImGui.getIO();
 
         io.setIniFilename(ModSetup.IMGUI_INI_FILE);
-        io.setDisplaySize(client.getWindow().getWidth(), client.getWindow().getHeight());
+        io.setDisplaySize(client.getWindow().getScreenWidth(), client.getWindow().getScreenHeight());
         io.setConfigFlags(ImGuiConfigFlags.DockingEnable);
     }
 
-    private static void onClientStopping(MinecraftClient client) {
+    private static void onClientStopping(Minecraft client) {
         Config.save();
         Config.waitForSave();
         Toolchain.saveConfig();
@@ -61,19 +61,19 @@ public class EventHandler {
 
         hasNotifiedPlayerAboutUpdate = true;
 
-        MinecraftClient client = MinecraftClient.getInstance();
+        Minecraft client = Minecraft.getInstance();
         client.execute(() -> {
             if (!ModSetup.hasCheckedForUpdates() || !ModSetup.isUpdateAvailable())
                 return;
 
-            MutableText updateMessage = MutableText
-                    .of(new PlainTextContent.Literal("An update is available for CodeNode Microcontrollers: v"));
+            MutableComponent updateMessage = MutableComponent
+                    .create(new PlainTextContents.LiteralContents("An update is available for CodeNode Microcontrollers: v"));
             updateMessage.setStyle(updateMessage.getStyle().withColor(0xFF5CFF5C));
 
-            MutableText version = MutableText.of(new PlainTextContent.Literal(ModSetup.getLatestVersion() + " "));
+            MutableComponent version = MutableComponent.create(new PlainTextContents.LiteralContents(ModSetup.getLatestVersion() + " "));
             version.setStyle(version.getStyle().withColor(0xFFFFF41F));
 
-            MutableText forMCVersions = MutableText.of(new PlainTextContent.Literal(
+            MutableComponent forMCVersions = MutableComponent.create(new PlainTextContents.LiteralContents(
                     "for Minecraft " + String.join(", ", ModSetup.getLatestForMinecraftVersions())));
             forMCVersions.setStyle(forMCVersions.getStyle().withColor(0xFF85A9FF));
 
@@ -81,7 +81,7 @@ public class EventHandler {
             updateMessage.getSiblings().add(forMCVersions);
 
             if(client.player != null)
-                client.player.sendMessage(updateMessage, true);
+                client.player.displayClientMessage(updateMessage, true);
         });
     }
 }

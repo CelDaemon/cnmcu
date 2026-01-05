@@ -6,20 +6,20 @@ import com.elmfer.cnmcu.CodeNodeMicrocontrollers;
 import com.elmfer.cnmcu.blockentities.CNnanoBlockEntity;
 
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Uuids;
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.Identifier;
 
 public record IDEScreenHeartbeatPayload(
         UUID mcuId
-) implements CustomPayload {
+) implements CustomPacketPayload {
 
     public static final Identifier RAW_ID = CodeNodeMicrocontrollers.id("ide_screen_heartbeat");
-    public static final CustomPayload.Id<IDEScreenHeartbeatPayload> ID = new CustomPayload.Id<>(RAW_ID);
-    public static final PacketCodec<PacketByteBuf, IDEScreenHeartbeatPayload> CODEC = PacketCodec.tuple(
-            Uuids.PACKET_CODEC, IDEScreenHeartbeatPayload::mcuId,
+    public static final CustomPacketPayload.Type<IDEScreenHeartbeatPayload> ID = new CustomPacketPayload.Type<>(RAW_ID);
+    public static final StreamCodec<FriendlyByteBuf, IDEScreenHeartbeatPayload> CODEC = StreamCodec.composite(
+            UUIDUtil.STREAM_CODEC, IDEScreenHeartbeatPayload::mcuId,
             IDEScreenHeartbeatPayload::new
     );
 
@@ -29,12 +29,12 @@ public record IDEScreenHeartbeatPayload(
         @SuppressWarnings("resource") var server = context.server();
         server.execute(() -> {
             if (CNnanoBlockEntity.SCREEN_UPDATES.containsKey(mcuId))
-                CNnanoBlockEntity.SCREEN_UPDATES.get(mcuId).heartBeat(context.player().getUuid());
+                CNnanoBlockEntity.SCREEN_UPDATES.get(mcuId).heartBeat(context.player().getUUID());
         });
     }
 
     @Override
-    public Id<? extends CustomPayload> getId() {
+    public Type<? extends CustomPacketPayload> type() {
         return ID;
     }
 }

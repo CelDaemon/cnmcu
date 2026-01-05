@@ -1,25 +1,23 @@
 package com.elmfer.cnmcu.ui.handler;
 
 import java.util.UUID;
-
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.ItemStack;
 import com.elmfer.cnmcu.blockentities.CNnanoBlockEntity;
 
 import io.netty.buffer.ByteBuf;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.util.Uuids;
 
-public class IDEScreenHandler extends ScreenHandler {
+public class IDEScreenHandler extends AbstractContainerMenu {
 
     private UUID mcuID;
     private String code;
     
-    public IDEScreenHandler(int syncId, PlayerInventory playerInventory, OpenData data) {
+    public IDEScreenHandler(int syncId, Inventory ignoredPlayerInventory, OpenData data) {
         super(ScreenHandlers.IDE_SCREEN_HANDLER, syncId);
 
         mcuID = data.mcuId;
@@ -41,19 +39,19 @@ public class IDEScreenHandler extends ScreenHandler {
     }
     
     @Override
-    public void onClosed(PlayerEntity player) {
-        if (!player.getEntityWorld().isClient() && CNnanoBlockEntity.SCREEN_UPDATES.containsKey(mcuID))
-            CNnanoBlockEntity.SCREEN_UPDATES.get(mcuID).removeListener(player.getUuid());
+    public void removed(Player player) {
+        if (!player.level().isClientSide() && CNnanoBlockEntity.SCREEN_UPDATES.containsKey(mcuID))
+            CNnanoBlockEntity.SCREEN_UPDATES.get(mcuID).removeListener(player.getUUID());
     }
    
     @Override
-    public ItemStack quickMove(PlayerEntity var1, int var2) {
+    public ItemStack quickMoveStack(Player var1, int var2) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public boolean canUse(PlayerEntity var1) {
+    public boolean stillValid(Player var1) {
         // TODO Auto-generated method stub
         return true;
     }
@@ -62,9 +60,9 @@ public class IDEScreenHandler extends ScreenHandler {
             UUID mcuId,
             String code
     ) {
-       public static final PacketCodec<ByteBuf, OpenData> PACKET_CODEC = PacketCodec.tuple(
-               Uuids.PACKET_CODEC, OpenData::mcuId,
-               PacketCodecs.STRING, OpenData::code,
+       public static final StreamCodec<ByteBuf, OpenData> PACKET_CODEC = StreamCodec.composite(
+               UUIDUtil.STREAM_CODEC, OpenData::mcuId,
+               ByteBufCodecs.STRING_UTF8, OpenData::code,
                OpenData::new
        );
     }

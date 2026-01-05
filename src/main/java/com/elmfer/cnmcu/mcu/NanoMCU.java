@@ -11,9 +11,7 @@ import com.elmfer.cnmcu.mcu.modules.CNUART;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.storage.ReadView;
-import net.minecraft.util.math.Direction;
+import net.minecraft.core.Direction;
 
 public class NanoMCU extends StrongNativeObject {
     public int frontInput, rightInput, backInput, leftInput;

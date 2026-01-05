@@ -4,13 +4,12 @@ import com.elmfer.cnmcu.CodeNodeMicrocontrollers;
 import com.elmfer.cnmcu.blockentities.CNnanoBlockEntity;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Uuids;
-
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.Identifier;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,14 +21,14 @@ public record UploadROMRequestPayload(
         int transactionId,
         UUID mcuId,
         byte[] rom
-) implements CustomPayload {
+) implements CustomPacketPayload {
     public static final Identifier RAW_ID = CodeNodeMicrocontrollers.id("upload_rom_request");
-    public static final CustomPayload.Id<UploadROMRequestPayload> ID = new CustomPayload.Id<>(RAW_ID);
+    public static final CustomPacketPayload.Type<UploadROMRequestPayload> ID = new CustomPacketPayload.Type<>(RAW_ID);
 
-    public static final PacketCodec<PacketByteBuf, UploadROMRequestPayload> CODEC = PacketCodec.tuple(
-            PacketCodecs.SYNC_ID, UploadROMRequestPayload::transactionId,
-            Uuids.PACKET_CODEC, UploadROMRequestPayload::mcuId,
-            PacketCodecs.BYTE_ARRAY, UploadROMRequestPayload::rom,
+    public static final StreamCodec<FriendlyByteBuf, UploadROMRequestPayload> CODEC = StreamCodec.composite(
+            ByteBufCodecs.CONTAINER_ID, UploadROMRequestPayload::transactionId,
+            UUIDUtil.STREAM_CODEC, UploadROMRequestPayload::mcuId,
+            ByteBufCodecs.BYTE_ARRAY, UploadROMRequestPayload::rom,
             UploadROMRequestPayload::new
     );
 
@@ -37,7 +36,7 @@ public record UploadROMRequestPayload(
     private static int nextTransactionId = 0;
 
     @Override
-    public Id<? extends CustomPayload> getId() {
+    public Type<? extends CustomPacketPayload> type() {
         return ID;
     }
 

@@ -1,6 +1,7 @@
 package com.elmfer.cnmcu;
 
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.resources.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,7 +14,6 @@ import com.elmfer.cnmcu.network.Packets;
 import com.elmfer.cnmcu.ui.handler.ScreenHandlers;
 
 import net.fabricmc.api.ModInitializer;
-import net.minecraft.util.Identifier;
 
 public class CodeNodeMicrocontrollers implements ModInitializer {
 
@@ -64,6 +64,6 @@ public class CodeNodeMicrocontrollers implements ModInitializer {
     }
 
     public static Identifier id(String path) {
-        return Identifier.of(MOD_ID, path);
+        return Identifier.fromNamespaceAndPath(MOD_ID, path);
     }
 }

@@ -5,17 +5,25 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import com.elmfer.cnmcu.mixins.DrawContextInvoker;
+import com.elmfer.cnmcu.mixins.GuiContextInvoker;
 import com.elmfer.cnmcu.network.*;
+import com.mojang.blaze3d.opengl.GlDevice;
 import com.mojang.blaze3d.opengl.GlStateManager;
+import com.mojang.blaze3d.opengl.GlTexture;
+import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.resource.RenderTargetDescriptor;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.AddressMode;
 import com.mojang.blaze3d.textures.FilterMode;
 import imgui.flag.*;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.client.gl.*;
-import net.minecraft.client.input.KeyInput;
-import net.minecraft.client.texture.GlTexture;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Inventory;
+import org.jspecify.annotations.NonNull;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
 
@@ -35,13 +43,9 @@ import imgui.ImGuiIO;
 import imgui.extension.imguifiledialog.ImGuiFileDialog;
 import imgui.extension.memedit.MemoryEditor;
 import imgui.extension.texteditor.TextEditor;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.text.Text;
 import org.lwjgl.opengl.*;
 
-public class IDEScreen extends HandledScreen<IDEScreenHandler> {
+public class IDEScreen extends AbstractContainerScreen<IDEScreenHandler> {
 
     private static final String DOCKSPACE_NAME = "DockSpace";
     private static final String CODE_EDITOR_NAME = "Code Editor";
@@ -52,7 +56,7 @@ public class IDEScreen extends HandledScreen<IDEScreenHandler> {
     private final TextEditor textEditor;
     private final MemoryEditor memoryEditor;
     private final IDEScreenHandler handler;
-    private final Framebuffer framebuffer;
+    private final RenderTarget renderTarget;
 
     private boolean saved = true;
 
@@ -76,7 +80,7 @@ public class IDEScreen extends HandledScreen<IDEScreenHandler> {
     private boolean shouldLoadDefaults = false;
     private boolean showRegistersInHex = Config.showRegistersInHex();
 
-    public IDEScreen(IDEScreenHandler handler, PlayerInventory inventory, Text title) {
+    public IDEScreen(IDEScreenHandler handler, Inventory inventory, Component title) {
         super(handler, inventory, title);
 
         textEditor = new TextEditor();
@@ -87,24 +91,25 @@ public class IDEScreen extends HandledScreen<IDEScreenHandler> {
 
         this.handler = handler;
 
-        final var factory = getFramebufferFactory();
-        this.framebuffer = factory.create();
+        final var descriptor = getTargetDescriptor();
+        this.renderTarget = descriptor.allocate();
     }
 
-    private SimpleFramebufferFactory getFramebufferFactory() {
-        final var window = client.getFramebuffer();
-        return new SimpleFramebufferFactory(window.textureWidth, window.textureHeight, false, 0);
+    private RenderTargetDescriptor getTargetDescriptor() {
+        final var target = minecraft.getMainRenderTarget();
+        return new RenderTargetDescriptor(target.width, target.height, false, 0);
     }
-    private void prepareFramebuffer() {
-        final var factory = getFramebufferFactory();
-        if(this.framebuffer.textureWidth != factory.width() || this.framebuffer.textureHeight != factory.height()) {
-            this.framebuffer.resize(factory.width(), factory.height());
+
+    private void prepareRenderTarget() {
+        final var descriptor = getTargetDescriptor();
+        if(this.renderTarget.width != descriptor.width() || this.renderTarget.height != descriptor.height()) {
+            this.renderTarget.resize(descriptor.width(), descriptor.height());
         }
-        factory.prepare(framebuffer);
+        descriptor.prepare(renderTarget);
     }
 
     @Override
-    public void render(DrawContext stack, int mouseX, int mouseY, float delta) {
+    public void render(@NonNull GuiGraphics gui, int mouseX, int mouseY, float delta) {
         sendHeartbeat();
 
         ImGui.newFrame(); // TODO: Fix incorrect cursor when exiting screen with resize cursor.
@@ -140,34 +145,35 @@ public class IDEScreen extends HandledScreen<IDEScreenHandler> {
 
         ImGui.render();
 
-        prepareFramebuffer();
+        prepareRenderTarget();
 
-        final var backend = (GlBackend) RenderSystem.getDevice();
-        backend.getDebugLabelManager().pushDebugGroup(() -> "ImGui render");
-        final var framebufferTexture = (GlTexture) framebuffer.getColorAttachment();
-        assert framebufferTexture != null;
+        final var device = (GlDevice) RenderSystem.getDevice();
+        final var debugLabels = device.debugLabels();
+        debugLabels.pushDebugGroup(() -> "ImGui render");
+        final var texture = (GlTexture) renderTarget.getColorTexture();
+        assert texture != null;
 
-        final var bufferManager = backend.getBufferManager();
-        GlStateManager._glBindFramebuffer(GL30C.GL_FRAMEBUFFER, framebufferTexture
-                .getOrCreateFramebuffer(bufferManager, null));
-        GlStateManager._viewport(0, 0, framebuffer.textureWidth, framebuffer.textureHeight);
+        final var stateAccess = device.directStateAccess();
+        GlStateManager._glBindFramebuffer(GL30C.GL_FRAMEBUFFER, texture
+                .getFbo(stateAccess, null));
+        GlStateManager._viewport(0, 0, renderTarget.width, renderTarget.height);
         EventHandler.IMGUI_GL3.renderDrawData(ImGui.getDrawData());
         GlStateManager._glBindFramebuffer(GL30C.GL_FRAMEBUFFER, 0);
-        backend.getDebugLabelManager().popDebugGroup();
-        var stackInvoker = (DrawContextInvoker) stack;
-        stackInvoker.cnmcu$drawTexturedQuad(RenderPipelines.GUI_TEXTURED, framebuffer.getColorAttachmentView(),
-                RenderSystem.getSamplerCache().get(AddressMode.REPEAT, AddressMode.REPEAT, FilterMode.NEAREST, FilterMode.LINEAR, false),
+        debugLabels.popDebugGroup();
+        var guiInvoker = (GuiContextInvoker) gui;
+        guiInvoker.cnmcu$submitBlit(RenderPipelines.GUI_TEXTURED, renderTarget.getColorTextureView(),
+                RenderSystem.getSamplerCache().getSampler(AddressMode.REPEAT, AddressMode.REPEAT, FilterMode.NEAREST, FilterMode.LINEAR, false),
                 0, 0, width, height, .0f, 1.0f, 1.f, 0.f, -1);
     }
 
     @Override
-    public boolean keyPressed(KeyInput key) {
+    public boolean keyPressed(KeyEvent key) {
 
         if (IO.getWantCaptureKeyboard())
             return true;
 
-        if (key.key() == GLFW.GLFW_KEY_ESCAPE || client.options.inventoryKey.matchesKey(key)) {
-            close();
+        if (key.key() == GLFW.GLFW_KEY_ESCAPE || minecraft.options.keyInventory.matches(key)) {
+            onClose();
             return true;
         }
 
@@ -575,7 +581,7 @@ public class IDEScreen extends HandledScreen<IDEScreenHandler> {
     }
 
     @Override
-    protected void drawBackground(DrawContext var1, float var2, int var3, int var4) {
+    protected void renderBg(GuiGraphics var1, float var2, int var3, int var4) {
 
     }
 
@@ -599,9 +605,9 @@ public class IDEScreen extends HandledScreen<IDEScreenHandler> {
     }
 
     @Override
-    public void close() {
-        framebuffer.delete();
+    public void onClose() {
+        renderTarget.destroyBuffers();
 
-        super.close();
+        super.onClose();
     }
 }

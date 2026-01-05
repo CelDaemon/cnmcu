@@ -1,8 +1,7 @@
 package com.elmfer.cnmcu.util;
 
 import java.io.InputStream;
-
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
 
 /**
  * Mod's own resource loader for loading resources like models and textures.
