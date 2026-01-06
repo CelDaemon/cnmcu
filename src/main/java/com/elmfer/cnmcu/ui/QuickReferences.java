@@ -5,19 +5,19 @@ import java.net.URI;
 import com.elmfer.cnmcu.CodeNodeMicrocontrollers;
 import com.elmfer.cnmcu.animation.Timer;
 import com.elmfer.cnmcu.config.ModSetup;
-import com.elmfer.cnmcu.cpp.NativesLoader;
 
 import imgui.ImGui;
 import imgui.flag.ImGuiTableFlags;
+import net.minecraft.util.Util;
 
-public class QuickReferences {
+public final class QuickReferences {
 
+    private static final String VASM_DOCS = "http://sun.hasenbraten.de/vasm/release/vasm.html";
+    private static final String DOCS = "https://elmfrain.github.io/code-node-docs/";
     private static final Timer vasmLicenseLinkTimer = new Timer(3).expire();
     private static final Timer docsLinkTimer = new Timer(3).expire();
 
-    private QuickReferences() {
-
-    }
+    private QuickReferences() {}
 
     public static void genUpdates() {
         if (!ModSetup.wasAbleToCheckForUpdates()) {
@@ -65,14 +65,14 @@ public class QuickReferences {
         ImGui.text("While this mod is under the GNU GPL v3 license, the vasm assembler is under a separate liscense.");
         if (ImGui.button(
                 vasmLicenseLinkTimer.hasExpired() ? "View vasm License; Section 1.2" : "Opened page in browser")) {
-            openWebpage("http://sun.hasenbraten.de/vasm/release/vasm.html");
+            openWebpage(VASM_DOCS);
             vasmLicenseLinkTimer.reset();
         }
         ImGui.newLine();
 
-        ImGui.text("Docs: https://elmfrain.github.io/code-node-docs/");
+        ImGui.text("Docs: " + DOCS);
         if (ImGui.button(docsLinkTimer.hasExpired() ? "Goto Docs" : "Opened page in browser")) {
-            openWebpage("https://elmfrain.github.io/code-node-docs/");
+            openWebpage(DOCS);
             docsLinkTimer.reset();
         }
     }
@@ -908,30 +908,15 @@ public class QuickReferences {
         ImGui.text("More Info");
         ImGui.newLine();
         ImGui.text("For more information, please refer to the CodeNode Microcontrollers documentation.");
-        ImGui.text("https://elmfrain.github.io/code-node-docs/");
+        ImGui.text(DOCS);
         ImGui.sameLine();
         if (ImGui.button(docsLinkTimer.hasExpired() ? "Goto Docs" : "Opened page in browser")) {
-            openWebpage("https://elmfrain.github.io/code-node-docs/");
+            openWebpage(DOCS);
             docsLinkTimer.reset();
         }
     }
 
-    public static boolean openWebpage(String page) {
-        try {
-            var url = URI.create(page).toURL();
-
-            String shell = NativesLoader.NATIVES_OS.equals("windows") ? "cmd" : "sh";
-            String shellFlag = NativesLoader.NATIVES_OS.equals("windows") ? "/c" : "-c";
-            String openBrowserCommand = NativesLoader.NATIVES_OS.equals("windows") ? "start"
-                    : NativesLoader.NATIVES_OS.equals("macos") ? "open" : "xdg-open";
-
-            ProcessBuilder builder = new ProcessBuilder(shell, shellFlag, openBrowserCommand + " " + url);
-            builder.inheritIO();
-            builder.start();
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
+    private static void openWebpage(String page) {
+        Util.getPlatform().openUri(page);
     }
 }

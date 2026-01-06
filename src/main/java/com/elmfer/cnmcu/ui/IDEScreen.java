@@ -22,7 +22,7 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
-import org.jspecify.annotations.NonNull;
+import org.jetbrains.annotations.NotNull;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
 
@@ -108,7 +108,7 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
     }
 
     @Override
-    public void render(@NonNull GuiGraphics gui, int mouseX, int mouseY, float delta) {
+    public void render(@NotNull GuiGraphics gui, int mouseX, int mouseY, float delta) {
         sendHeartbeat();
 
         ImGui.newFrame(); // TODO: Fix incorrect cursor when exiting screen with resize cursor.
@@ -166,7 +166,7 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
     }
 
     @Override
-    public boolean keyPressed(KeyEvent key) {
+    public boolean keyPressed(@NotNull KeyEvent key) {
 
         if (IO.getWantCaptureKeyboard())
             return true;
@@ -262,10 +262,10 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
         }
 
 
-        float width = UIRender.getWindowWidth();
-        float height = UIRender.getWindowHeight();
-        float centerX = width / 2;
-        float centerY = height / 2;
+        var width = renderTarget.width;
+        var height = renderTarget.height;
+        var centerX = width / 2;
+        var centerY = height / 2;
         ImGui.setNextWindowPos(centerX, centerY, ImGuiCond.Always, 0.5f, 0.5f);
         ImGui.setNextWindowSize(800, 322, ImGuiCond.Once);
         
@@ -369,8 +369,8 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
     }
 
     private void genDocs() {
-        var centerX = UIRender.getWindowWidth() / 2;
-        var centerY = UIRender.getWindowHeight() / 2;
+        var centerX = renderTarget.width / 2;
+        var centerY = renderTarget.height / 2;
 
         ImGui.setNextWindowPos(centerX, centerY, ImGuiCond.FirstUseEver, 0.5f, 0.5f);
         ImGui.setNextWindowSize(800, 400, ImGuiCond.FirstUseEver);
@@ -580,7 +580,7 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
     }
 
     @Override
-    protected void renderBg(GuiGraphics var1, float var2, int var3, int var4) {
+    protected void renderBg(@NotNull GuiGraphics guiGraphics, float f, int i, int j) {
 
     }
 
