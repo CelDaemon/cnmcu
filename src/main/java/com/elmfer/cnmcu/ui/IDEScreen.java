@@ -13,7 +13,6 @@ import com.mojang.blaze3d.opengl.GlTexture;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.resource.RenderTargetDescriptor;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.textures.AddressMode;
 import com.mojang.blaze3d.textures.FilterMode;
 import imgui.flag.*;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -162,7 +161,7 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
         debugLabels.popDebugGroup();
         var guiInvoker = (GuiContextInvoker) gui;
         guiInvoker.cnmcu$submitBlit(RenderPipelines.GUI_TEXTURED, renderTarget.getColorTextureView(),
-                RenderSystem.getSamplerCache().getSampler(AddressMode.REPEAT, AddressMode.REPEAT, FilterMode.NEAREST, FilterMode.LINEAR, false),
+                RenderSystem.getSamplerCache().getRepeat(FilterMode.NEAREST),
                 0, 0, width, height, .0f, 1.0f, 1.f, 0.f, -1);
     }
 
