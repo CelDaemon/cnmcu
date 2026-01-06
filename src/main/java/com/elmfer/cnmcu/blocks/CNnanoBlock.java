@@ -1,5 +1,7 @@
 package com.elmfer.cnmcu.blocks;
 
+import com.elmfer.cnmcu.CodeNodeMicrocontrollers;
+import com.elmfer.cnmcu.util.DirectionUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -62,7 +64,7 @@ public class CNnanoBlock extends BaseEntityBlock {
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
-        return defaultBlockState().setValue(FACING, context.getHorizontalDirection());
+        return defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
     }
 
     @Override
@@ -84,15 +86,15 @@ public class CNnanoBlock extends BaseEntityBlock {
 
         if (entity.mcu == null || !entity.mcu.isPowered())
             return 0;
-        
-        Direction blockDir = state.getValue(FACING);
-        Direction localDir = getLocalDirection(blockDir, direction);
 
-        return switch (localDir) {
+        var front = state.getValue(FACING);
+        var localDirection = DirectionUtil.rotateInverse(front, direction);
+
+        return switch (localDirection) {
+            case NORTH -> entity.mcu.frontOutput;
             case EAST -> entity.mcu.rightOutput;
             case SOUTH -> entity.mcu.backOutput;
             case WEST -> entity.mcu.leftOutput;
-            case NORTH -> entity.mcu.frontOutput;
             default -> 0;
         };
     }
@@ -131,23 +133,5 @@ public class CNnanoBlock extends BaseEntityBlock {
     @NotNull
     public VoxelShape getShape(@NotNull BlockState state, @NotNull BlockGetter world, @NotNull BlockPos pos, @NotNull CollisionContext context) {
         return Shapes.box(0.0, 0.0, 0.0, 1.0, 0.125, 1.0);
-    }
-    
-    public static Direction getGlobalDirection(Direction facing, Direction direction) {
-        return switch (facing) {
-            case EAST -> direction.getClockWise();
-            case SOUTH -> direction.getOpposite();
-            case WEST -> direction.getCounterClockWise();
-            default -> direction;
-        };
-    }
-    
-    public static Direction getLocalDirection(Direction facing, Direction direction) {
-        return switch (facing) {
-            case WEST -> direction.getCounterClockWise();
-            case NORTH -> direction.getOpposite();
-            case EAST -> direction.getClockWise();
-            default -> direction;
-        };
     }
 }

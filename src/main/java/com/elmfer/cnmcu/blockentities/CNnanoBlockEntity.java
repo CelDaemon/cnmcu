@@ -2,11 +2,13 @@ package com.elmfer.cnmcu.blockentities;
 
 import java.util.*;
 
+import com.elmfer.cnmcu.CodeNodeMicrocontrollers;
 import com.elmfer.cnmcu.blocks.CNnanoBlock;
 import com.elmfer.cnmcu.mcu.NanoMCU;
 import com.elmfer.cnmcu.network.IDEScreenSyncPayload;
 import com.elmfer.cnmcu.ui.handler.IDEMenu;
 
+import com.elmfer.cnmcu.util.DirectionUtil;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.minecraft.core.BlockPos;
@@ -81,7 +83,7 @@ public class CNnanoBlockEntity extends BlockEntity implements ExtendedScreenHand
         var front = state.getValue(CNnanoBlock.FACING);
         var right = front.getClockWise();
         var back = front.getOpposite();
-        var left = front.getCounterClockWise();
+        var left = front.getCounterClockWise();;
 
         mcu.frontInput = level.getSignal(pos.relative(front), front);
         mcu.rightInput = level.getSignal(pos.relative(right), right);
@@ -102,12 +104,12 @@ public class CNnanoBlockEntity extends BlockEntity implements ExtendedScreenHand
         for (var localDirection : Direction.Plane.HORIZONTAL) {
             if (!mcu.outputHasChanged(localDirection))
                 continue;
-            var globalDirection = CNnanoBlock.getGlobalDirection(front, localDirection);
+            var globalDirection = DirectionUtil.rotate(front, localDirection);
             var targetSide = globalDirection.getOpposite();
-            var neighborPosition = pos.relative(globalDirection);
-            var orientation = ExperimentalRedstoneUtils.initialOrientation(level, globalDirection, null);
+            var neighborPosition = pos.relative(targetSide);
+            var orientation = ExperimentalRedstoneUtils.initialOrientation(level, targetSide, null);
             level.neighborChanged(neighborPosition, state.getBlock(), orientation);
-            level.updateNeighborsAtExceptFromFacing(neighborPosition, block, targetSide, orientation);
+            level.updateNeighborsAtExceptFromFacing(neighborPosition, block, globalDirection, orientation);
         }
     }
 
