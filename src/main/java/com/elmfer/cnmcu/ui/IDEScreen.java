@@ -588,7 +588,8 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
     public void removed() {
         if (!saved && !textEditor.getText().isEmpty())
             Sketches.saveBackup(textEditor.getText());
-        
+
+        ImGui.setMouseCursor(ImGuiMouseCursor.Arrow);
         Config.setShowRegistersInHex(showRegistersInHex);
         Config.save();
         Toolchain.saveConfig();
