@@ -22,51 +22,51 @@ public class CNROM extends WeakNativeObject {
      * Called in the mod's native code, do not call directly.
      */
     protected CNROM(long ptr) {
-        setNativePtr(ptr);
+        super(ptr);
         
         size = size(getNativePtr());
         writeProtected = isWriteProtected(getNativePtr());
     }
     
     public long getSize() {
-        assert isNativeObjectValid();
+        assert isNotNull();
 
         return size;
     }
     
     public ByteBuffer getData() {
-        assert isNativeObjectValid();
+        assert isNotNull();
 
         return data(getNativePtr());
     }
     
     public byte read(int address) {
-        assert isNativeObjectValid();
+        assert isNotNull();
 
         return read(getNativePtr(), address);
     }
     
     public void write(int address, byte value) {
-        assert isNativeObjectValid();
+        assert isNotNull();
 
         write(getNativePtr(), address, value);
     }
     
     public void setWriteProtected(boolean writeProtected) {
-        assert isNativeObjectValid();
+        assert isNotNull();
 
         setWriteProtected(getNativePtr(), writeProtected);
         this.writeProtected = writeProtected;
     }
     
     public boolean isWriteProtected() {
-        assert isNativeObjectValid();
+        assert isNotNull();
 
         return writeProtected;
     }
     
     public State getState() {
-        assert isNativeObjectValid();
+        assert isNotNull();
         ByteBuffer data = getData();
         return new State(
                 data,
@@ -75,7 +75,7 @@ public class CNROM extends WeakNativeObject {
     }
     
     public void setState(State state) {
-        assert isNativeObjectValid();
+        assert isNotNull();
 
         ByteBuffer data = getData();
         data.put(state.data());

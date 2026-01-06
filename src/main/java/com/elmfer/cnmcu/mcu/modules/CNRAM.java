@@ -22,44 +22,44 @@ public class CNRAM extends WeakNativeObject {
      * Called in the mod's native code, do not call directly.
      */
     protected CNRAM(long ptr) {
-        setNativePtr(ptr);
+        super(ptr);
         
         size = size(getNativePtr());
     }
     
     public long getSize() {
-        assert isNativeObjectValid();
+        assert isNotNull();
 
         return size;
     }
     
     public ByteBuffer getData() {
-        assert isNativeObjectValid();
+        assert isNotNull();
 
         return data(getNativePtr());
     }
     
     public byte read(int address) {
-        assert isNativeObjectValid();
+        assert isNotNull();
 
         return read(getNativePtr(), address);
     }
     
     public void write(int address, byte value) {
-        assert isNativeObjectValid();
+        assert isNotNull();
 
         write(getNativePtr(), address, value);
     }
     
     public State getState() {
-        assert isNativeObjectValid();
+        assert isNotNull();
         
         ByteBuffer buffer = getData();
         return new State(buffer);
     }
     
     public void setState(State state) {
-        assert isNativeObjectValid();
+        assert isNotNull();
 
         ByteBuffer buffer = getData();
         buffer.put(state.data);

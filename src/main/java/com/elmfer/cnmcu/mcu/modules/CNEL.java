@@ -37,55 +37,55 @@ public class CNEL extends WeakNativeObject {
      * Called in the mod's native code, do not call directly.
      */
     protected CNEL(long ptr) {
-        setNativePtr(ptr);
+        super(ptr);
         
         size = size(getNativePtr());
     }
     
     public long getSize() {
-        assert isNativeObjectValid();
+        assert isNotNull();
 
         return size;
     }
     
     public ByteBuffer getICLRegistersData() {
-        assert isNativeObjectValid();
+        assert isNotNull();
 
         return iclRegistersData(getNativePtr());
     }
     
     public ByteBuffer getIFLRegistersData() {
-        assert isNativeObjectValid();
+        assert isNotNull();
 
         return iflRegistersData(getNativePtr());
     }
     
     public void triggerEvent(EventType event) {
-        assert isNativeObjectValid();
+        assert isNotNull();
 
         triggerEvent(getNativePtr(), event.value);
     }
     
     public boolean shouldInterrupt() {
-        assert isNativeObjectValid();
+        assert isNotNull();
 
         return shouldInterrupt(getNativePtr());
     }
     
     public int read(int address) {
-        assert isNativeObjectValid();
+        assert isNotNull();
 
         return read(address);
     }
     
     public void write(int address, int data) {
-        assert isNativeObjectValid();
+        assert isNotNull();
 
         write(address, data);
     }
     
     public State getState() {
-        assert isNativeObjectValid();
+        assert isNotNull();
         
         ByteBuffer iclRegistersData = getICLRegistersData();
         ByteBuffer iflRegistersData = getIFLRegistersData();
@@ -97,7 +97,7 @@ public class CNEL extends WeakNativeObject {
     }
     
     public void setState(State state) {
-        assert isNativeObjectValid();
+        assert isNotNull();
         
         var iclRegistersData = getICLRegistersData();
         var iflRegistersData = getIFLRegistersData();

@@ -1,6 +1,5 @@
 package com.elmfer.cnmcu.mcu;
 
-import com.elmfer.cnmcu.CodeNodeMicrocontrollers;
 import com.elmfer.cnmcu.cpp.StrongNativeObject;
 import com.elmfer.cnmcu.mcu.cpu.MOS6502;
 import com.elmfer.cnmcu.mcu.modules.CNEL;
@@ -19,9 +18,6 @@ import java.nio.ByteBuffer;
 public class NanoMCU extends StrongNativeObject {
     public int frontInput, rightInput, backInput, leftInput;
     public int frontOutput, rightOutput, backOutput, leftOutput;
-
-    private int[] inputs = new int[4];
-    private int[] outputs = new int[4];
     private boolean frontOutputChanged, rightOutputChanged, backOutputChanged, leftOutputChanged;
 
     private MOS6502 cpu;
@@ -32,7 +28,7 @@ public class NanoMCU extends StrongNativeObject {
     private CNUART uart;
 
     public NanoMCU() {
-        setNativePtr(createMCU());
+        super(createMCU());
 
         cpu = CPU(getNativePtr());
         gpio = GPIO(getNativePtr());
@@ -43,6 +39,9 @@ public class NanoMCU extends StrongNativeObject {
     }
 
     public void tick() {
+        var inputs = new int[4];
+        var outputs = new int[4];
+
         inputs[0] = frontInput;
         inputs[1] = rightInput;
         inputs[2] = backInput;

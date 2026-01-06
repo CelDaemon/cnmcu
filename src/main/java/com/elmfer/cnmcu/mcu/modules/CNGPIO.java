@@ -23,67 +23,67 @@ public class CNGPIO extends WeakNativeObject {
      * Called in the mod's native code, do not call directly.
      */
     protected CNGPIO(long ptr) {
-        setNativePtr(ptr);
+        super(ptr);
         
         size = size(getNativePtr());
     }
     
     public long getSize() {
-        assert isNativeObjectValid();
+        assert isNotNull();
 
         return size;
     }
     
     public ByteBuffer getPVFrontData() {
-        assert isNativeObjectValid();
+        assert isNotNull();
 
         return pvFrontData(getNativePtr());
     }
     
     public ByteBuffer getPVBackData() {
-        assert isNativeObjectValid();
+        assert isNotNull();
 
         return pvBackData(getNativePtr());
     }
     
     public ByteBuffer getDirData() {
-        assert isNativeObjectValid();
+        assert isNotNull();
 
         return dirData(getNativePtr());
     }
     
     public ByteBuffer getIntData() {
-        assert isNativeObjectValid();
+        assert isNotNull();
 
         return intData(getNativePtr());
     }
     
     public ByteBuffer getIFLData() {
-        assert isNativeObjectValid();
+        assert isNotNull();
 
         return iflData(getNativePtr());
     }
     
     public int read(int address) {
-        assert isNativeObjectValid();
+        assert isNotNull();
 
         return read(getNativePtr(), address);
     }
     
     public void write(int address, int value) {
-        assert isNativeObjectValid();
+        assert isNotNull();
 
         write(getNativePtr(), address, value);
     }
     
     public boolean shouldInterrupt() {
-        assert isNativeObjectValid();
+        assert isNotNull();
 
         return shouldInterrupt(getNativePtr());
     }
     
     public State getState() {
-        assert isNativeObjectValid();
+        assert isNotNull();
 
         var pvFrontData = getPVFrontData();
 
@@ -105,7 +105,7 @@ public class CNGPIO extends WeakNativeObject {
     }
     
     public void setState(State state) {
-        assert isNativeObjectValid();
+        assert isNotNull();
 
         ByteBuffer buffer = getPVFrontData();
         buffer.put(state.pvFrontData);

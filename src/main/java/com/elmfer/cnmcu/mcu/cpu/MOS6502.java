@@ -18,65 +18,65 @@ public class MOS6502 extends WeakNativeObject {
      * Called in the mod's native code, do not call directly.
      */
     protected MOS6502(long ptr) {
-        setNativePtr(ptr);
+        super(ptr);
     }
     
     public void NMI() {
-        assert isNativeObjectValid();
+        assert isNotNull();
         
         NMI(getNativePtr());
     }
     
     public void IRQ() {
-        assert isNativeObjectValid();
+        assert isNotNull();
 
         IRQ(getNativePtr());
     }
     
     public void Reset() {
-        assert isNativeObjectValid();
+        assert isNotNull();
 
         Reset(getNativePtr());
     }
     
     public int getPC() {
-        assert isNativeObjectValid();
+        assert isNotNull();
 
         return GetPC(getNativePtr());
     }
     
     public int getS() {
-        assert isNativeObjectValid();
+        assert isNotNull();
 
         return GetS(getNativePtr());
     }
     
     public int getP() {
-        assert isNativeObjectValid();
+        assert isNotNull();
 
         return GetP(getNativePtr());
     }
     
     public int getA() {
-        assert isNativeObjectValid();
+        assert isNotNull();
 
         return GetA(getNativePtr());
     }
     
     public int getX() {
-        assert isNativeObjectValid();
+        assert isNotNull();
 
         return GetX(getNativePtr());
     }
     
     public int getY() {
-        assert isNativeObjectValid();
+        assert isNotNull();
 
         return GetY(getNativePtr());
     }
     
     public State getState() {
-        assert isNativeObjectValid();
+        assert isNotNull();
 
         return new State(
                 getPC(),
@@ -89,7 +89,7 @@ public class MOS6502 extends WeakNativeObject {
     }
     
     public void setState(State state) {
-        assert isNativeObjectValid();
+        assert isNotNull();
 
 
         int[] stateArray = new int[] { state.pc, state.s, state.p, state.a,

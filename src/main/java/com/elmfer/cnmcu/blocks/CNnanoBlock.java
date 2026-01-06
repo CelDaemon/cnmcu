@@ -109,7 +109,7 @@ public class CNnanoBlock extends BaseEntityBlock {
         if (world.isClientSide())
             return null;
 
-        return CNnanoBlock.createTickerHelper(type, BlockEntities.CN_NANO, CNnanoBlockEntity::tick);
+        return CNnanoBlock.createTickerHelper(type, BlockEntities.CN_NANO, CNnanoBlockEntity::serverTick);
     }
 
 

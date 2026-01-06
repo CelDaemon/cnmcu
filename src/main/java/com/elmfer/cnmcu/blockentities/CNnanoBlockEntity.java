@@ -39,7 +39,7 @@ public class CNnanoBlockEntity extends BlockEntity implements ExtendedScreenHand
         super(BlockEntities.CN_NANO, pos, state);
     }
 
-    public static void tick(@NotNull Level level, @NotNull BlockPos pos, @NotNull BlockState state, @NotNull CNnanoBlockEntity blockEntity) {
+    public static void serverTick(@NotNull Level level, @NotNull BlockPos pos, @NotNull BlockState state, @NotNull CNnanoBlockEntity blockEntity) {
         if(!blockEntity.hasInit)
             blockEntity.init();
 
@@ -108,7 +108,7 @@ public class CNnanoBlockEntity extends BlockEntity implements ExtendedScreenHand
     public String getCode() {
         return code;
     }
-    
+
     public void setCode(String code) {
         this.code = code;
         setChanged();

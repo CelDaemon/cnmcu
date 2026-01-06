@@ -23,49 +23,49 @@ public class CNUART extends WeakNativeObject {
      * Called in the mod's native code, do not call directly.
      */
     protected CNUART(long ptr) {
-        setNativePtr(ptr);
+        super(ptr);
         
         size = size(getNativePtr());
     }
     
     public long getSize() {
-        assert isNativeObjectValid();
+        assert isNotNull();
 
         return size;
     }
     
     public void reset() {
-        assert isNativeObjectValid();
+        assert isNotNull();
 
         reset(getNativePtr());
     }
     
     public boolean shouldInterrupt() {
-        assert isNativeObjectValid();
+        assert isNotNull();
 
         return shouldInterrupt(getNativePtr());
     }
     
     public ByteBuffer getRegisterData() {
-        assert isNativeObjectValid();
+        assert isNotNull();
 
         return registerData(getNativePtr());
     }
     
     public void write(int address, int data) {
-        assert isNativeObjectValid();
+        assert isNotNull();
 
         write(getNativePtr(), address, data);
     }
     
     public int read(int address) {
-        assert isNativeObjectValid();
+        assert isNotNull();
 
         return read(getNativePtr(), address);
     }
     
     public State getState() {
-        assert isNativeObjectValid();
+        assert isNotNull();
         
         ByteBuffer registerData = getRegisterData();
 
@@ -75,7 +75,7 @@ public class CNUART extends WeakNativeObject {
     }
     
     public void setState(State data) {
-        assert isNativeObjectValid();
+        assert isNotNull();
 
         var registerData = getRegisterData();
         registerData.put(data.registerData);
