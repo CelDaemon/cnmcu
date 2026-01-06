@@ -7,11 +7,11 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.inventory.MenuType;
 
-public class ScreenHandlers {
+public class Menus {
     
-    public static final MenuType<IDEScreenHandler> IDE_SCREEN_HANDLER = new ExtendedScreenHandlerType<>(IDEScreenHandler::new, IDEScreenHandler.OpenData.PACKET_CODEC);
+    public static final MenuType<IDEMenu> IDE_MENU = new ExtendedScreenHandlerType<>(IDEMenu::new, IDEMenu.OpenData.STREAM_CODEC);
     
     public static void init() {
-        Registry.register(BuiltInRegistries.MENU, CodeNodeMicrocontrollers.id("ide"), IDE_SCREEN_HANDLER);
+        Registry.register(BuiltInRegistries.MENU, CodeNodeMicrocontrollers.id("ide"), IDE_MENU);
     }
 }

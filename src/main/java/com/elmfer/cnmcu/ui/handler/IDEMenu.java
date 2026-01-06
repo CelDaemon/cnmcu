@@ -1,39 +1,47 @@
 package com.elmfer.cnmcu.ui.handler;
 
 import java.util.UUID;
+
+import com.elmfer.cnmcu.blocks.Blocks;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.item.ItemStack;
 import com.elmfer.cnmcu.blockentities.CNnanoBlockEntity;
 
 import io.netty.buffer.ByteBuf;
+import org.jetbrains.annotations.NotNull;
 
-public class IDEScreenHandler extends AbstractContainerMenu {
+public class IDEMenu extends AbstractContainerMenu {
 
-    private UUID mcuID;
-    private String code;
+    private final UUID mcuID;
+    private final String code;
+
+    private final ContainerLevelAccess containerAccess;
     
-    public IDEScreenHandler(int syncId, Inventory ignoredPlayerInventory, OpenData data) {
-        super(ScreenHandlers.IDE_SCREEN_HANDLER, syncId);
+    public IDEMenu(int containerId, Inventory ignoredPlayerInventory, OpenData data) {
+        super(Menus.IDE_MENU, containerId);
 
         mcuID = data.mcuId;
         code = data.code;
+        containerAccess = ContainerLevelAccess.NULL;
     }
-
-    public IDEScreenHandler(int syncId, UUID mcuID) {
-        super(ScreenHandlers.IDE_SCREEN_HANDLER, syncId);
+    public IDEMenu(int containerId, UUID mcuID, ContainerLevelAccess containerAccess) {
+        super(Menus.IDE_MENU, containerId);
         
         this.mcuID = mcuID;
+        this.code = "";
+        this.containerAccess = containerAccess;
     }
 
     public UUID getMcuID() {
         return mcuID;
     }
-    
+
     public String getCode() {
         return code;
     }
@@ -45,22 +53,20 @@ public class IDEScreenHandler extends AbstractContainerMenu {
     }
    
     @Override
-    public ItemStack quickMoveStack(Player var1, int var2) {
-        // TODO Auto-generated method stub
-        return null;
+    public ItemStack quickMoveStack(Player player, int slot) {
+        return ItemStack.EMPTY;
     }
 
     @Override
-    public boolean stillValid(Player var1) {
-        // TODO Auto-generated method stub
-        return true;
+    public boolean stillValid(@NotNull Player player) {
+        return stillValid(containerAccess, player, Blocks.CN_NANO_BLOCK);
     }
 
     public record OpenData(
             UUID mcuId,
             String code
     ) {
-       public static final StreamCodec<ByteBuf, OpenData> PACKET_CODEC = StreamCodec.composite(
+       public static final StreamCodec<ByteBuf, OpenData> STREAM_CODEC = StreamCodec.composite(
                UUIDUtil.STREAM_CODEC, OpenData::mcuId,
                ByteBufCodecs.STRING_UTF8, OpenData::code,
                OpenData::new

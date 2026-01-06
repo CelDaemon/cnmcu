@@ -5,7 +5,7 @@ import java.util.*;
 import com.elmfer.cnmcu.blocks.CNnanoBlock;
 import com.elmfer.cnmcu.mcu.NanoMCU;
 import com.elmfer.cnmcu.network.IDEScreenSyncPayload;
-import com.elmfer.cnmcu.ui.handler.IDEScreenHandler;
+import com.elmfer.cnmcu.ui.handler.IDEMenu;
 
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
@@ -16,6 +16,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -24,7 +25,7 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.NotNull;
 
-public class CNnanoBlockEntity extends BlockEntity implements ExtendedScreenHandlerFactory<IDEScreenHandler.OpenData> {
+public class CNnanoBlockEntity extends BlockEntity implements ExtendedScreenHandlerFactory<IDEMenu.OpenData> {
 
     public static final Map<UUID, ScreenUpdates> SCREEN_UPDATES = new HashMap<>();
     
@@ -157,14 +158,15 @@ public class CNnanoBlockEntity extends BlockEntity implements ExtendedScreenHand
     }
 
     @Override
-    public AbstractContainerMenu createMenu(int syncId, Inventory playerInventory, Player player) {
+    public AbstractContainerMenu createMenu(int containerId, Inventory playerInventory, Player player) {
         SCREEN_UPDATES.get(uuid).addListener((ServerPlayer) player);
-        return new IDEScreenHandler(syncId, uuid);
+        assert level != null;
+        return new IDEMenu(containerId, uuid, ContainerLevelAccess.create(level, getBlockPos()));
     }
 
     @Override
-    public IDEScreenHandler.OpenData getScreenOpeningData(ServerPlayer player) {
-        return new IDEScreenHandler.OpenData(
+    public IDEMenu.OpenData getScreenOpeningData(ServerPlayer player) {
+        return new IDEMenu.OpenData(
                 uuid,
                 code
         );

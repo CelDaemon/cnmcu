@@ -1,6 +1,7 @@
 package com.elmfer.cnmcu.network;
 
 import java.util.UUID;
+import java.util.function.IntFunction;
 
 import com.elmfer.cnmcu.CodeNodeMicrocontrollers;
 import com.elmfer.cnmcu.blockentities.CNnanoBlockEntity;
@@ -13,6 +14,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.ByIdMap;
 
 public record IDEScreenMCUControlPayload(
         UUID mcuId,
@@ -21,7 +23,7 @@ public record IDEScreenMCUControlPayload(
     public static final Type<IDEScreenMCUControlPayload> ID = new Type<>(RAW_ID);
     public static final StreamCodec<FriendlyByteBuf, IDEScreenMCUControlPayload> CODEC = StreamCodec.composite(
             UUIDUtil.STREAM_CODEC, IDEScreenMCUControlPayload::mcuId,
-            Control.PACKET_CODEC, IDEScreenMCUControlPayload::control,
+            Control.STREAM_CODEC, IDEScreenMCUControlPayload::control,
             IDEScreenMCUControlPayload::new
     );
 
@@ -71,25 +73,12 @@ public record IDEScreenMCUControlPayload(
         PAUSE_CLOCK(3),
         RESUME_CLOCK(4),
         CYCLE(5);
-
-        public static final StreamCodec<ByteBuf, Control> PACKET_CODEC = ByteBufCodecs.idMapper(Control::fromId, Control::getId);
+        public static final IntFunction<Control> BY_ID = ByIdMap.continuous(Control::getId, values(), ByIdMap.OutOfBoundsStrategy.WRAP);
+        public static final StreamCodec<ByteBuf, Control> STREAM_CODEC = ByteBufCodecs.idMapper(BY_ID, Control::getId);
         private final int id;
-        
         Control(int id) {
             this.id = id;
         }
-        public static Control fromId(int id) {
-            return switch(id) {
-                case 0 -> POWER_ON;
-                case 1 -> POWER_OFF;
-                case 2 -> RESET;
-                case 3 -> PAUSE_CLOCK;
-                case 4 -> RESUME_CLOCK;
-                case 5 -> CYCLE;
-                default -> throw new IllegalStateException("Unexpected value: " + id);
-            };
-        }
-        
         public int getId() {
             return id;
         }

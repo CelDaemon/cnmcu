@@ -11,7 +11,7 @@ import com.elmfer.cnmcu.config.Config;
 import com.elmfer.cnmcu.config.ModSetup;
 import com.elmfer.cnmcu.cpp.NativesLoader;
 import com.elmfer.cnmcu.network.Packets;
-import com.elmfer.cnmcu.ui.handler.ScreenHandlers;
+import com.elmfer.cnmcu.ui.handler.Menus;
 
 import net.fabricmc.api.ModInitializer;
 
@@ -40,7 +40,7 @@ public class CodeNodeMicrocontrollers implements ModInitializer {
 
         Blocks.init();
         BlockEntities.init();
-        ScreenHandlers.init();
+        Menus.init();
 
         Packets.registerPackets();
         Packets.initServerPackets();

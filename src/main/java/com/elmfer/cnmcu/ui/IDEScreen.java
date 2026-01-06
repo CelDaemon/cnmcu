@@ -36,7 +36,7 @@ import com.elmfer.cnmcu.mcu.Toolchain;
 import com.elmfer.cnmcu.network.IDEScreenMCUControlPayload.Control;
 import com.elmfer.cnmcu.network.IDEScreenSyncPayload.BusStatus;
 import com.elmfer.cnmcu.network.IDEScreenSyncPayload.CPUStatus;
-import com.elmfer.cnmcu.ui.handler.IDEScreenHandler;
+import com.elmfer.cnmcu.ui.handler.IDEMenu;
 
 import imgui.ImGui;
 import imgui.ImGuiIO;
@@ -45,7 +45,7 @@ import imgui.extension.memedit.MemoryEditor;
 import imgui.extension.texteditor.TextEditor;
 import org.lwjgl.opengl.*;
 
-public class IDEScreen extends AbstractContainerScreen<IDEScreenHandler> {
+public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
 
     private static final String DOCKSPACE_NAME = "DockSpace";
     private static final String CODE_EDITOR_NAME = "Code Editor";
@@ -55,7 +55,7 @@ public class IDEScreen extends AbstractContainerScreen<IDEScreenHandler> {
 
     private final TextEditor textEditor;
     private final MemoryEditor memoryEditor;
-    private final IDEScreenHandler handler;
+    private final IDEMenu handler;
     private final RenderTarget renderTarget;
 
     private boolean saved = true;
@@ -80,7 +80,7 @@ public class IDEScreen extends AbstractContainerScreen<IDEScreenHandler> {
     private boolean shouldLoadDefaults = false;
     private boolean showRegistersInHex = Config.showRegistersInHex();
 
-    public IDEScreen(IDEScreenHandler handler, Inventory inventory, Component title) {
+    public IDEScreen(IDEMenu handler, Inventory inventory, Component title) {
         super(handler, inventory, title);
 
         textEditor = new TextEditor();
