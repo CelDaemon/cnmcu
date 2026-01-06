@@ -8,7 +8,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 /**
- * Reference to a CNROM object it is a weak reference, so it will be invalidated
+ * Reference to a CNROM object. It is a weak reference, so it will be invalidated
  * if the native object is deleted.
  */
 public class CNROM extends WeakNativeObject {  

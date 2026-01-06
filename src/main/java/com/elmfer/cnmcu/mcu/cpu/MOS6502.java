@@ -13,8 +13,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 public class MOS6502 extends WeakNativeObject {
 
     /**
-     * Constructor
-     * 
      * Called in the mod's native code, do not call directly.
      */
     protected MOS6502(long ptr) {
@@ -167,7 +165,7 @@ public class MOS6502 extends WeakNativeObject {
         return static_cast<jint>(cpu->GetY());
     */
     
-    private static native void SetState(long ptr, int state[]); /*
+    private static native void SetState(long ptr, int[] state); /*
         mos6502* cpu = reinterpret_cast<mos6502*>(ptr);
         cpu->SetState(state);
     */

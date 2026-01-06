@@ -20,12 +20,12 @@ public class NanoMCU extends StrongNativeObject {
     public int frontOutput, rightOutput, backOutput, leftOutput;
     private boolean frontOutputChanged, rightOutputChanged, backOutputChanged, leftOutputChanged;
 
-    private MOS6502 cpu;
-    private CNGPIO gpio;
-    private CNRAM ram;
-    private CNROM rom;
-    private CNEL el;
-    private CNUART uart;
+    private final MOS6502 cpu;
+    private final CNGPIO gpio;
+    private final CNRAM ram;
+    private final CNROM rom;
+    private final CNEL el;
+    private final CNUART uart;
 
     public NanoMCU() {
         super(createMCU());
@@ -39,16 +39,36 @@ public class NanoMCU extends StrongNativeObject {
     }
 
     public void tick() {
-        var inputs = new int[4];
-        var outputs = new int[4];
 
-        inputs[0] = frontInput;
-        inputs[1] = rightInput;
-        inputs[2] = backInput;
-        inputs[3] = leftInput;
-
+        updateInputs();
         el.triggerEvent(EventType.GAME_TICK);
-        tick(getNativePtr(), inputs, outputs);
+        tick(getNativePtr());
+        updateOutputs();
+    }
+
+    public boolean outputHasChanged(Direction direction) {
+        return switch (direction) {
+            case NORTH -> frontOutputChanged;
+            case EAST -> rightOutputChanged;
+            case SOUTH -> backOutputChanged;
+            case WEST -> leftOutputChanged;
+            default -> false;
+        };
+    }
+
+    private void updateInputs() {
+        var inputs = new int[] {
+                frontInput,
+                rightInput,
+                backInput,
+                leftInput
+        };
+
+        setInputs(inputs);
+    }
+
+    private void updateOutputs() {
+        var outputs = getOutputs();
 
         frontOutputChanged = frontOutput != outputs[0];
         rightOutputChanged = rightOutput != outputs[1];
@@ -61,31 +81,30 @@ public class NanoMCU extends StrongNativeObject {
         leftOutput = outputs[3];
     }
 
-    public boolean outputHasChanged(Direction direction) {
-        switch (direction) {
-        case NORTH:
-            return frontOutputChanged;
-        case EAST:
-            return rightOutputChanged;
-        case SOUTH:
-            return backOutputChanged;
-        case WEST:
-            return leftOutputChanged;
-        default:
-            return false;
-        }
+    public void cycle() {
+        updateInputs();
+        cycle(getNativePtr());
+        updateOutputs();
     }
 
-    public void cycle() {
-        cycle(getNativePtr());
+    private void resetIO() {
+        frontInput = rightInput = backInput = leftInput = 0;
+
+        frontOutputChanged = frontOutput != 0;
+        rightOutputChanged = rightOutput != 0;
+        backOutputChanged = backOutput != 0;
+        leftOutputChanged = leftOutput != 0;
+
+        frontOutput = rightOutput = backOutput = leftOutput = 0;
     }
 
     public void reset() {
-        frontInput = rightInput = backInput = leftInput = 0;
+        resetIO();
         reset(getNativePtr());
     }
 
     public void setPowered(boolean powered) {
+        resetIO();
         setPowered(getNativePtr(), powered);
     }
 
@@ -207,14 +226,14 @@ public class NanoMCU extends StrongNativeObject {
     }
 
     public void setState(State state) {
+        setPowered(state.powered);
+        setClockPause(state.clockPaused);
+        setNumCycles(getNativePtr(), state.numCycles);
+
         frontOutput = state.frontOutput;
         rightOutput = state.rightOutput;
         backOutput = state.backOutput;
         leftOutput = state.leftOutput;
-
-        setPowered(state.powered);
-        setClockPause(state.clockPaused);
-        setNumCycles(getNativePtr(), state.numCycles);
 
         var pinOutputDrivers = getPinOutputDrivers();
         pinOutputDrivers.put(state.pinOutputDrivers);
@@ -265,6 +284,19 @@ public class NanoMCU extends StrongNativeObject {
         return pinOutputDrivers(getNativePtr());
     }
 
+    public void setInputs(int[] inputs) {
+        assert inputs.length == 4;
+        setInputs(getNativePtr(), inputs);
+    }
+
+    public int[] getOutputs() {
+        var outputs = new int[4];
+
+        getOutputs(getNativePtr(), outputs);
+
+        return outputs;
+    }
+
     // @formatter:off
     
     /*JNI
@@ -282,29 +314,40 @@ public class NanoMCU extends StrongNativeObject {
         CodeNodeNano* nano = reinterpret_cast<CodeNodeNano*>(ptr);
         delete nano;
     */
-    
-    private static native void tick(long ptr, int[] inputs, int[] outputs); /*
+
+    private static native void setInputs(long ptr, int[] inputs); /*
         CodeNodeNano* nano = reinterpret_cast<CodeNodeNano*>(ptr);
-        
+
         CNGPIO<CodeNodeNano::GPIO_NUM_PINS>& gpio = nano->GPIO();
         uint8_t* pvFront = gpio.pvFrontData();
+
+        for(int i = 0; i < 4; i++) {
+            if(!gpio.isInput(i))
+                continue;
+            pvFront[i] = static_cast<uint8_t>(inputs[i]);
+        }
+    */
+
+    private static native void getOutputs(long ptr, int[] outputs); /*
+        CodeNodeNano* nano = reinterpret_cast<CodeNodeNano*>(ptr);
+
+        CNGPIO<CodeNodeNano::GPIO_NUM_PINS>& gpio = nano->GPIO();
+
         uint8_t* outputPinDrivers = nano->pinOutputDrivers();
-        bool frontPinIsInput = gpio.isInput(0);
-        bool rightPinIsInput = gpio.isInput(1);
-        bool backPinIsInput  = gpio.isInput(2);
-        bool leftPinIsInput  = gpio.isInput(3);
-        
-        pvFront[0] = frontPinIsInput ? static_cast<uint8_t>(inputs[0]) : pvFront[0];
-        pvFront[1] = rightPinIsInput ? static_cast<uint8_t>(inputs[1]) : pvFront[1];
-        pvFront[2] = backPinIsInput  ? static_cast<uint8_t>(inputs[2]) : pvFront[2];
-        pvFront[3] = leftPinIsInput  ? static_cast<uint8_t>(inputs[3]) : pvFront[3];
+
+        for(int i = 0; i < 4; i++) {
+            if(gpio.isInput(i)) {
+                outputs[i] = 0;
+                continue;
+            }
+            outputs[i] = static_cast<jint>(outputPinDrivers[i]);
+        }
+    */
+    
+    private static native void tick(long ptr); /*
+        CodeNodeNano* nano = reinterpret_cast<CodeNodeNano*>(ptr);
         
         nano->tick();
-        
-        outputs[0] = static_cast<jint>(frontPinIsInput ? 0 : outputPinDrivers[0]);
-        outputs[1] = static_cast<jint>(rightPinIsInput ? 0 : outputPinDrivers[1]);
-        outputs[2] = static_cast<jint>(backPinIsInput  ? 0 : outputPinDrivers[2]);
-        outputs[3] = static_cast<jint>(leftPinIsInput  ? 0 : outputPinDrivers[3]);
     */
     
     private static native void cycle(long ptr); /*

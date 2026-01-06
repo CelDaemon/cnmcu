@@ -8,8 +8,8 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 /**
- * Reference to a CNRAM object
- * it is a weak reference, so it will be invalidated if the native
+ * Reference to a CNRAM object.
+ * It is a weak reference, so it will be invalidated if the native
  * object is deleted.
  */
 public class CNRAM extends WeakNativeObject {
@@ -17,8 +17,6 @@ public class CNRAM extends WeakNativeObject {
     private final long size;
     
     /**
-     * Constructor
-     * 
      * Called in the mod's native code, do not call directly.
      */
     protected CNRAM(long ptr) {

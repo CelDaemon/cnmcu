@@ -8,8 +8,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 /**
- * Reference to a CNGPIO object
- * 
+ * Reference to a CNGPIO object.
  * it is a weak reference, so it will be invalidated if the native
  * object is deleted.
  */
@@ -18,8 +17,6 @@ public class CNGPIO extends WeakNativeObject {
     private final long size;
     
     /**
-     * Constructor
-     * 
      * Called in the mod's native code, do not call directly.
      */
     protected CNGPIO(long ptr) {

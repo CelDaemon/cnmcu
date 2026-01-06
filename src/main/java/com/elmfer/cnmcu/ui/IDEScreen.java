@@ -111,7 +111,7 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
     public void render(@NotNull GuiGraphics gui, int mouseX, int mouseY, float delta) {
         sendHeartbeat();
 
-        ImGui.newFrame(); // TODO: Fix incorrect cursor when exiting screen with resize cursor.
+        ImGui.newFrame();
 
         ImGui.setNextWindowPos(0, 0, ImGuiCond.Always);
         ImGui.setNextWindowSize(IO.getDisplaySizeX(), IO.getDisplaySizeY(), ImGuiCond.Always);

@@ -77,10 +77,8 @@ public class CNnanoBlock extends BaseEntityBlock {
     public int getSignal(BlockState state, BlockGetter world, BlockPos pos, Direction direction) {
         BlockEntity blockEntity = world.getBlockEntity(pos);
 
-        if (!(blockEntity instanceof CNnanoBlockEntity))
+        if (!(blockEntity instanceof CNnanoBlockEntity entity))
             return 0;
-
-        CNnanoBlockEntity entity = (CNnanoBlockEntity) blockEntity;
 
         if (entity.mcu == null || !entity.mcu.isPowered())
             return 0;
@@ -100,6 +98,11 @@ public class CNnanoBlock extends BaseEntityBlock {
         default:
             return 0;
         }
+    }
+
+    @Override
+    protected int getDirectSignal(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
+        return getSignal(blockState, blockGetter, blockPos, direction);
     }
 
     @Nullable

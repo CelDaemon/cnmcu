@@ -11,6 +11,7 @@ import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import com.elmfer.cnmcu.CodeNodeMicrocontrollers;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -25,7 +26,7 @@ public class HTTPSFetcher {
         try {
             worker = new FetcherWorker(this, URI.create(url).toURL());
         } catch (MalformedURLException e) {
-            e.printStackTrace();
+            CodeNodeMicrocontrollers.LOGGER.error("Failed to parse url: {}", url, e);
         }
     }
 
@@ -45,7 +46,7 @@ public class HTTPSFetcher {
         try {
             worker.join();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            CodeNodeMicrocontrollers.LOGGER.error("Completion was interrupted", e);
         }
     }
     
@@ -115,7 +116,7 @@ public class HTTPSFetcher {
                 ByteArrayOutputStream os = new ByteArrayOutputStream();
 
                 byte[] chunk = new byte[4096];
-                int bytesRead = 0;
+                int bytesRead;
                 while (0 < (bytesRead = is.read(chunk))) {
                     os.write(chunk, 0, bytesRead);
                 }
@@ -128,10 +129,9 @@ public class HTTPSFetcher {
 
                 complete = true;
             } catch (IOException e) {
-                // TODO Auto-generated catch block
                 statusCode = 0;
                 status = String.format("Fetch Failed: %s", e.toString());
-                e.printStackTrace();
+                CodeNodeMicrocontrollers.LOGGER.error("Fetch failed", e);
             }
         }
     }

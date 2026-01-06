@@ -8,9 +8,9 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 /*
- * Reference to a CNUART object
+ * Reference to a CNUART object.
  * 
- * it is a weak reference, so it will be invalidated if the native
+ * It is a weak reference, so it will be invalidated if the native
  * object is deleted.
  */
 public class CNUART extends WeakNativeObject {
@@ -18,8 +18,6 @@ public class CNUART extends WeakNativeObject {
     private final long size;
     
     /**
-     * Constructor
-     * 
      * Called in the mod's native code, do not call directly.
      */
     protected CNUART(long ptr) {

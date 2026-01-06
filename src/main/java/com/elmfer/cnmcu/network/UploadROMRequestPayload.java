@@ -59,6 +59,8 @@ public record UploadROMRequestPayload(
         var entity = CNnanoBlockEntity.SCREEN_UPDATES.get(mcuId).getEntity();
 
         var mcu = entity.mcu;
+        if(mcu == null)
+            throw new RuntimeException();
 
         var mcuRomSize = mcu.getROM().getSize();
         if(mcuRomSize != rom.length) {

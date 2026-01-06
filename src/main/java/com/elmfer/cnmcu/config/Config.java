@@ -107,7 +107,7 @@ public class Config {
         	String path = Paths.get(lastSaveFilePath).toAbsolutePath().toString();
         	config.addProperty("lastSaveFilePath", path);
         } catch (Exception e) {
-        	
+        	LOGGER.error("Failed to add last save file path property", e);
         }
     }
     

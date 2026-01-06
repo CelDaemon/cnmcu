@@ -39,52 +39,114 @@ public class CNnanoBlockEntity extends BlockEntity implements ExtendedScreenHand
         super(BlockEntities.CN_NANO, pos, state);
     }
 
-    public static void serverTick(@NotNull Level level, @NotNull BlockPos pos, @NotNull BlockState state, @NotNull CNnanoBlockEntity blockEntity) {
+    public static void serverTick(@NotNull Level ignoredLevel, @NotNull BlockPos ignoredPos, @NotNull BlockState ignoredState, @NotNull CNnanoBlockEntity blockEntity) {
         if(!blockEntity.hasInit)
             blockEntity.init();
 
-        SCREEN_UPDATES.get(blockEntity.uuid).handleScreenListeners();
-
         var mcu = blockEntity.mcu;
 
-        if(!mcu.isPowered())
+        SCREEN_UPDATES.get(blockEntity.uuid).handleScreenListeners();
+
+        if (!mcu.isPowered() || mcu.isClockPaused())
             return;
-        
+
+        blockEntity.loadInputs();
+        mcu.tick();
+        blockEntity.writeOutputs();
+
+        blockEntity.setChanged();
+    }
+
+    public void cycle() {
+        if(!hasInit)
+            init();
+
+        if(!mcu.isPowered() || !mcu.isClockPaused())
+            return;
+
+        loadInputs();
+        mcu.cycle();
+        writeOutputs();
+
+        setChanged();
+    }
+
+    private void loadInputs() {
+        assert mcu != null;
+        assert level != null;
+
+        var state = getBlockState();
+        var pos = getBlockPos();
+
         var front = state.getValue(CNnanoBlock.FACING);
         var right = front.getClockWise();
         var back = front.getOpposite();
         var left = front.getCounterClockWise();
-        
+
         mcu.frontInput = level.getSignal(pos.relative(front), front);
         mcu.rightInput = level.getSignal(pos.relative(right), right);
         mcu.backInput = level.getSignal(pos.relative(back), back);
         mcu.leftInput = level.getSignal(pos.relative(left), left);
+    }
 
-        mcu.tick();
-        blockEntity.setChanged();
+    private void writeOutputs() {
+        assert mcu != null;
+        assert level != null;
+
+        var state = getBlockState();
+        var pos = getBlockPos();
+        var front = state.getValue(CNnanoBlock.FACING);
 
         var block = state.getBlock();
-        
+
         for (var localDirection : Direction.Plane.HORIZONTAL) {
-            if(!blockEntity.mcu.outputHasChanged(localDirection))
+            if (!mcu.outputHasChanged(localDirection))
                 continue;
             var globalDirection = CNnanoBlock.getGlobalDirection(front, localDirection);
+            var targetSide = globalDirection.getOpposite();
             var neighborPosition = pos.relative(globalDirection);
             var orientation = ExperimentalRedstoneUtils.initialOrientation(level, globalDirection, null);
             level.neighborChanged(neighborPosition, state.getBlock(), orientation);
-            level.updateNeighborsAtExceptFromFacing(neighborPosition, block, globalDirection, orientation);
+            level.updateNeighborsAtExceptFromFacing(neighborPosition, block, targetSide, orientation);
         }
     }
 
     public void setPowered(boolean powered) {
+        if(!hasInit)
+            init();
+
         mcu.setPowered(powered);
+        writeOutputs();
         setChanged();
         if(level != null)
             level.updateNeighborsAt(worldPosition, getBlockState().getBlock());
     }
 
+    public boolean isPowered() {
+        if(!hasInit)
+            init();
+        return mcu.isPowered();
+    }
+
+    public void setClockPause(boolean paused) {
+        if(!hasInit)
+            init();
+
+        mcu.setClockPause(paused);
+        setChanged();
+    }
+
+    public boolean isClockPaused() {
+        if(!hasInit)
+            init();
+        return mcu.isClockPaused();
+    }
+
     public void reset() {
+        if(!hasInit)
+            init();
         mcu.reset();
+        writeOutputs();
         setChanged();
     }
     
@@ -100,14 +162,6 @@ public class CNnanoBlockEntity extends BlockEntity implements ExtendedScreenHand
         
         hasInit = true;
     }
-    
-    public UUID getUUID() {
-        return uuid;
-    }
-
-    public String getCode() {
-        return code;
-    }
 
     public void setCode(String code) {
         this.code = code;
@@ -115,14 +169,11 @@ public class CNnanoBlockEntity extends BlockEntity implements ExtendedScreenHand
     }
 
     @Override
-    public void loadAdditional(ValueInput view) {
+    public void loadAdditional(@NotNull ValueInput view) {
         super.loadAdditional(view);
-        
-        if (!hasInit)
+
+        if(!hasInit)
             init();
-        
-        if(!view.contains("code"))
-            return;
         
         mcu.setState(view.read("mcu", NanoMCU.State.CODEC).orElseThrow());
         code = view.getStringOr("code", "");
@@ -130,10 +181,10 @@ public class CNnanoBlockEntity extends BlockEntity implements ExtendedScreenHand
     }
 
     @Override
-    public void saveAdditional(ValueOutput view) {
+    public void saveAdditional(@NotNull ValueOutput view) {
         super.saveAdditional(view);
         
-        if (!hasInit)
+        if(!hasInit)
             init();
 
         view.store("mcu", NanoMCU.State.CODEC, mcu.getState());
@@ -143,7 +194,7 @@ public class CNnanoBlockEntity extends BlockEntity implements ExtendedScreenHand
    @Override
    public void setRemoved() {
        super.setRemoved();
-       
+
        if(mcu != null) {
            mcu.deleteNativeObject();
            mcu = null;
@@ -153,19 +204,20 @@ public class CNnanoBlockEntity extends BlockEntity implements ExtendedScreenHand
    }
     
     @Override
+    @NotNull
     public Component getDisplayName() {
         return Component.literal("Code Node Nano");
     }
 
     @Override
-    public AbstractContainerMenu createMenu(int containerId, Inventory playerInventory, Player player) {
+    public AbstractContainerMenu createMenu(int containerId, @NotNull Inventory playerInventory, @NotNull Player player) {
         SCREEN_UPDATES.get(uuid).addListener((ServerPlayer) player);
         assert level != null;
         return new IDEMenu(containerId, uuid, ContainerLevelAccess.create(level, getBlockPos()));
     }
 
     @Override
-    public IDEMenu.OpenData getScreenOpeningData(ServerPlayer player) {
+    public IDEMenu.OpenData getScreenOpeningData(@NotNull  ServerPlayer player) {
         return new IDEMenu.OpenData(
                 uuid,
                 code

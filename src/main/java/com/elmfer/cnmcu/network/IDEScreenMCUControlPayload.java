@@ -52,16 +52,16 @@ public record IDEScreenMCUControlPayload(
             entity.reset();
             break;
         case PAUSE_CLOCK:
-            if (entity.mcu.isPowered())
-                entity.mcu.setClockPause(true);
+            if (entity.isPowered())
+                entity.setClockPause(true);
             break;
         case RESUME_CLOCK:
-            if (entity.mcu.isPowered())
-                entity.mcu.setClockPause(false);
+            if (entity.isPowered())
+                entity.setClockPause(false);
             break;
         case CYCLE:
-            if (entity.mcu.isClockPaused())
-                entity.mcu.cycle();
+            if (entity.isClockPaused())
+                entity.cycle();
             break;
         }
     }

@@ -49,7 +49,6 @@ public final class ModSetup {
     
     /**
      * Returns the Minecraft versions the latest release of the mod is available for.
-     * @return
      */
     public static String[] getLatestForMinecraftVersions() {
         return LATEST_FOR_MINECRAFT_VERSIONS.toArray(new String[0]);
@@ -67,7 +66,7 @@ public final class ModSetup {
         if (hasCheckedForUpdates)
             return CompletableFuture.completedFuture(null);
         
-        return CompletableFuture.runAsync(() -> checkForUpdates());
+        return CompletableFuture.runAsync(ModSetup::checkForUpdates);
     }
     
     public static boolean hasCheckedForUpdates() {
@@ -87,7 +86,7 @@ public final class ModSetup {
         fetcher.start();
         fetcher.waitForCompletion();
 
-        if (fetcher.statusCode() != 200) {
+        if (fetcher.hasFailed()) {
             wasAbleToConnect = false;
             hasCheckedForUpdates = true;
             return;
@@ -139,7 +138,7 @@ public final class ModSetup {
             ModSetup.changelog = releases.get(latestIndex).getAsJsonObject().get("body").getAsString().replaceAll("[#*>_]", "").replaceAll("\\* ", "-");
         } catch (Exception e) {
             wasAbleToConnect = false;
-            e.printStackTrace();
+            LOGGER.error("Failed to check for updates", e);
         }
         
         hasCheckedForUpdates = true;
@@ -152,43 +151,44 @@ public final class ModSetup {
             Files.createDirectories(Paths.get(NativesLoader.BINARIES_PATH));
             Files.createDirectories(Paths.get(Sketches.BACKUP_PATH));
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error("Failed to create directories", e);
         }
     }
 
     public static void imguiIniFile() {
         final Identifier imguiIniId = CodeNodeMicrocontrollers.id("setup/imgui.ini");
 
-        if (Files.exists(Paths.get(IMGUI_INI_FILE)))
+        Path configPath = Paths.get(IMGUI_INI_FILE);
+        if (Files.exists(configPath))
             return;
 
         try {
             InputStream imguiIni = ResourceLoader.getInputStream(imguiIniId);
-            Files.copy(imguiIni, Paths.get(IMGUI_INI_FILE));
+            Files.copy(imguiIni, configPath);
 
             imguiIni.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("Failed to write defaint imgui config file", e);
         }
     }
 
     public static void downloadNatives() {
-        ensureInstallExtract("Native library", Paths.get(NativesLoader.BINARIES_PATH, NativesLoader.getBinaryFilename()),
+        ensureInstallNatives(Paths.get(NativesLoader.BINARIES_PATH, NativesLoader.getBinaryFilename()),
                 NativesLoader.getBinaryFilename());
     }
 
     public static void downloadToolchain() {
         final String vasmFilename = "vasm6502_oldstyle";
-        ensureInstallDownload("vasm", Paths.get(Toolchain.TOOLCHAIN_PATH, vasmFilename + NativesLoader.EXE_EXT),
+        ensureInstall("vasm", Paths.get(Toolchain.TOOLCHAIN_PATH, vasmFilename + NativesLoader.EXE_EXT),
                 NativesLoader.getExecutableFilename(vasmFilename));
 
         final String vobjFilename = "vobjdump";
-        ensureInstallDownload("vobjdump", Paths.get(Toolchain.TOOLCHAIN_PATH, vobjFilename + NativesLoader.EXE_EXT),
+        ensureInstall("vobjdump", Paths.get(Toolchain.TOOLCHAIN_PATH, vobjFilename + NativesLoader.EXE_EXT),
                 NativesLoader.getExecutableFilename(vobjFilename));
 
         final String cygFilename = "cygwin1.dll";
         if (NativesLoader.NATIVES_OS.equals("windows"))
-            ensureInstallDownload("cygwin1.dll", Paths.get(Toolchain.TOOLCHAIN_PATH, cygFilename),
+            ensureInstall("cygwin1.dll", Paths.get(Toolchain.TOOLCHAIN_PATH, cygFilename),
                     "cygwin1.dll");
     }
 
@@ -210,7 +210,7 @@ public final class ModSetup {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("Failed to parse github assets", e);
             return null;
         }
 
@@ -222,7 +222,7 @@ public final class ModSetup {
         fetcher.start();
         fetcher.waitForCompletion();
 
-        if (fetcher.statusCode() != 200)
+        if (fetcher.hasFailed())
             return null;
 
         return fetcher.byteContent();
@@ -235,10 +235,7 @@ public final class ModSetup {
         LOGGER.debug("Listing assets from GitHub...");
 
         HTTPSFetcher fetcher = new HTTPSFetcher(
-                GITHUB_REPO_URL + "/releases/tags/" + "0.0.10a-1.20.4");
-        // TODO: Include natives in jar by default.
-//        HTTPSFetcher fetcher = new HTTPSFetcher(
-//                GITHUB_REPO_URL + "/releases/tags/" + CodeNodeMicrocontrollers.MOD_VERSION;
+                GITHUB_REPO_URL + "/releases/tags/" + "0.0.10a-1.20.4"); // + CodeNodeMicrocontrollers.MOD_VERSION
         fetcher.addHeader("Accept", "application/vnd.github.v3+json");
         fetcher.start();
         fetcher.waitForCompletion();
@@ -246,7 +243,7 @@ public final class ModSetup {
         if (fetcher.statusCode() == 0)
             throw new RuntimeException("Failed to connect to GitHub API! Check your internet connection.");
 
-        if (fetcher.statusCode() != 200)
+        if (fetcher.hasFailed())
             return;
 
         try {
@@ -256,13 +253,13 @@ public final class ModSetup {
         }
     }
 
-    private static void ensureInstallExtract(String moduleName, Path localPath, String assetName) {
+    private static void ensureInstallNatives(Path localPath, String assetName) {
         if (Files.exists(localPath)) {
-            LOGGER.debug("{} is already installed! Skipping extract...", moduleName);
+            LOGGER.debug("Natives is already installed! Skipping extract...");
             return;
         }
 
-        LOGGER.info("{} is not installed! Extracting...", moduleName);
+        LOGGER.info("Natives are not installed! Extracting...");
 
         try(var inputStream = ModSetup.class.getResourceAsStream(assetName)) {
             if(inputStream == null)
@@ -274,7 +271,7 @@ public final class ModSetup {
         }
     }
 
-    private static void ensureInstallDownload(String moduleName, Path localPath, String assetName) {
+    private static void ensureInstall(String moduleName, Path localPath, String assetName) {
         if (Files.exists(localPath)) {
             LOGGER.debug("{} is already installed! Skipping download...", moduleName);
             return;
@@ -282,7 +279,7 @@ public final class ModSetup {
 
         LOGGER.info("{} is not installed! Downloading...", moduleName);
 
-        byte rawBinary[] = getGitHubAsset(assetName);
+        var rawBinary = getGitHubAsset(assetName);
 
         if (rawBinary == null)
             throw new RuntimeException("Failed to download " + moduleName + "!");

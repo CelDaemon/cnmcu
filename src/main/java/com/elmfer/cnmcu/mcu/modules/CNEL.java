@@ -8,9 +8,8 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 /**
- * Reference to a CNEL object
- * 
- * it is a weak reference, so it will be invalidated if the native
+ * Reference to a CNEL object.
+ * It is a weak reference, so it will be invalidated if the native
  * object is deleted.
  */
 public class CNEL extends WeakNativeObject {
@@ -32,8 +31,6 @@ public class CNEL extends WeakNativeObject {
     private final long size;
     
     /**
-     * Constructor
-     * 
      * Called in the mod's native code, do not call directly.
      */
     protected CNEL(long ptr) {
@@ -75,13 +72,13 @@ public class CNEL extends WeakNativeObject {
     public int read(int address) {
         assert isNotNull();
 
-        return read(address);
+        return read(getNativePtr(), address);
     }
     
     public void write(int address, int data) {
         assert isNotNull();
 
-        write(address, data);
+        write(getNativePtr(), address, data);
     }
     
     public State getState() {

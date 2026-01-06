@@ -31,6 +31,8 @@ public record IDEScreenSyncPayload(
 
     public static IDEScreenSyncPayload create(CNnanoBlockEntity blockEntity) {
         var mcu = blockEntity.mcu;
+        if(mcu == null)
+            throw new RuntimeException();
         var dataBuffer = mcu.getRAM().getData();
         var data = new byte[256];
         dataBuffer.get(data);
