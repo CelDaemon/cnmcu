@@ -130,7 +130,7 @@ public class HTTPSFetcher {
                 complete = true;
             } catch (IOException e) {
                 statusCode = 0;
-                status = String.format("Fetch Failed: %s", e.toString());
+                status = String.format("Fetch Failed: %s", e);
                 CodeNodeMicrocontrollers.LOGGER.error("Fetch failed", e);
             }
         }

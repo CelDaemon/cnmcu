@@ -15,6 +15,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ByIdMap;
+import org.jetbrains.annotations.NotNull;
 
 public record IDEScreenMCUControlPayload(
         UUID mcuId,
@@ -28,7 +29,7 @@ public record IDEScreenMCUControlPayload(
     );
 
     @Override
-    public Type<? extends CustomPacketPayload> type() {
+    public @NotNull Type<? extends CustomPacketPayload> type() {
         return ID;
     }
 

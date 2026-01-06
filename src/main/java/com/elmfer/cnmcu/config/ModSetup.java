@@ -11,6 +11,7 @@ import java.nio.file.attribute.PosixFilePermissions;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+
 import net.minecraft.resources.Identifier;
 import com.elmfer.cnmcu.CodeNodeMicrocontrollers;
 import com.elmfer.cnmcu.cpp.NativesLoader;
@@ -99,7 +100,7 @@ public final class ModSetup {
         
         try {
             JsonArray releases = fetcher.jsonContent().getAsJsonArray();
-            String[] releaseVersion = null;
+            String[] releaseVersion;
             for (int i = 0; i < releases.size(); i++) {
                 releaseVersion = releases.get(i).getAsJsonObject().get("tag_name").getAsString().split("-");
                 if (isMinecraftSnapshot(releaseVersion[1]))
@@ -285,11 +286,9 @@ public final class ModSetup {
             throw new RuntimeException("Failed to download " + moduleName + "!");
 
         try {
-            if (NativesLoader.NATIVES_OS != "windows") {
-                Set<PosixFilePermission> perms = PosixFilePermissions.fromString("rwxr-xr-x");
-                FileAttribute<Set<PosixFilePermission>> attr = PosixFilePermissions.asFileAttribute(perms);
-                Files.createFile(localPath, attr);
-            }
+            Set<PosixFilePermission> perms = PosixFilePermissions.fromString("rwxr-xr-x");
+            FileAttribute<Set<PosixFilePermission>> attr = PosixFilePermissions.asFileAttribute(perms);
+            Files.createFile(localPath, attr);
 
             Files.write(localPath, rawBinary);
         } catch (IOException e) {
@@ -307,7 +306,7 @@ public final class ModSetup {
         
         long number = 0;
         for (int i = 0; i < parts.length; i++) {
-            number |= Integer.parseInt(parts[i]) << (i * 16);
+            number |= (long) Integer.parseInt(parts[i]) << (i * 16);
         }
         return number;
     }

@@ -11,6 +11,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
+import org.jetbrains.annotations.NotNull;
 
 public record IDEScreenSyncPayload(
         boolean isPowered,
@@ -63,6 +64,7 @@ public record IDEScreenSyncPayload(
     }
 
     @Override
+    @NotNull
     public Type<? extends CustomPacketPayload> type() {
         return ID;
     }

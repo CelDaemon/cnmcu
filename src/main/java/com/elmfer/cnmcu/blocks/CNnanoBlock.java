@@ -1,5 +1,6 @@
 package com.elmfer.cnmcu.blocks;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.elmfer.cnmcu.blockentities.BlockEntities;
@@ -39,17 +40,18 @@ public class CNnanoBlock extends BaseEntityBlock {
     }
 
     @Override
+    @NotNull
     public MapCodec<CNnanoBlock> codec() {
         return CODEC;
     }
 
     @Override
-    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+    public BlockEntity newBlockEntity(@NotNull BlockPos pos, @NotNull BlockState state) {
         return new CNnanoBlockEntity(pos, state);
     }
 
     @Override
-    public boolean canSurvive(BlockState state, LevelReader world, BlockPos pos) {
+    public boolean canSurvive(@NotNull BlockState state, @NotNull LevelReader world, @NotNull BlockPos pos) {
         BlockPos blockPos = pos.below();
         return this.canPlaceAbove(world, blockPos, world.getBlockState(blockPos));
     }
@@ -69,12 +71,12 @@ public class CNnanoBlock extends BaseEntityBlock {
     }
 
     @Override
-    public boolean isSignalSource(BlockState state) {
+    public boolean isSignalSource(@NotNull BlockState state) {
         return true;
     }
 
     @Override
-    public int getSignal(BlockState state, BlockGetter world, BlockPos pos, Direction direction) {
+    public int getSignal(@NotNull BlockState state, @NotNull BlockGetter world, @NotNull BlockPos pos, @NotNull Direction direction) {
         BlockEntity blockEntity = world.getBlockEntity(pos);
 
         if (!(blockEntity instanceof CNnanoBlockEntity entity))
@@ -86,29 +88,24 @@ public class CNnanoBlock extends BaseEntityBlock {
         Direction blockDir = state.getValue(FACING);
         Direction localDir = getLocalDirection(blockDir, direction);
 
-        switch (localDir) {
-        case EAST:
-            return entity.mcu.rightOutput;
-        case SOUTH:
-            return entity.mcu.backOutput;
-        case WEST:
-            return entity.mcu.leftOutput;
-        case NORTH:
-            return entity.mcu.frontOutput;
-        default:
-            return 0;
-        }
+        return switch (localDir) {
+            case EAST -> entity.mcu.rightOutput;
+            case SOUTH -> entity.mcu.backOutput;
+            case WEST -> entity.mcu.leftOutput;
+            case NORTH -> entity.mcu.frontOutput;
+            default -> 0;
+        };
     }
 
     @Override
-    protected int getDirectSignal(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
+    protected int getDirectSignal(@NotNull BlockState blockState, @NotNull BlockGetter blockGetter, @NotNull BlockPos blockPos, @NotNull Direction direction) {
         return getSignal(blockState, blockGetter, blockPos, direction);
     }
 
     @Nullable
     @Override
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level world, BlockState state,
-            BlockEntityType<T> type) {
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level world, @NotNull BlockState state,
+            @NotNull BlockEntityType<T> type) {
         if (world.isClientSide())
             return null;
 
@@ -117,8 +114,9 @@ public class CNnanoBlock extends BaseEntityBlock {
 
 
     @Override
-    public InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player,
-            BlockHitResult hit) {
+    @NotNull
+    public InteractionResult useWithoutItem(@NotNull BlockState state, @NotNull Level world, @NotNull BlockPos pos, Player player,
+            @NotNull BlockHitResult hit) {
         if (!world.isClientSide()) {
             MenuProvider screenHandlerFactory = state.getMenuProvider(world, pos);
 
@@ -130,7 +128,8 @@ public class CNnanoBlock extends BaseEntityBlock {
     }
 
     @Override
-    public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
+    @NotNull
+    public VoxelShape getShape(@NotNull BlockState state, @NotNull BlockGetter world, @NotNull BlockPos pos, @NotNull CollisionContext context) {
         return Shapes.box(0.0, 0.0, 0.0, 1.0, 0.125, 1.0);
     }
     
