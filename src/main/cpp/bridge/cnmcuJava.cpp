@@ -10,12 +10,8 @@ jclass cnmcuJava::RuntimeException;
 
 
 
-jclass cnmcuJava::System;
-jfieldID cnmcuJava::System_out_id;
-jobject cnmcuJava::System_out;
-
-jclass cnmcuJava::PrintStream;
-jmethodID cnmcuJava::PrintStream_print;
+jobject cnmcuJava::LOGGER;
+jmethodID cnmcuJava::Logger_debug;
 
 
 
@@ -56,16 +52,19 @@ void cnmcuJava::init(JNIEnv* env)
     GET_CLASS(IllegalStateException, "java/lang/IllegalStateException");
     GET_CLASS(RuntimeException, "java/lang/RuntimeException");
 
+    jclass CodeNodeMicrocontrollers;
+    jfieldID CodeNodeMicrocontrollers_LOGGER_id;
 
-    // System.out
-    GET_CLASS(System, "java/lang/System");
-    GET_STATIC_FIELD_ID(System_out_id, System, "out", "Ljava/io/PrintStream;");
-    System_out = env->GetStaticObjectField(System, System_out_id);
-    System_out = env->NewGlobalRef(System_out);
+    // CodeNodeMicrocontrollers.LOGGER
+    GET_CLASS(CodeNodeMicrocontrollers, "com/elmfer/cnmcu/CodeNodeMicrocontrollers");
+    GET_STATIC_FIELD_ID(CodeNodeMicrocontrollers_LOGGER_id, CodeNodeMicrocontrollers, "LOGGER", "Lorg/slf4j/Logger;");
+    LOGGER = env->GetStaticObjectField(CodeNodeMicrocontrollers, CodeNodeMicrocontrollers_LOGGER_id);
+    LOGGER = env->NewGlobalRef(LOGGER);
 
-    GET_CLASS(PrintStream, "java/io/PrintStream");
-    GET_METHOD_ID(PrintStream_print, PrintStream, "print", "(Ljava/lang/String;)V");
-
+    // Logger.info
+    jclass Logger;
+    GET_CLASS(Logger, "org/slf4j/Logger");
+    GET_METHOD_ID(Logger_debug, Logger, "debug", "(Ljava/lang/String;)V");
 
     // For CNMCU
     GET_CLASS(NanoMCU, "com/elmfer/cnmcu/mcu/NanoMCU");
@@ -91,7 +90,7 @@ void cnmcuJava::init(JNIEnv* env)
     initialized = true;
 }
 
-void cnmcuJava::printf(const char* format, ...)
+void cnmcuJava::debug_printf(const char* format, ...)
 {
     if(!initialized)
         return;
@@ -105,6 +104,6 @@ void cnmcuJava::printf(const char* format, ...)
     va_end(args);
 
     jstring str = env->NewStringUTF(buffer);
-    env->CallVoidMethod(System_out, PrintStream_print, str);
+    env->CallVoidMethod(LOGGER, Logger_debug, str);
     env->DeleteLocalRef(str);
 }

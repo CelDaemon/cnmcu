@@ -46,13 +46,9 @@ public:
     static jclass RuntimeException;
 
 
-    // System.out
-    static jclass System;
-    static jfieldID System_out_id;
-    static jobject System_out;
-
-    static jclass PrintStream;
-    static jmethodID PrintStream_print;
+    // Logger
+    static jobject LOGGER;
+    static jmethodID Logger_debug;
 
 
     // For CNMCU
@@ -79,5 +75,5 @@ public:
     static bool initialized;
 
     static void init(JNIEnv* env);
-    static void printf(const char* format, ...);
+    static void debug_printf(const char* format, ...);
 };
