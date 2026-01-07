@@ -12,7 +12,11 @@ jclass cnmcuJava::RuntimeException;
 
 
 jobject cnmcuJava::LOGGER;
+jmethodID cnmcuJava::Logger_trace;
 jmethodID cnmcuJava::Logger_debug;
+jmethodID cnmcuJava::Logger_info;
+jmethodID cnmcuJava::Logger_warn;
+jmethodID cnmcuJava::Logger_error;
 
 
 
@@ -75,7 +79,11 @@ void cnmcuJava::init(JNIEnv* env)
     // Logger.info
     jclass Logger;
     GET_CLASS(Logger, "org/slf4j/Logger");
+    GET_METHOD_ID(Logger_trace, Logger, "trace", "(Ljava/lang/String;[Ljava/lang/Object;)V");
     GET_METHOD_ID(Logger_debug, Logger, "debug", "(Ljava/lang/String;[Ljava/lang/Object;)V");
+    GET_METHOD_ID(Logger_info, Logger, "info", "(Ljava/lang/String;[Ljava/lang/Object;)V");
+    GET_METHOD_ID(Logger_warn, Logger, "warn", "(Ljava/lang/String;[Ljava/lang/Object;)V");
+    GET_METHOD_ID(Logger_error, Logger, "error", "(Ljava/lang/String;[Ljava/lang/Object;)V");
 
     GET_CLASS(Object, "java/lang/Object");
 
@@ -96,15 +104,15 @@ void cnmcuJava::init(JNIEnv* env)
 
     initialized = true;
 
-    cnmcuJava::debug_printf("meow {} {} {}", std::array { 10, 69 }, "boo", true);
+    cnmcuJava::debug("Natives initialised");
 }
 
-jobject cnmcuJava::convert_element(char const *arg) {
-    return convert_element(std::string(arg));
+jobject cnmcuJava::convert_element(char const &arg) {
+    return env->NewStringUTF(&arg);
 }
 
-jobject cnmcuJava::convert_element(std::string arg) {
-    return env->NewStringUTF(arg.c_str());
+jobject cnmcuJava::convert_element(std::string& arg) {
+    return convert_element(arg.c_str());
 }
 
 jobject cnmcuJava::convert_element(bool arg) {

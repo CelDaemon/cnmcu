@@ -9,7 +9,6 @@ set(MOD_ID "cnmcu")
 
 project("${MOD_ID}-natives")
 
-find_package(Java REQUIRED)
 set(JAVA_AWT_LIBRARY NotNeeded)
 set(JAVA_JVM_LIBRARY NotNeeded)
 find_package(JNI REQUIRED)
