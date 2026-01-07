@@ -33,7 +33,7 @@ public class CNEL extends WeakNativeObject {
     /**
      * Called in the mod's native code, do not call directly.
      */
-    protected CNEL(long ptr) {
+    public CNEL(long ptr) {
         super(ptr);
         
         size = size(getNativePtr().orElseThrow());
@@ -78,8 +78,6 @@ public class CNEL extends WeakNativeObject {
     }
     
     public void setState(State state) {
-        assert isNotNull();
-        
         var iclRegistersData = getICLRegistersData();
         var iflRegistersData = getIFLRegistersData();
 

@@ -19,7 +19,7 @@ public class CNROM extends WeakNativeObject {
     /**
      * Called in the mod's native code, do not call directly.
      */
-    protected CNROM(long ptr) {
+    public CNROM(long ptr) {
         super(ptr);
         
         size = size(getNativePtr().orElseThrow());

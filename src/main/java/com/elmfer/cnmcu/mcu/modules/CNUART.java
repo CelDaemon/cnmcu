@@ -20,7 +20,7 @@ public class CNUART extends WeakNativeObject {
     /**
      * Called in the mod's native code, do not call directly.
      */
-    protected CNUART(long ptr) {
+    public CNUART(long ptr) {
         super(ptr);
         
         size = size(getNativePtr().orElseThrow());

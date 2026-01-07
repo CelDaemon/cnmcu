@@ -19,7 +19,7 @@ public class CNGPIO extends WeakNativeObject {
     /**
      * Called in the mod's native code, do not call directly.
      */
-    protected CNGPIO(long ptr) {
+    public CNGPIO(long ptr) {
         super(ptr);
         
         size = size(ptr);
@@ -62,8 +62,6 @@ public class CNGPIO extends WeakNativeObject {
     }
     
     public State getState() {
-        assert isNotNull();
-
         var pvFrontData = getPVFrontData();
 
         var pvBackData = getPVBackData();
@@ -84,8 +82,6 @@ public class CNGPIO extends WeakNativeObject {
     }
     
     public void setState(State state) {
-        assert isNotNull();
-
         ByteBuffer buffer = getPVFrontData();
         buffer.put(state.pvFrontData);
 

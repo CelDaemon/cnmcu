@@ -15,7 +15,7 @@ public class MOS6502 extends WeakNativeObject {
     /**
      * Called in the mod's native code, do not call directly.
      */
-    protected MOS6502(long ptr) {
+    public MOS6502(long ptr) {
         super(ptr);
     }
     
@@ -56,8 +56,6 @@ public class MOS6502 extends WeakNativeObject {
     }
     
     public State getState() {
-        assert isNotNull();
-
         return new State(
                 getPC(),
                 getS(),

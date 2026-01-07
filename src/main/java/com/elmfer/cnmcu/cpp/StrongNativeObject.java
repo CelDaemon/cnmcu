@@ -12,7 +12,7 @@ public abstract class StrongNativeObject extends NativeObject {
     }
 
     public void deleteNativeObject() {
-        if(!isNotNull())
+        if(!isValid())
             return;
 
         deleteNative();

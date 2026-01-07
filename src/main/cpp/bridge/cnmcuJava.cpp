@@ -1,4 +1,5 @@
 #include "cnmcuJava.h"
+#include <array>
 
 JNIEnv* cnmcuJava::env;
 JavaVM* cnmcuJava::vm;
@@ -35,6 +36,23 @@ jmethodID cnmcuJava::CNEL_init;
 jclass cnmcuJava::CNUART;
 jmethodID cnmcuJava::CNUART_init;
 
+jclass cnmcuJava::Object;
+
+jclass cnmcuJava::Boolean;
+jmethodID cnmcuJava::Boolean_valueOf;
+
+jclass cnmcuJava::Byte;
+jmethodID cnmcuJava::Byte_valueOf;
+
+jclass cnmcuJava::Short;
+jmethodID cnmcuJava::Short_valueOf;
+
+jclass cnmcuJava::Integer;
+jmethodID cnmcuJava::Integer_valueOf;
+
+jclass cnmcuJava::Long;
+jmethodID cnmcuJava::Long_valueOf;
+
 bool cnmcuJava::initialized = false;
 
 void cnmcuJava::init(JNIEnv* env)
@@ -44,13 +62,6 @@ void cnmcuJava::init(JNIEnv* env)
 
     cnmcuJava::env = env;
     env->GetJavaVM(&vm);
-
-
-    // Exceptions
-    GET_CLASS(NullPointerException, "java/lang/NullPointerException");
-    GET_CLASS(IllegalArgumentException, "java/lang/IllegalArgumentException");
-    GET_CLASS(IllegalStateException, "java/lang/IllegalStateException");
-    GET_CLASS(RuntimeException, "java/lang/RuntimeException");
 
     jclass CodeNodeMicrocontrollers;
     jfieldID CodeNodeMicrocontrollers_LOGGER_id;
@@ -64,46 +75,58 @@ void cnmcuJava::init(JNIEnv* env)
     // Logger.info
     jclass Logger;
     GET_CLASS(Logger, "org/slf4j/Logger");
-    GET_METHOD_ID(Logger_debug, Logger, "debug", "(Ljava/lang/String;)V");
+    GET_METHOD_ID(Logger_debug, Logger, "debug", "(Ljava/lang/String;[Ljava/lang/Object;)V");
 
-    // For CNMCU
-    GET_CLASS(NanoMCU, "com/elmfer/cnmcu/mcu/NanoMCU");
+    GET_CLASS(Object, "java/lang/Object");
 
-    GET_CLASS(MOS6502, "com/elmfer/cnmcu/mcu/cpu/MOS6502");
-    GET_METHOD_ID(MOS6502_init, MOS6502, "<init>", "(J)V");
+    GET_CLASS(Boolean, "java/lang/Boolean");
+    GET_STATIC_METHOD_ID(Boolean_valueOf, Boolean, "valueOf", "(Z)Ljava/lang/Boolean;");
 
-    GET_CLASS(CNGPIO, "com/elmfer/cnmcu/mcu/modules/CNGPIO");
-    GET_METHOD_ID(CNGPIO_init, CNGPIO, "<init>", "(J)V");
+    GET_CLASS(Byte, "java/lang/Byte");
+    GET_STATIC_METHOD_ID(Byte_valueOf, Byte, "valueOf", "(B)Ljava/lang/Byte;");
 
-    GET_CLASS(CNRAM, "com/elmfer/cnmcu/mcu/modules/CNRAM");
-    GET_METHOD_ID(CNRAM_init, CNRAM, "<init>", "(J)V");
+    GET_CLASS(Short, "java/lang/Short");
+    GET_STATIC_METHOD_ID(Short_valueOf, Short, "valueOf", "(S)Ljava/lang/Short;");
 
-    GET_CLASS(CNROM, "com/elmfer/cnmcu/mcu/modules/CNROM");
-    GET_METHOD_ID(CNROM_init, CNROM, "<init>", "(J)V");
+    GET_CLASS(Integer, "java/lang/Integer");
+    GET_STATIC_METHOD_ID(Integer_valueOf, Integer, "valueOf", "(I)Ljava/lang/Integer;");
 
-    GET_CLASS(CNEL, "com/elmfer/cnmcu/mcu/modules/CNEL");
-    GET_METHOD_ID(CNEL_init, CNEL, "<init>", "(J)V");
-
-    GET_CLASS(CNUART, "com/elmfer/cnmcu/mcu/modules/CNUART");
-    GET_METHOD_ID(CNUART_init, CNUART, "<init>", "(J)V");
+    GET_CLASS(Long, "java/lang/Long");
+    GET_STATIC_METHOD_ID(Long_valueOf, Long, "valueOf", "(J)Ljava/lang/Long;");
 
     initialized = true;
+
+    cnmcuJava::debug_printf("meow {} {} {}", std::array { 10, 69 }, "boo", true);
 }
 
-void cnmcuJava::debug_printf(const char* format, ...)
-{
-    if(!initialized)
-        return;
+jobject cnmcuJava::convert_element(char const *arg) {
+    return convert_element(std::string(arg));
+}
 
-    va_list args;
-    va_start(args, format);
+jobject cnmcuJava::convert_element(std::string arg) {
+    return env->NewStringUTF(arg.c_str());
+}
 
-    char buffer[512] = {0};
-    vsnprintf(buffer, sizeof(buffer) - 1, format, args);
+jobject cnmcuJava::convert_element(bool arg) {
+    return env->CallStaticObjectMethod(Boolean, Boolean_valueOf, static_cast<jboolean>(arg));
+}
 
-    va_end(args);
+jobject cnmcuJava::convert_element(std::uint8_t arg) {
+    return env->CallStaticObjectMethod(Byte, Byte_valueOf, static_cast<jbyte>(arg));
+}
 
-    jstring str = env->NewStringUTF(buffer);
-    env->CallVoidMethod(LOGGER, Logger_debug, str);
-    env->DeleteLocalRef(str);
+jobject cnmcuJava::convert_element(std::uint16_t arg) {
+    return env->CallStaticObjectMethod(Short, Short_valueOf, static_cast<jshort>(arg));
+}
+
+jobject cnmcuJava::convert_element(std::uint32_t arg) {
+    return env->CallStaticObjectMethod(Integer, Integer_valueOf, static_cast<jint>(arg));
+}
+
+jobject cnmcuJava::convert_element(std::uint64_t arg) {
+    return env->CallStaticObjectMethod(Long, Long_valueOf, static_cast<jlong>(arg));
+}
+
+jobject cnmcuJava::convert_element(jobject arg) {
+    return arg;
 }

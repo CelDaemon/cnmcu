@@ -19,15 +19,13 @@ public class CNRAM extends WeakNativeObject {
     /**
      * Called in the mod's native code, do not call directly.
      */
-    protected CNRAM(long ptr) {
+    public CNRAM(long ptr) {
         super(ptr);
         
         size = size(ptr);
     }
     
     public long getSize() {
-        assert isNotNull();
-
         return size;
     }
     

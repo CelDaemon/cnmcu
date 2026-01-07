@@ -30,14 +30,13 @@ public class NanoMCU extends StrongNativeObject {
     public NanoMCU() {
         super(createMCU());
 
-
         var ptr = getNativePtr().orElseThrow();
-        cpu = CPU(ptr);
-        gpio = GPIO(ptr);
-        ram = RAM(ptr);
-        rom = ROM(ptr);
-        el = EL(ptr);
-        uart = UART(ptr);
+        cpu = new MOS6502(CPU(ptr));
+        gpio = new CNGPIO(GPIO(ptr));
+        ram = new CNRAM(RAM(ptr));
+        rom = new CNROM(ROM(ptr));
+        el = new CNEL(EL(ptr));
+        uart = new CNUART(UART(ptr));
     }
 
     public void tick() {
@@ -421,44 +420,38 @@ public class NanoMCU extends StrongNativeObject {
         return env->NewDirectByteBuffer(nano->pinOutputDrivers(), CodeNodeNano::GPIO_NUM_PINS);
     */
     
-    private static native MOS6502 CPU(long ptr); /*
+    private static native long CPU(long ptr); /*
         CodeNodeNano* nano = reinterpret_cast<CodeNodeNano*>(ptr);
         mos6502* cpu = &nano->CPU();
-        jobject cpuObj = env->NewObject(cnmcuJava::MOS6502, cnmcuJava::MOS6502_init, reinterpret_cast<jlong>(cpu));
-        return cpuObj;
+        return reinterpret_cast<jlong>(cpu);
     */
     
-    private static native CNGPIO GPIO(long ptr); /*
+    private static native long GPIO(long ptr); /*
         CodeNodeNano* nano = reinterpret_cast<CodeNodeNano*>(ptr);
         CNGPIO<CodeNodeNano::GPIO_NUM_PINS>* gpio = &nano->GPIO();
-        jobject gpioObj = env->NewObject(cnmcuJava::CNGPIO, cnmcuJava::CNGPIO_init, reinterpret_cast<jlong>(gpio));
-        return gpioObj;
+        return reinterpret_cast<jlong>(gpio);
     */
     
-    private static native CNRAM RAM(long ptr); /*
+    private static native long RAM(long ptr); /*
         CodeNodeNano* nano = reinterpret_cast<CodeNodeNano*>(ptr);
         CNRAM<CodeNodeNano::RAM_SIZE>* ram = &nano->RAM();
-        jobject ramObj = env->NewObject(cnmcuJava::CNRAM, cnmcuJava::CNRAM_init, reinterpret_cast<jlong>(ram));
-        return ramObj;
+        return reinterpret_cast<jlong>(ram);
     */
-    private static native CNROM ROM(long ptr); /*
+    private static native long ROM(long ptr); /*
         CodeNodeNano* nano = reinterpret_cast<CodeNodeNano*>(ptr);
         CNROM<CodeNodeNano::ROM_SIZE>* rom = &nano->ROM();
-        jobject romObj = env->NewObject(cnmcuJava::CNROM, cnmcuJava::CNROM_init, reinterpret_cast<jlong>(rom));
-        return romObj;
+        return reinterpret_cast<jlong>(rom);
     */
     
-    private static native CNEL EL(long ptr); /*
+    private static native long EL(long ptr); /*
         CodeNodeNano* nano = reinterpret_cast<CodeNodeNano*>(ptr);
         CNEL<CodeNodeNano::EL_SIZE>* el = &nano->EL();
-        jobject elObj = env->NewObject(cnmcuJava::CNEL, cnmcuJava::CNEL_init, reinterpret_cast<jlong>(el));
-        return elObj;
+        return reinterpret_cast<jlong>(el);
     */
     
-    private static native CNUART UART(long ptr); /*
+    private static native long UART(long ptr); /*
         CodeNodeNano* nano = reinterpret_cast<CodeNodeNano*>(ptr);
         CNUART* uart = &nano->UART();
-        jobject uartObj = env->NewObject(cnmcuJava::CNUART, cnmcuJava::CNUART_init, reinterpret_cast<jlong>(uart));
-        return uartObj;
+        return reinterpret_cast<jlong>(uart);
     */
 }
