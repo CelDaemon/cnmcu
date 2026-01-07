@@ -1,5 +1,7 @@
 package com.elmfer.cnmcu.cpp;
 
+import java.util.OptionalLong;
+
 public abstract class NativeObject {
 
     private long nativePtr;
@@ -7,8 +9,8 @@ public abstract class NativeObject {
         this.nativePtr = nativePtr;
     }
 
-    protected long getNativePtr() {
-        return nativePtr;
+    protected OptionalLong getNativePtr() {
+        return nativePtr == 0 ? OptionalLong.empty() : OptionalLong.of(nativePtr);
     }
     protected void clear() {
         nativePtr = 0;
@@ -19,6 +21,6 @@ public abstract class NativeObject {
 
     @Override
     public int hashCode() {
-        return Long.hashCode(getNativePtr());
+        return Long.hashCode(getNativePtr().orElse(0));
     }
 }

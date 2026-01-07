@@ -30,19 +30,21 @@ public class NanoMCU extends StrongNativeObject {
     public NanoMCU() {
         super(createMCU());
 
-        cpu = CPU(getNativePtr());
-        gpio = GPIO(getNativePtr());
-        ram = RAM(getNativePtr());
-        rom = ROM(getNativePtr());
-        el = EL(getNativePtr());
-        uart = UART(getNativePtr());
+
+        var ptr = getNativePtr().orElseThrow();
+        cpu = CPU(ptr);
+        gpio = GPIO(ptr);
+        ram = RAM(ptr);
+        rom = ROM(ptr);
+        el = EL(ptr);
+        uart = UART(ptr);
     }
 
     public void tick() {
 
         updateInputs();
         el.triggerEvent(EventType.GAME_TICK);
-        tick(getNativePtr());
+        tick(getNativePtr().orElseThrow());
         updateOutputs();
     }
 
@@ -83,7 +85,7 @@ public class NanoMCU extends StrongNativeObject {
 
     public void cycle() {
         updateInputs();
-        cycle(getNativePtr());
+        cycle(getNativePtr().orElseThrow());
         updateOutputs();
     }
 
@@ -100,43 +102,43 @@ public class NanoMCU extends StrongNativeObject {
 
     public void reset() {
         resetIO();
-        reset(getNativePtr());
+        reset(getNativePtr().orElseThrow());
     }
 
     public void setPowered(boolean powered) {
         resetIO();
-        setPowered(getNativePtr(), powered);
+        setPowered(getNativePtr().orElseThrow(), powered);
     }
 
     public boolean isPowered() {
-        return isPowered(getNativePtr());
+        return isPowered(getNativePtr().orElseThrow());
     }
 
     public void setClockPause(boolean paused) {
-        setClockPause(getNativePtr(), paused);
+        setClockPause(getNativePtr().orElseThrow(), paused);
     }
 
     public boolean isClockPaused() {
-        return isClockPaused(getNativePtr());
+        return isClockPaused(getNativePtr().orElseThrow());
     }
 
     public long numCycles() {
-        return numCycles(getNativePtr());
+        return numCycles(getNativePtr().orElseThrow());
     }
 
     public int busAddress() {
-        return busAddress(getNativePtr());
+        return busAddress(getNativePtr().orElseThrow());
     }
 
     public int busData() {
-        return busData(getNativePtr());
+        return busData(getNativePtr().orElseThrow());
     }
 
     public boolean busRW() {
-        return busRW(getNativePtr());
+        return busRW(getNativePtr().orElseThrow());
     }
 
-    public void deleteNative() {
+    protected void deleteNative() {
         cpu.invalidateNativeObject();
         gpio.invalidateNativeObject();
         ram.invalidateNativeObject();
@@ -144,7 +146,7 @@ public class NanoMCU extends StrongNativeObject {
         el.invalidateNativeObject();
         uart.invalidateNativeObject();
 
-        deleteMCU(getNativePtr());
+        deleteMCU(getNativePtr().orElseThrow());
     }
 
     /*
@@ -228,7 +230,7 @@ public class NanoMCU extends StrongNativeObject {
     public void setState(State state) {
         setPowered(state.powered);
         setClockPause(state.clockPaused);
-        setNumCycles(getNativePtr(), state.numCycles);
+        setNumCycles(getNativePtr().orElseThrow(), state.numCycles);
 
         frontOutput = state.frontOutput;
         rightOutput = state.rightOutput;
@@ -281,18 +283,19 @@ public class NanoMCU extends StrongNativeObject {
     }
 
     public ByteBuffer getPinOutputDrivers() {
-        return pinOutputDrivers(getNativePtr());
+        return pinOutputDrivers(getNativePtr().orElseThrow());
     }
 
     public void setInputs(int[] inputs) {
-        assert inputs.length == 4;
-        setInputs(getNativePtr(), inputs);
+        if(inputs.length != 4)
+            throw new IllegalArgumentException();
+        setInputs(getNativePtr().orElseThrow(), inputs);
     }
 
     public int[] getOutputs() {
         var outputs = new int[4];
 
-        getOutputs(getNativePtr(), outputs);
+        getOutputs(getNativePtr().orElseThrow(), outputs);
 
         return outputs;
     }
@@ -300,6 +303,9 @@ public class NanoMCU extends StrongNativeObject {
     // @formatter:off
     
     /*JNI
+        #include <functional>
+        #include <array>
+
         #include "cnmcuJava.h"
         #include "Nano.hpp"
      */ 

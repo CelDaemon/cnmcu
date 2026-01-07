@@ -79,6 +79,9 @@ public class CNnanoBlock extends BaseEntityBlock {
 
     @Override
     public int getSignal(@NotNull BlockState state, @NotNull BlockGetter world, @NotNull BlockPos pos, @NotNull Direction direction) {
+        if(direction == Direction.UP || direction == Direction.DOWN)
+            return 0;
+
         BlockEntity blockEntity = world.getBlockEntity(pos);
 
         if (!(blockEntity instanceof CNnanoBlockEntity entity))

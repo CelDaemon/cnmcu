@@ -22,7 +22,7 @@ public class CNRAM extends WeakNativeObject {
     protected CNRAM(long ptr) {
         super(ptr);
         
-        size = size(getNativePtr());
+        size = size(ptr);
     }
     
     public long getSize() {
@@ -32,33 +32,23 @@ public class CNRAM extends WeakNativeObject {
     }
     
     public ByteBuffer getData() {
-        assert isNotNull();
-
-        return data(getNativePtr());
+        return data(getNativePtr().orElseThrow());
     }
     
     public byte read(int address) {
-        assert isNotNull();
-
-        return read(getNativePtr(), address);
+        return read(getNativePtr().orElseThrow(), address);
     }
     
     public void write(int address, byte value) {
-        assert isNotNull();
-
-        write(getNativePtr(), address, value);
+        write(getNativePtr().orElseThrow(), address, value);
     }
     
     public State getState() {
-        assert isNotNull();
-        
         ByteBuffer buffer = getData();
         return new State(buffer);
     }
     
     public void setState(State state) {
-        assert isNotNull();
-
         ByteBuffer buffer = getData();
         buffer.put(state.data);
     }

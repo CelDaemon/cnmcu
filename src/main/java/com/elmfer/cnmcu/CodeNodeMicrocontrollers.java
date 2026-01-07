@@ -15,12 +15,15 @@ import com.elmfer.cnmcu.ui.handler.Menus;
 
 import net.fabricmc.api.ModInitializer;
 
+import java.lang.ref.Cleaner;
+
 public class CodeNodeMicrocontrollers implements ModInitializer {
 
     public static final String MOD_ID = "cnmcu";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
     public static final String MOD_NAME;
     public static final String MOD_VERSION;
+    public static final Cleaner CLEANER = Cleaner.create();
     static {
         var metadata = FabricLoader.getInstance().getModContainer(MOD_ID).orElseThrow().getMetadata();
         MOD_VERSION = metadata.getVersion().getFriendlyString();

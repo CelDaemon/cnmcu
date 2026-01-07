@@ -22,49 +22,36 @@ public class CNROM extends WeakNativeObject {
     protected CNROM(long ptr) {
         super(ptr);
         
-        size = size(getNativePtr());
-        writeProtected = isWriteProtected(getNativePtr());
+        size = size(getNativePtr().orElseThrow());
+        writeProtected = isWriteProtected(getNativePtr().orElseThrow());
     }
     
     public long getSize() {
-        assert isNotNull();
-
         return size;
     }
     
     public ByteBuffer getData() {
-        assert isNotNull();
-
-        return data(getNativePtr());
+        return data(getNativePtr().orElseThrow());
     }
     
     public byte read(int address) {
-        assert isNotNull();
-
-        return read(getNativePtr(), address);
+        return read(getNativePtr().orElseThrow(), address);
     }
     
     public void write(int address, byte value) {
-        assert isNotNull();
-
-        write(getNativePtr(), address, value);
+        write(getNativePtr().orElseThrow(), address, value);
     }
     
     public void setWriteProtected(boolean writeProtected) {
-        assert isNotNull();
-
-        setWriteProtected(getNativePtr(), writeProtected);
+        setWriteProtected(getNativePtr().orElseThrow(), writeProtected);
         this.writeProtected = writeProtected;
     }
     
     public boolean isWriteProtected() {
-        assert isNotNull();
-
         return writeProtected;
     }
     
     public State getState() {
-        assert isNotNull();
         ByteBuffer data = getData();
         return new State(
                 data,
@@ -73,8 +60,6 @@ public class CNROM extends WeakNativeObject {
     }
     
     public void setState(State state) {
-        assert isNotNull();
-
         ByteBuffer data = getData();
         data.put(state.data());
         setWriteProtected(state.writeProtected());

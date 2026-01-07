@@ -36,54 +36,38 @@ public class CNEL extends WeakNativeObject {
     protected CNEL(long ptr) {
         super(ptr);
         
-        size = size(getNativePtr());
+        size = size(getNativePtr().orElseThrow());
     }
     
     public long getSize() {
-        assert isNotNull();
-
         return size;
     }
     
     public ByteBuffer getICLRegistersData() {
-        assert isNotNull();
-
-        return iclRegistersData(getNativePtr());
+        return iclRegistersData(getNativePtr().orElseThrow());
     }
     
     public ByteBuffer getIFLRegistersData() {
-        assert isNotNull();
-
-        return iflRegistersData(getNativePtr());
+        return iflRegistersData(getNativePtr().orElseThrow());
     }
     
     public void triggerEvent(EventType event) {
-        assert isNotNull();
-
-        triggerEvent(getNativePtr(), event.value);
+        triggerEvent(getNativePtr().orElseThrow(), event.value);
     }
     
     public boolean shouldInterrupt() {
-        assert isNotNull();
-
-        return shouldInterrupt(getNativePtr());
+        return shouldInterrupt(getNativePtr().orElseThrow());
     }
     
     public int read(int address) {
-        assert isNotNull();
-
-        return read(getNativePtr(), address);
+        return read(getNativePtr().orElseThrow(), address);
     }
     
     public void write(int address, int data) {
-        assert isNotNull();
-
-        write(getNativePtr(), address, data);
+        write(getNativePtr().orElseThrow(), address, data);
     }
     
     public State getState() {
-        assert isNotNull();
-        
         ByteBuffer iclRegistersData = getICLRegistersData();
         ByteBuffer iflRegistersData = getIFLRegistersData();
 

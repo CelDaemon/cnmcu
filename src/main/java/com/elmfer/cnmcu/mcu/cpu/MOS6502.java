@@ -20,57 +20,39 @@ public class MOS6502 extends WeakNativeObject {
     }
     
     public void NMI() {
-        assert isNotNull();
-        
-        NMI(getNativePtr());
+        NMI(getNativePtr().orElseThrow());
     }
     
     public void IRQ() {
-        assert isNotNull();
-
-        IRQ(getNativePtr());
+        IRQ(getNativePtr().orElseThrow());
     }
     
     public void Reset() {
-        assert isNotNull();
-
-        Reset(getNativePtr());
+        Reset(getNativePtr().orElseThrow());
     }
     
     public int getPC() {
-        assert isNotNull();
-
-        return GetPC(getNativePtr());
+        return GetPC(getNativePtr().orElseThrow());
     }
     
     public int getS() {
-        assert isNotNull();
-
-        return GetS(getNativePtr());
+        return GetS(getNativePtr().orElseThrow());
     }
     
     public int getP() {
-        assert isNotNull();
-
-        return GetP(getNativePtr());
+        return GetP(getNativePtr().orElseThrow());
     }
     
     public int getA() {
-        assert isNotNull();
-
-        return GetA(getNativePtr());
+        return GetA(getNativePtr().orElseThrow());
     }
     
     public int getX() {
-        assert isNotNull();
-
-        return GetX(getNativePtr());
+        return GetX(getNativePtr().orElseThrow());
     }
     
     public int getY() {
-        assert isNotNull();
-
-        return GetY(getNativePtr());
+        return GetY(getNativePtr().orElseThrow());
     }
     
     public State getState() {
@@ -87,13 +69,10 @@ public class MOS6502 extends WeakNativeObject {
     }
     
     public void setState(State state) {
-        assert isNotNull();
-
-
         int[] stateArray = new int[] { state.pc, state.s, state.p, state.a,
                 state.x, state.y };
 
-        SetState(getNativePtr(), stateArray);
+        SetState(getNativePtr().orElseThrow(), stateArray);
     }
 
     public record State(

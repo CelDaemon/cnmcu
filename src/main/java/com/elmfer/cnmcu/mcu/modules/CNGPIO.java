@@ -22,61 +22,43 @@ public class CNGPIO extends WeakNativeObject {
     protected CNGPIO(long ptr) {
         super(ptr);
         
-        size = size(getNativePtr());
+        size = size(ptr);
     }
     
     public long getSize() {
-        assert isNotNull();
-
         return size;
     }
     
     public ByteBuffer getPVFrontData() {
-        assert isNotNull();
-
-        return pvFrontData(getNativePtr());
+        return pvFrontData(getNativePtr().orElseThrow());
     }
     
     public ByteBuffer getPVBackData() {
-        assert isNotNull();
-
-        return pvBackData(getNativePtr());
+        return pvBackData(getNativePtr().orElseThrow());
     }
     
     public ByteBuffer getDirData() {
-        assert isNotNull();
-
-        return dirData(getNativePtr());
+        return dirData(getNativePtr().orElseThrow());
     }
     
     public ByteBuffer getIntData() {
-        assert isNotNull();
-
-        return intData(getNativePtr());
+        return intData(getNativePtr().orElseThrow());
     }
     
     public ByteBuffer getIFLData() {
-        assert isNotNull();
-
-        return iflData(getNativePtr());
+        return iflData(getNativePtr().orElseThrow());
     }
     
     public int read(int address) {
-        assert isNotNull();
-
-        return read(getNativePtr(), address);
+        return read(getNativePtr().orElseThrow(), address);
     }
     
     public void write(int address, int value) {
-        assert isNotNull();
-
-        write(getNativePtr(), address, value);
+        write(getNativePtr().orElseThrow(), address, value);
     }
     
     public boolean shouldInterrupt() {
-        assert isNotNull();
-
-        return shouldInterrupt(getNativePtr());
+        return shouldInterrupt(getNativePtr().orElseThrow());
     }
     
     public State getState() {

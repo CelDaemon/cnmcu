@@ -1,5 +1,6 @@
 package com.elmfer.cnmcu.blockentities;
 
+import java.lang.ref.Cleaner;
 import java.util.*;
 
 import com.elmfer.cnmcu.CodeNodeMicrocontrollers;
@@ -31,19 +32,28 @@ public class CNnanoBlockEntity extends BlockEntity implements ExtendedScreenHand
 
     public static final Map<UUID, ScreenUpdates> SCREEN_UPDATES = new HashMap<>();
     
-    public NanoMCU mcu;
-    private UUID uuid;
-    private boolean hasInit = false;
+    public final NanoMCU mcu = new NanoMCU();
+    private final UUID uuid = UUID.randomUUID();
 
     private String code = "";
-    
+
+    private final Cleaner.Cleanable cleanable;
+
     public CNnanoBlockEntity(BlockPos pos, BlockState state) {
         super(BlockEntities.CN_NANO, pos, state);
+
+
+        var mcu = this.mcu;
+        var uuid = this.uuid;
+        SCREEN_UPDATES.put(uuid, new ScreenUpdates(this));
+
+        cleanable = CodeNodeMicrocontrollers.CLEANER.register(this, () -> {
+            mcu.deleteNativeObject();
+            SCREEN_UPDATES.remove(uuid);
+        });
     }
 
     public static void serverTick(@NotNull Level ignoredLevel, @NotNull BlockPos ignoredPos, @NotNull BlockState ignoredState, @NotNull CNnanoBlockEntity blockEntity) {
-        if(!blockEntity.hasInit)
-            blockEntity.init();
 
         var mcu = blockEntity.mcu;
 
@@ -60,8 +70,6 @@ public class CNnanoBlockEntity extends BlockEntity implements ExtendedScreenHand
     }
 
     public void cycle() {
-        if(!hasInit)
-            init();
 
         if(!mcu.isPowered() || !mcu.isClockPaused())
             return;
@@ -80,7 +88,7 @@ public class CNnanoBlockEntity extends BlockEntity implements ExtendedScreenHand
         var state = getBlockState();
         var pos = getBlockPos();
 
-        var front = state.getValue(CNnanoBlock.FACING);
+        var front = state.getValue(CNnanoBlock.FACING).getOpposite();
         var right = front.getClockWise();
         var back = front.getOpposite();
         var left = front.getCounterClockWise();;
@@ -114,55 +122,29 @@ public class CNnanoBlockEntity extends BlockEntity implements ExtendedScreenHand
     }
 
     public void setPowered(boolean powered) {
-        if(!hasInit)
-            init();
-
         mcu.setPowered(powered);
         writeOutputs();
         setChanged();
-        if(level != null)
-            level.updateNeighborsAt(worldPosition, getBlockState().getBlock());
     }
 
     public boolean isPowered() {
-        if(!hasInit)
-            init();
         return mcu.isPowered();
     }
 
     public void setClockPause(boolean paused) {
-        if(!hasInit)
-            init();
 
         mcu.setClockPause(paused);
         setChanged();
     }
 
     public boolean isClockPaused() {
-        if(!hasInit)
-            init();
         return mcu.isClockPaused();
     }
 
     public void reset() {
-        if(!hasInit)
-            init();
         mcu.reset();
         writeOutputs();
         setChanged();
-    }
-    
-    protected void init() {
-        if(hasInit)
-            return;
-        
-        uuid = UUID.randomUUID();
-        SCREEN_UPDATES.put(uuid, new ScreenUpdates(this));
-        
-        if (mcu == null)
-            mcu = new NanoMCU();
-        
-        hasInit = true;
     }
 
     public void setCode(String code) {
@@ -173,9 +155,6 @@ public class CNnanoBlockEntity extends BlockEntity implements ExtendedScreenHand
     @Override
     public void loadAdditional(@NotNull ValueInput view) {
         super.loadAdditional(view);
-
-        if(!hasInit)
-            init();
         
         mcu.setState(view.read("mcu", NanoMCU.State.CODEC).orElseThrow());
         code = view.getStringOr("code", "");
@@ -185,9 +164,6 @@ public class CNnanoBlockEntity extends BlockEntity implements ExtendedScreenHand
     @Override
     public void saveAdditional(@NotNull ValueOutput view) {
         super.saveAdditional(view);
-        
-        if(!hasInit)
-            init();
 
         view.store("mcu", NanoMCU.State.CODEC, mcu.getState());
         view.putString("code", code);
@@ -197,14 +173,9 @@ public class CNnanoBlockEntity extends BlockEntity implements ExtendedScreenHand
    public void setRemoved() {
        super.setRemoved();
 
-       if(mcu != null) {
-           mcu.deleteNativeObject();
-           mcu = null;
-       }
-       
-       SCREEN_UPDATES.remove(uuid);
+       cleanable.clean();
    }
-    
+
     @Override
     @NotNull
     public Component getDisplayName() {
