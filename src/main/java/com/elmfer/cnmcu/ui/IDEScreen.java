@@ -140,7 +140,8 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
         final var debugLabels = device.debugLabels();
         debugLabels.pushDebugGroup(() -> "ImGui render");
         final var texture = (GlTexture) renderTarget.getColorTexture();
-        assert texture != null;
+        if(texture == null)
+            throw new RuntimeException("Failed to get color texture");
 
         final var stateAccess = device.directStateAccess();
         GlStateManager._glBindFramebuffer(GL30C.GL_FRAMEBUFFER, texture
@@ -579,6 +580,7 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
         if (!saved && !textEditor.getText().isEmpty())
             Sketches.saveBackup(textEditor.getText());
 
+        renderTarget.destroyBuffers();
         ImGui.setMouseCursor(ImGuiMouseCursor.Arrow);
         Config.setShowRegistersInHex(showRegistersInHex);
         Config.save();
@@ -596,8 +598,6 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
 
     @Override
     public void onClose() {
-        renderTarget.destroyBuffers();
-
         super.onClose();
     }
 }
