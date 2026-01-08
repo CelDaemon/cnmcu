@@ -1,10 +1,5 @@
 package com.elmfer.cnmcu;
 
-import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.resources.Identifier;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.elmfer.cnmcu.blockentities.BlockEntities;
 import com.elmfer.cnmcu.blocks.Blocks;
 import com.elmfer.cnmcu.config.Config;
@@ -12,8 +7,11 @@ import com.elmfer.cnmcu.config.ModSetup;
 import com.elmfer.cnmcu.cpp.NativesLoader;
 import com.elmfer.cnmcu.network.Packets;
 import com.elmfer.cnmcu.ui.handler.Menus;
-
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.resources.Identifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.ref.Cleaner;
 
@@ -44,6 +42,7 @@ public class CodeNodeMicrocontrollers implements ModInitializer {
         Blocks.init();
         BlockEntities.init();
         Menus.init();
+        DataComponents.init();
 
         Packets.registerPackets();
         Packets.initServerPackets();
