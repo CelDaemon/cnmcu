@@ -39,7 +39,7 @@ public class EventHandler {
         ImGui.createContext();
 
         IMGUI_GLFW.init(client.getWindow().handle(), true);
-        IMGUI_GL3.init("#version 150");
+        IMGUI_GL3.init("#version 330 core");
 
         ImGuiIO io = ImGui.getIO();
 
