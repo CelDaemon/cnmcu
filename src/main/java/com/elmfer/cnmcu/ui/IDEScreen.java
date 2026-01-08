@@ -45,8 +45,6 @@ import imgui.extension.texteditor.TextEditor;
 import org.lwjgl.opengl.*;
 
 public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
-
-    private static final String DOCKSPACE_NAME = "DockSpace";
     private static final String CODE_EDITOR_NAME = "Code Editor";
     private static final String CONSOLE_NAME = "Console";
 
@@ -113,18 +111,10 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
 
         ImGui.newFrame();
 
-        ImGui.setNextWindowPos(0, 0, ImGuiCond.Always);
-        ImGui.setNextWindowSize(IO.getDisplaySizeX(), IO.getDisplaySizeY(), ImGuiCond.Always);
         ImGui.pushStyleVar(ImGuiStyleVar.WindowRounding, 0.0f);
         ImGui.pushStyleVar(ImGuiStyleVar.WindowBorderSize, 0.0f);
         ImGui.pushStyleVar(ImGuiStyleVar.WindowPadding, 0.0f, 0.0f);
-
-        int windowFlags = ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove
-                | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoBringToFrontOnFocus | ImGuiWindowFlags.NoNavFocus
-                | ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.MenuBar;
-
-        ImGui.begin(DOCKSPACE_NAME, windowFlags);
-        ImGui.dockSpace(ImGui.getID(DOCKSPACE_NAME), 0, 0, ImGuiDockNodeFlags.PassthruCentralNode);
+        ImGui.dockSpaceOverViewport(ImGui.getMainViewport(), ImGuiDockNodeFlags.PassthruCentralNode);
         ImGui.popStyleVar(3);
         
         genMainMenuBar();
@@ -180,7 +170,7 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
     }
 
     private void genMainMenuBar() {
-        if (!ImGui.beginMenuBar())
+        if (!ImGui.beginMainMenuBar())
             return;
 
         if (ImGui.beginMenu("File")) {
