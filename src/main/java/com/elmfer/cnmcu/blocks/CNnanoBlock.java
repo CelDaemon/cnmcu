@@ -25,13 +25,13 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class CNnanoBlock extends BaseEntityBlock {
     public static final MapCodec<CNnanoBlock> CODEC = simpleCodec(CNnanoBlock::new);
+    private static final VoxelShape SHAPE = Block.column(16.0, 0.0, 2.0);
 
     public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
 
@@ -82,10 +82,7 @@ public class CNnanoBlock extends BaseEntityBlock {
 
         BlockEntity blockEntity = world.getBlockEntity(pos);
 
-        if (!(blockEntity instanceof CNnanoBlockEntity entity))
-            return 0;
-
-        if (entity.mcu == null || !entity.mcu.isPowered())
+        if (!(blockEntity instanceof CNnanoBlockEntity entity) || entity.mcu.isPowered())
             return 0;
 
         var front = state.getValue(FACING);
@@ -118,7 +115,7 @@ public class CNnanoBlock extends BaseEntityBlock {
 
     @Override
     @NotNull
-    public InteractionResult useWithoutItem(@NotNull BlockState state, @NotNull Level world, @NotNull BlockPos pos, Player player,
+    public InteractionResult useWithoutItem(@NotNull BlockState state, @NotNull Level world, @NotNull BlockPos pos, @NotNull Player player,
             @NotNull BlockHitResult hit) {
         if (!world.isClientSide()) {
             MenuProvider screenHandlerFactory = state.getMenuProvider(world, pos);
@@ -133,6 +130,6 @@ public class CNnanoBlock extends BaseEntityBlock {
     @Override
     @NotNull
     public VoxelShape getShape(@NotNull BlockState state, @NotNull BlockGetter world, @NotNull BlockPos pos, @NotNull CollisionContext context) {
-        return Shapes.box(0.0, 0.0, 0.0, 1.0, 0.125, 1.0);
+        return SHAPE;
     }
 }
