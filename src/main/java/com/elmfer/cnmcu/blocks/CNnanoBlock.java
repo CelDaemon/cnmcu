@@ -82,7 +82,7 @@ public class CNnanoBlock extends BaseEntityBlock {
 
         BlockEntity blockEntity = world.getBlockEntity(pos);
 
-        if (!(blockEntity instanceof CNnanoBlockEntity entity) || entity.mcu.isPowered())
+        if (!(blockEntity instanceof CNnanoBlockEntity entity && entity.mcu.isPowered()))
             return 0;
 
         var front = state.getValue(FACING);
