@@ -21,7 +21,7 @@ set(PROJECT_SOURCES
   cnmcu/mos6502.cpp
   cnmcu/Nano.cpp
   cnmcu/CNUART.cpp
-  bridge/cnmcuJava.cpp
+  cnmcu.cpp
 
   ${GENERATED_SOURCES}
 )
