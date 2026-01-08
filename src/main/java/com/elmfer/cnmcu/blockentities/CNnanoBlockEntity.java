@@ -1,19 +1,18 @@
 package com.elmfer.cnmcu.blockentities;
 
-import java.lang.ref.Cleaner;
-import java.util.*;
-
 import com.elmfer.cnmcu.CodeNodeMicrocontrollers;
 import com.elmfer.cnmcu.blocks.CNnanoBlock;
+import com.elmfer.cnmcu.DataComponents;
 import com.elmfer.cnmcu.mcu.NanoMCU;
 import com.elmfer.cnmcu.network.IDEScreenSyncPayload;
 import com.elmfer.cnmcu.ui.handler.IDEMenu;
-
 import com.elmfer.cnmcu.util.DirectionUtil;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponentGetter;
+import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
@@ -28,26 +27,26 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
 public class CNnanoBlockEntity extends BlockEntity implements ExtendedScreenHandlerFactory<IDEMenu.OpenData> {
 
     public static final Map<UUID, ScreenUpdates> SCREEN_UPDATES = new HashMap<>();
     
     public final NanoMCU mcu = new NanoMCU();
     private final UUID uuid = UUID.randomUUID();
-
     private String code = "";
-
-    private final Cleaner.Cleanable cleanable;
 
     public CNnanoBlockEntity(BlockPos pos, BlockState state) {
         super(BlockEntities.CN_NANO, pos, state);
-
 
         var mcu = this.mcu;
         var uuid = this.uuid;
         SCREEN_UPDATES.put(uuid, new ScreenUpdates(this));
 
-        cleanable = CodeNodeMicrocontrollers.CLEANER.register(this, () -> {
+        CodeNodeMicrocontrollers.CLEANER.register(this, () -> {
             mcu.deleteNativeObject();
             SCREEN_UPDATES.remove(uuid);
         });
@@ -91,7 +90,7 @@ public class CNnanoBlockEntity extends BlockEntity implements ExtendedScreenHand
         var front = state.getValue(CNnanoBlock.FACING).getOpposite();
         var right = front.getClockWise();
         var back = front.getOpposite();
-        var left = front.getCounterClockWise();;
+        var left = front.getCounterClockWise();
 
         mcu.frontInput = level.getSignal(pos.relative(front), front);
         mcu.rightInput = level.getSignal(pos.relative(right), right);
@@ -153,15 +152,6 @@ public class CNnanoBlockEntity extends BlockEntity implements ExtendedScreenHand
     }
 
     @Override
-    public void loadAdditional(@NotNull ValueInput view) {
-        super.loadAdditional(view);
-        
-        mcu.setState(view.read("mcu", NanoMCU.State.CODEC).orElseThrow());
-        code = view.getStringOr("code", "");
-
-    }
-
-    @Override
     public void saveAdditional(@NotNull ValueOutput view) {
         super.saveAdditional(view);
 
@@ -169,12 +159,31 @@ public class CNnanoBlockEntity extends BlockEntity implements ExtendedScreenHand
         view.putString("code", code);
     }
 
-   @Override
-   public void setRemoved() {
-       super.setRemoved();
+    @Override
+    public void loadAdditional(@NotNull ValueInput view) {
+        super.loadAdditional(view);
 
-       cleanable.clean();
-   }
+        if(view.contains("mcu"))
+            mcu.setState(view.read("mcu", NanoMCU.State.CODEC).orElseThrow());
+        code = view.getStringOr("code", "");
+    }
+
+    @Override
+    protected void collectImplicitComponents(@NotNull DataComponentMap.Builder builder) {
+        super.collectImplicitComponents(builder);
+        builder.set(DataComponents.CODE, this.code);
+        builder.set(DataComponents.MCU, this.mcu.getState());
+    }
+
+    @Override
+    protected void applyImplicitComponents(@NotNull DataComponentGetter dataComponentGetter) {
+        super.applyImplicitComponents(dataComponentGetter);
+
+        this.code = dataComponentGetter.getOrDefault(DataComponents.CODE, "");
+        var mcuState = dataComponentGetter.get(DataComponents.MCU);
+        if(mcuState != null)
+            mcu.setState(mcuState);
+    }
 
     @Override
     @NotNull
@@ -196,7 +205,14 @@ public class CNnanoBlockEntity extends BlockEntity implements ExtendedScreenHand
                 code
         );
     }
-    
+
+    @SuppressWarnings("deprecation")
+    @Override
+    public void removeComponentsFromTag(ValueOutput valueOutput) {
+        valueOutput.discard("code");
+        valueOutput.discard("mcu");
+    }
+
     public static class Listener {
         ServerPlayer player;
         int ticksSinceLastHeartbeat = 0;

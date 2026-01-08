@@ -1,0 +1,29 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "cnmcu:nano",
+          "functions": [
+            {
+              "function": "minecraft:copy_components",
+              "include": [
+                "cnmcu:code"
+              ],
+              "source": "block_entity"
+            }
+          ]
+        }
+      ],
+      "rolls": 1
+    }
+  ],
+  "random_sequence": "cnmcu:blocks/nano"
+}
