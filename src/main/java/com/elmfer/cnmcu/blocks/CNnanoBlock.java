@@ -1,12 +1,8 @@
 package com.elmfer.cnmcu.blocks;
 
-import com.elmfer.cnmcu.CodeNodeMicrocontrollers;
-import com.elmfer.cnmcu.util.DirectionUtil;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 import com.elmfer.cnmcu.blockentities.BlockEntities;
 import com.elmfer.cnmcu.blockentities.CNnanoBlockEntity;
+import com.elmfer.cnmcu.util.DirectionUtil;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -31,6 +27,8 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class CNnanoBlock extends BaseEntityBlock {
     public static final MapCodec<CNnanoBlock> CODEC = simpleCodec(CNnanoBlock::new);
@@ -79,7 +77,7 @@ public class CNnanoBlock extends BaseEntityBlock {
 
     @Override
     public int getSignal(@NotNull BlockState state, @NotNull BlockGetter world, @NotNull BlockPos pos, @NotNull Direction direction) {
-        if(direction == Direction.UP || direction == Direction.DOWN)
+        if(!Direction.Plane.HORIZONTAL.test(direction))
             return 0;
 
         BlockEntity blockEntity = world.getBlockEntity(pos);
