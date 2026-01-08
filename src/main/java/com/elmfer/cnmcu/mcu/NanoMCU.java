@@ -305,7 +305,6 @@ public class NanoMCU extends StrongNativeObject {
         #include <functional>
         #include <array>
 
-        #include "cnmcuJava.h"
         #include "Nano.hpp"
      */ 
     
