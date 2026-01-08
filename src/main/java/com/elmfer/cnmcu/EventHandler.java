@@ -32,7 +32,7 @@ public class EventHandler {
         if (!hasNotifiedPlayerAboutUpdate)
             notifyPlayerAboutUpdate();
 
-        EventHandler.IMGUI_GLFW.newFrame();
+
     }
 
     private static void onClientStarted(Minecraft client) {

@@ -1,12 +1,17 @@
 package com.elmfer.cnmcu.ui;
 
-import java.nio.ByteBuffer;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-
+import com.elmfer.cnmcu.EventHandler;
+import com.elmfer.cnmcu.animation.ClockTimer;
+import com.elmfer.cnmcu.config.Config;
+import com.elmfer.cnmcu.cpp.NativesUtils;
+import com.elmfer.cnmcu.mcu.Sketches;
+import com.elmfer.cnmcu.mcu.Toolchain;
 import com.elmfer.cnmcu.mixins.GuiContextInvoker;
 import com.elmfer.cnmcu.network.*;
+import com.elmfer.cnmcu.network.IDEScreenMCUControlPayload.Control;
+import com.elmfer.cnmcu.network.IDEScreenSyncPayload.BusStatus;
+import com.elmfer.cnmcu.network.IDEScreenSyncPayload.CPUStatus;
+import com.elmfer.cnmcu.ui.handler.IDEMenu;
 import com.mojang.blaze3d.opengl.GlDevice;
 import com.mojang.blaze3d.opengl.GlStateManager;
 import com.mojang.blaze3d.opengl.GlTexture;
@@ -14,6 +19,11 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.resource.RenderTargetDescriptor;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.FilterMode;
+import imgui.ImGui;
+import imgui.ImGuiIO;
+import imgui.extension.imguifiledialog.ImGuiFileDialog;
+import imgui.extension.memedit.MemoryEditor;
+import imgui.extension.texteditor.TextEditor;
 import imgui.flag.*;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.gui.GuiGraphics;
@@ -25,24 +35,12 @@ import net.minecraft.world.entity.player.Inventory;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
+import org.lwjgl.opengl.GL30C;
 
-import com.elmfer.cnmcu.EventHandler;
-import com.elmfer.cnmcu.animation.ClockTimer;
-import com.elmfer.cnmcu.config.Config;
-import com.elmfer.cnmcu.cpp.NativesUtils;
-import com.elmfer.cnmcu.mcu.Sketches;
-import com.elmfer.cnmcu.mcu.Toolchain;
-import com.elmfer.cnmcu.network.IDEScreenMCUControlPayload.Control;
-import com.elmfer.cnmcu.network.IDEScreenSyncPayload.BusStatus;
-import com.elmfer.cnmcu.network.IDEScreenSyncPayload.CPUStatus;
-import com.elmfer.cnmcu.ui.handler.IDEMenu;
-
-import imgui.ImGui;
-import imgui.ImGuiIO;
-import imgui.extension.imguifiledialog.ImGuiFileDialog;
-import imgui.extension.memedit.MemoryEditor;
-import imgui.extension.texteditor.TextEditor;
-import org.lwjgl.opengl.*;
+import java.nio.ByteBuffer;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
     private static final String CODE_EDITOR_NAME = "Code Editor";
@@ -109,6 +107,8 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
     public void render(@NotNull GuiGraphics gui, int mouseX, int mouseY, float delta) {
         sendHeartbeat();
 
+        EventHandler.IMGUI_GL3.newFrame();
+        EventHandler.IMGUI_GLFW.newFrame();
         ImGui.newFrame();
 
         ImGui.pushStyleVar(ImGuiStyleVar.WindowRounding, 0.0f);
