@@ -1,7 +1,6 @@
 #include "cnmcuJava.h"
 #include <array>
 
-JNIEnv* cnmcuJava::env;
 JavaVM* cnmcuJava::vm;
 
 jclass cnmcuJava::NullPointerException;
@@ -17,28 +16,6 @@ jmethodID cnmcuJava::Logger_debug;
 jmethodID cnmcuJava::Logger_info;
 jmethodID cnmcuJava::Logger_warn;
 jmethodID cnmcuJava::Logger_error;
-
-
-
-jclass cnmcuJava::NanoMCU;
-
-jclass cnmcuJava::MOS6502;
-jmethodID cnmcuJava::MOS6502_init;
-
-jclass cnmcuJava::CNGPIO;
-jmethodID cnmcuJava::CNGPIO_init;
-
-jclass cnmcuJava::CNRAM;
-jmethodID cnmcuJava::CNRAM_init;
-
-jclass cnmcuJava::CNROM;
-jmethodID cnmcuJava::CNROM_init;
-
-jclass cnmcuJava::CNEL;
-jmethodID cnmcuJava::CNEL_init;
-
-jclass cnmcuJava::CNUART;
-jmethodID cnmcuJava::CNUART_init;
 
 jclass cnmcuJava::Object;
 
@@ -64,7 +41,6 @@ void cnmcuJava::init(JNIEnv* env)
     if(initialized)
         return;
 
-    cnmcuJava::env = env;
     env->GetJavaVM(&vm);
 
     jclass CodeNodeMicrocontrollers;
@@ -107,34 +83,34 @@ void cnmcuJava::init(JNIEnv* env)
     cnmcuJava::debug("Natives initialised");
 }
 
-jobject cnmcuJava::convert_element(char const &arg) {
+jobject cnmcuJava::convert_element(JNIEnv* env, char const &arg) {
     return env->NewStringUTF(&arg);
 }
 
-jobject cnmcuJava::convert_element(std::string& arg) {
-    return convert_element(arg.c_str());
+jobject cnmcuJava::convert_element(JNIEnv* env, std::string& arg) {
+    return convert_element(env, arg.c_str());
 }
 
-jobject cnmcuJava::convert_element(bool arg) {
+jobject cnmcuJava::convert_element(JNIEnv* env, bool arg) {
     return env->CallStaticObjectMethod(Boolean, Boolean_valueOf, static_cast<jboolean>(arg));
 }
 
-jobject cnmcuJava::convert_element(std::uint8_t arg) {
+jobject cnmcuJava::convert_element(JNIEnv* env, std::uint8_t arg) {
     return env->CallStaticObjectMethod(Byte, Byte_valueOf, static_cast<jbyte>(arg));
 }
 
-jobject cnmcuJava::convert_element(std::uint16_t arg) {
+jobject cnmcuJava::convert_element(JNIEnv* env, std::uint16_t arg) {
     return env->CallStaticObjectMethod(Short, Short_valueOf, static_cast<jshort>(arg));
 }
 
-jobject cnmcuJava::convert_element(std::uint32_t arg) {
+jobject cnmcuJava::convert_element(JNIEnv* env, std::uint32_t arg) {
     return env->CallStaticObjectMethod(Integer, Integer_valueOf, static_cast<jint>(arg));
 }
 
-jobject cnmcuJava::convert_element(std::uint64_t arg) {
+jobject cnmcuJava::convert_element(JNIEnv* env, std::uint64_t arg) {
     return env->CallStaticObjectMethod(Long, Long_valueOf, static_cast<jlong>(arg));
 }
 
-jobject cnmcuJava::convert_element(jobject arg) {
+jobject cnmcuJava::convert_element(JNIEnv* env, jobject arg) {
     return arg;
 }

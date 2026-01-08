@@ -35,19 +35,23 @@
     (var) = env->GetStaticFieldID(clazz, name, sig); \
     CHECK_FOR_EXCEPTION(); \
 
+#define GET_ENV(var, vm) \
+    if(vm->GetEnv(reinterpret_cast<void**>(&(var)), JNI_VERSION_21) != JNI_OK) \
+        abort(); \
+
 class cnmcuJava
 {
-    static jobject convert_element(char const & arg);
-    static jobject convert_element(std::string& arg);
-    static jobject convert_element(bool arg);
-    static jobject convert_element(std::uint8_t arg);
-    static jobject convert_element(std::uint16_t arg);
-    static jobject convert_element(std::uint32_t arg);
-    static jobject convert_element(std::uint64_t arg);
-    static jobject convert_element(jobject arg);
+    static jobject convert_element(JNIEnv* env, char const & arg);
+    static jobject convert_element(JNIEnv* env, std::string& arg);
+    static jobject convert_element(JNIEnv* env, bool arg);
+    static jobject convert_element(JNIEnv* env, std::uint8_t arg);
+    static jobject convert_element(JNIEnv* env, std::uint16_t arg);
+    static jobject convert_element(JNIEnv* env, std::uint32_t arg);
+    static jobject convert_element(JNIEnv* env, std::uint64_t arg);
+    static jobject convert_element(JNIEnv* env, jobject arg);
 
     template<size_t N>
-    static jobject convert_element(std::array<int, N> const & arg) {
+    static jobject convert_element(JNIEnv* env, std::array<int, N> const & arg) {
         std::array<jint, N> converted_arg;
         std::copy(arg.cbegin(), arg.cend(), converted_arg.begin());
         jintArray array = env->NewIntArray(N);
@@ -56,8 +60,8 @@ class cnmcuJava
     }
 
     template<typename T>
-    static void write_element(jobjectArray array, jsize index, T arg) {
-        auto const elem = convert_element(arg);
+    static void write_element(JNIEnv* env, jobjectArray array, jsize index, T arg) {
+        auto const elem = convert_element(env, arg);
         env->SetObjectArrayElement(array, index, elem);
         env->DeleteLocalRef(elem);
     }
@@ -68,13 +72,16 @@ class cnmcuJava
         if(!initialized)
             return;
 
+        JNIEnv* env;
+        GET_ENV(env, vm);
+
         jobjectArray log_args = env->NewObjectArray(sizeof...(args), Object, NULL);
         if(log_args == NULL) {
             std::cerr << "Failed to create log args array" << std::endl;
             return;
         }
         jsize index;
-        (write_element(log_args, index++, args), ...);
+        (write_element(env, log_args, index++, args), ...);
 
         jstring str = env->NewStringUTF(format);
         env->CallVoidMethod(LOGGER, method, str, log_args);
@@ -83,7 +90,6 @@ class cnmcuJava
     }
 
 public:
-    static JNIEnv* env;
     static JavaVM* vm;
 
 
@@ -101,28 +107,6 @@ public:
     static jmethodID Logger_info;
     static jmethodID Logger_warn;
     static jmethodID Logger_error;
-
-
-    // For CNMCU
-    static jclass NanoMCU;
-
-    static jclass MOS6502;
-    static jmethodID MOS6502_init;
-
-    static jclass CNGPIO;
-    static jmethodID CNGPIO_init;
-
-    static jclass CNRAM;
-    static jmethodID CNRAM_init;
-
-    static jclass CNROM;
-    static jmethodID CNROM_init;
-
-    static jclass CNEL;
-    static jmethodID CNEL_init;
-
-    static jclass CNUART;
-    static jmethodID CNUART_init;
 
     static jclass Object;
 
