@@ -310,7 +310,6 @@ public class NanoMCU extends StrongNativeObject {
      */ 
     
     private static native long createMCU(); /*
-        cnmcuJava::init(env);
         CodeNodeNano* nano = new CodeNodeNano();
         return reinterpret_cast<jlong>(nano);
     */

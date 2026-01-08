@@ -12,4 +12,12 @@ public class NativesUtils {
     public static native long getByteBufferAddress(ByteBuffer buffer); /*
         return (jlong) env->GetDirectBufferAddress(obj_buffer);
     */
+
+    /*JNI
+        #include <cnmcuJava.h>
+     */
+
+    public static native void init(); /*
+        return cnmcuJava::init(env);
+    */
 }

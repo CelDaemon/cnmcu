@@ -34,6 +34,7 @@ public final class NativesLoader {
 
         try {
             System.load(libPath.toString());
+            NativesUtils.init();
             loaded = true;
         } catch (Exception e) {
             throw new RuntimeException("Failed to load native library: " + libPath, e);
