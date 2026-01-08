@@ -29,7 +29,8 @@ public class EventHandler {
     }
 
     private static void onStartRenderWorld(WorldTerrainRenderContext context) {
-        EventHandler.IMGUI_GLFW.newFrame();
+        IMGUI_GLFW.newFrame();
+        IMGUI_GL3.newFrame();
     }
 
     private static void onClientStarted(Minecraft client) {
@@ -46,8 +47,8 @@ public class EventHandler {
     }
 
     private static void onClientStopping(Minecraft client) {
-        IMGUI_GL3.dispose();
-        IMGUI_GLFW.dispose();
+        IMGUI_GL3.shutdown();
+        IMGUI_GLFW.shutdown();
         ImGui.destroyContext(IMGUI);
         CONFIG.save().join();
         TOOLCHAIN.saveConfig().join();
