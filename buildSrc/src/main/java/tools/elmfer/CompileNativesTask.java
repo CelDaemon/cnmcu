@@ -4,22 +4,12 @@ import org.gradle.api.DefaultTask;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.*;
+import org.gradle.process.ExecOperations;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Predicate;
+import javax.inject.Inject;
+import java.util.Arrays;
 
 public abstract class CompileNativesTask extends DefaultTask {
-
-    private static final Predicate<Path> LIBS_FILTER = path -> {
-        final var name = path.getFileName().toString();
-        return name.endsWith(".so") || name.endsWith(".dll") || name.endsWith(".dylib");
-    };
 
     @InputDirectory
     public abstract DirectoryProperty getSourceDir();
@@ -30,13 +20,16 @@ public abstract class CompileNativesTask extends DefaultTask {
     @Input
     public abstract Property<String> getCmakeTarget();
     @OutputDirectory
-    public abstract DirectoryProperty getTargetDir();
-    @OutputDirectory
     public abstract DirectoryProperty getOutputDir();
     @Input
     public abstract Property<String> getBuildType();
 
-    public CompileNativesTask() {
+    private final ExecOperations execOperations;
+
+    @Inject
+    public CompileNativesTask(ExecOperations execOperations) {
+        this.execOperations = execOperations;
+
         setGroup("build");
         setDescription("Compiles native source files using CMake.");
 
@@ -45,7 +38,7 @@ public abstract class CompileNativesTask extends DefaultTask {
     }
 
     @TaskAction
-    void execute() throws Exception {
+    void execute() {
         final var project = getProject();
         final var sourceDir = getSourceDir();
         final var buildDir = getBuildDir();
@@ -62,78 +55,22 @@ public abstract class CompileNativesTask extends DefaultTask {
         if (!outputDir.isPresent())
             throw new RuntimeException("You must specify output directory for generating native source files!");
 
-        if(!executeCommand("cmake", "--version"))
-            throw new RuntimeException("CMake is not installed on your system!");
-
         final var absSourceDir = project.file(sourceDir).getAbsolutePath();
         final var absBuildDir = project.file(buildDir).getAbsolutePath();
         final var absBridgeDir = project.file(bridgeDir).getAbsolutePath();
         final var absOutputDir = project.file(outputDir).getAbsolutePath();
 
-        if(!executeCommand("cmake", "-S", absSourceDir, "-B", absBuildDir, "-DCMAKE_BUILD_TYPE=" + buildType.get(), "-DGENERATED_SOURCES_DIR=" + absBridgeDir))
-            throw new RuntimeException("Error configuring CMake project!");
+        cmakeExec("-S", absSourceDir, "-B", absBuildDir, "-DCMAKE_BUILD_TYPE=" + buildType.get(), "-DGENERATED_SOURCES_DIR=" + absBridgeDir);
 
-        if(!executeCommand("cmake", "--build", absBuildDir, "--parallel", "4", "--target", cmakeTarget.get(), "--config", buildType.get()))
-            throw new RuntimeException("Error compiling native source files!");
+        cmakeExec("--build", absBuildDir, "--parallel", "4", "--target", cmakeTarget.get(), "--config", buildType.get());
 
-        if(!executeCommand("cmake", "--install", absBuildDir, "--prefix", absOutputDir))
-            throw new RuntimeException("Error installing artifacts");
-
-        final var inProduction = System.getenv("PRODUCTION") != null;
-        if (!inProduction && getTargetDir().isPresent())
-            copyBinaries();
+        cmakeExec("--install", absBuildDir, "--prefix", absOutputDir);
     }
 
-    private boolean executeCommand(String ...args) throws Exception {
-        final var logger = getLogger();
-
-        final var builder = new ProcessBuilder(args);
-        builder.redirectErrorStream(true);
-
-        final var process = builder.start();
-
-        final var outThread = new Thread(() -> {
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-                String line;
-                while ((line = reader.readLine()) != null)
-                    System.out.println("[cmake] " + line);
-            } catch (IOException e) {
-                logger.error("Failed to read cmake command output");
-            }
+    private void cmakeExec(String... args) {
+        execOperations.exec(innerAction -> {
+            innerAction.setExecutable("cmake");
+            innerAction.args(Arrays.asList(args));
         });
-        outThread.start();
-
-        final var exitCode = process.waitFor();
-        outThread.join();
-
-        return exitCode == 0;
-    }
-
-    /**
-     * Copy binaries to target directory, if specified.
-     * This is useful when you want to copy the compiled binaries to
-     * quickly to aid in development.
-     */
-    private void copyBinaries() throws IOException {
-        final var project = getProject();
-        final var copyError = new AtomicReference<IOException>();
-
-        final var targetPath = project.file(getTargetDir()).toPath();
-        final var buildDir = project.file(getBuildDir()).toPath();
-
-        try(var walker = Files.walk(buildDir)) {
-            walker.filter(LIBS_FILTER).forEach(source -> {
-                try {
-                    final var target = targetPath.resolve(source.getFileName());
-
-                    Files.createDirectories(target.getParent());
-                    Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
-                } catch (IOException e) {
-                    copyError.set(e);
-                }
-            });
-        }
-        if (copyError.get() != null)
-            throw copyError.get();
     }
 }
