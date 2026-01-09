@@ -5,8 +5,7 @@
   "compatibilityLevel": "JAVA_21",
   "mixins": [],
   "client": [
-    "GuiContextInvoker",
-    "ImGuiImplGl3Mixin"
+    "GuiContextInvoker"
   ],
   "server": [],
   "injectors": {
