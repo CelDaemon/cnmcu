@@ -1,110 +1,85 @@
 package com.elmfer.cnmcu.mcu;
 
+
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 
 import com.elmfer.cnmcu.CodeNodeMicrocontrollers;
 import com.elmfer.cnmcu.cpp.NativesLoader;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.*;
 
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.JsonOps;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import imgui.ImGui;
 import imgui.type.ImString;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.util.Util;
 
 import static com.elmfer.cnmcu.CodeNodeMicrocontrollers.LOGGER;
 
 public class Toolchain {
 
-	public static final String TOOLCHAIN_PATH = CodeNodeMicrocontrollers.MOD_ID + "/toolchain";
-	public static final String TEMP_PATH = TOOLCHAIN_PATH + "/temp";
-	public static final File CONFIG_FILE = new File(TOOLCHAIN_PATH + "/config.json");
+	public static final Path TOOLCHAIN_PATH = CodeNodeMicrocontrollers.DATA_PATH
+            .resolve("toolchain");
+	public static final Path TEMP_PATH = TOOLCHAIN_PATH.resolve("temp");
+	public static final Path CONFIG_PATH = TOOLCHAIN_PATH.resolve("config.json");
+
+	private final StringBuffer buildStdout = new StringBuffer();
+    private ToolchainConfig config = ToolchainConfig.load();
 	
-	private static JsonObject config = new JsonObject();
-	private static JsonObject buildVariables = new JsonObject();
-	private static JsonObject envVariables = new JsonObject();
-	private static CompletableFuture<Void> saveOperation = null;
-
-	private static StringBuffer buildStdout = new StringBuffer();
-
-	static {
-        loadConfig();
+	public void loadDefaults() {
+	    config = ToolchainConfig.defaultConfig();
+	}
+    public void reloadConfig() {
+        config = ToolchainConfig.load();
     }
-	
-	public static void loadConfig() {
-		try {
-            BufferedReader reader = new BufferedReader(new FileReader(CONFIG_FILE));
-
-            config = JsonParser.parseReader(reader).getAsJsonObject();
-            
-           	if(config.has("buildVariables"))
-           		buildVariables = config.getAsJsonObject("buildVariables");
-           	else
-           		loadDefaultBuildVariables();
-           	
-           	if(config.has("envVariables"))
-           		envVariables = config.getAsJsonObject("envVariables");
-        } catch (Exception e) {
-            loadDefaults();
-            saveConfig();
-        }
-	}
-	
-	public static void loadDefaults() {
-	    config.remove("buildCommand");
-	    config.remove("workingDirectory");
-	    config.addProperty("buildCommand", getBuildCommand());
-	    config.addProperty("workingDirectory", TOOLCHAIN_PATH);
-	    buildVariables = new JsonObject();
-	    loadDefaultBuildVariables();
-        envVariables = new JsonObject();
-	}
-	
-	private static void loadDefaultBuildVariables() {
-		buildVariables.addProperty("input", "temp/program.s");
-        buildVariables.addProperty("output", "temp/output.bin");
-	}
-
-	public static CompletableFuture<byte[]> build(String code) {
+    public CompletableFuture<Void> saveConfig() {
+        return config.save();
+    }
+    public String getBuildVariable(String name) {
+        return config.buildVariables.get(name);
+    }
+	public CompletableFuture<byte[]> build(String code) {
 		CompletableFuture<byte[]> future = new CompletableFuture<>();
 
-		File workingDir = new File(getWorkingDirectory());
+		Path workingDir = config.workingDirectory;
 		
 		CompletableFuture.runAsync(() -> {
 			try {
-				File codeFile = new File(workingDir, buildVariables.get("input").getAsString());
-				Files.write(codeFile.toPath(), code.getBytes());
+                final var codeFile = workingDir.resolve(config.buildVariables.get("input"));
+				Files.writeString(codeFile, code);
 
-				File outputFile = new File(workingDir, buildVariables.get("output").getAsString());
+                final var outputFile = workingDir.resolve(config.buildVariables.get("output"));
 
-				String shell = NativesLoader.NATIVES_OS.equals("windows") ? "cmd" : "sh";
-				String shellFlag = NativesLoader.NATIVES_OS.equals("windows") ? "/c" : "-c";
-				String buildCommand = getBuildCommand();
+				final var shell = NativesLoader.NATIVES_OS.equals("windows") ? "cmd" : "sh";
+                final var shellFlag = NativesLoader.NATIVES_OS.equals("windows") ? "/c" : "-c";
+                var buildCommand = config.buildCommand;
 				
-                for (Map.Entry<String, JsonElement> entry : buildVariables.entrySet()) {
+                for (final var entry : config.buildVariables.entrySet()) {
                     buildCommand = buildCommand.replace("${" + entry.getKey() + "}",
-                            Matcher.quoteReplacement(entry.getValue().getAsString()));
+                            Matcher.quoteReplacement(entry.getValue()));
                 }
 
-				ProcessBuilder builder = new ProcessBuilder(shell, shellFlag, buildCommand);
-				builder.directory(new File(getWorkingDirectory()));
+				final var builder = new ProcessBuilder(shell, shellFlag, buildCommand);
+				builder.directory(workingDir.toFile());
 				builder.redirectErrorStream(true);
-				Map<String, String> env = builder.environment();
-                for (Map.Entry<String, JsonElement> entry : envVariables.entrySet())
-                    env.put(entry.getKey(), entry.getValue().getAsString());
+                builder.environment().putAll(config.environmentVariables);
 
-				Process process = builder.start();
+				final var process = builder.start();
 
-				Thread outThread = new Thread(() -> {
-					try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+				final var outThread = new Thread(() -> {
+					try (final var reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
 						String line;
 						while ((line = reader.readLine()) != null)
 							appendBuildStdout(line);
@@ -117,139 +92,64 @@ public class Toolchain {
 				int exitCode = process.waitFor();
 				outThread.join();
 
-				if (exitCode == 0) {
-					byte[] output = Files.readAllBytes(outputFile.toPath());
+				if (exitCode != 0) {
+                    future.completeExceptionally(new Exception("Build failed"));
 
-					future.complete(output);
+                    appendBuildStdout("build", "Build failed");
+                    return;
 
-					appendBuildStdout("build", "Build successful");
-				} else {
-					future.completeExceptionally(new Exception("Build failed"));
-
-					appendBuildStdout("build", "Build failed");
 				}
+
+                final var output = Files.readAllBytes(outputFile);
+
+                future.complete(output);
+
+                appendBuildStdout("build", "Build successful");
 			} catch (Exception e) {
 				future.completeExceptionally(e);
 
-				appendBuildStdout("build", "Build failed with exception: \n" + e.getMessage());
+				appendBuildStdout("build", "Build failed with exception: \n" + e);
+
+                LOGGER.error("Build failed with exception", e);
 			}
 		});
 
 		return future;
 	}
 
-	public static String getBuildStdout() {
+	public String getBuildStdout() {
 		return buildStdout.toString();
 	}
 
-	public static void appendBuildStdout(String module, String output) {
+	public void appendBuildStdout(String module, String output) {
 		buildStdout.append("[").append(module).append("] ").append(output).append("\n");
 	}
 
-	public static void appendBuildStdout(String output) {
+	public void appendBuildStdout(String output) {
 		buildStdout.append(output).append("\n");
 	}
 
-	public static void clearBuildStdout() {
+	public void clearBuildStdout() {
 		buildStdout.setLength(0);
 	}
-
-	public static String getBuildCommand() {
-		if (config.has("buildCommand"))
-			return config.get("buildCommand").getAsString();
-
-		return NativesLoader.NATIVES_OS.equals("windows") ? "vasm6502_oldstyle -Fbin -dotdir ${input} -o ${output}"
-				: "./vasm6502_oldstyle -Fbin -dotdir ${input} -o ${output}";
-	}
-
-	public static void setBuildCommand(String command) {
-		config.addProperty("buildCommand", command);
-	}
-	
-	public static String getWorkingDirectory() {
-        if (config.has("workingDirectory"))
-            return config.get("workingDirectory").getAsString();
-        
-        return TOOLCHAIN_PATH;
-	}
-	
-    public static void setWorkingDirectory(String directory) {
-        config.addProperty("workingDirectory", directory);
-    }
     
-    public static String getBuildVariable(String name) {
-        if (buildVariables.has(name))
-            return buildVariables.get(name).getAsString();
-        
-        return "";
-    }
-    
-    public static void setBuildVariable(String name, String value) {
-        buildVariables.addProperty(name, value);
-    }
-
-    public static void removeBuildVariable(String name) {
-        buildVariables.remove(name);
-    }
-    
-    public static String getEnvVariable(String name) {
-        if (envVariables.has(name))
-            return envVariables.get(name).getAsString();
-
-        return "";
-    }
-    
-    public static void setEnvVariable(String name, String value) {
-        envVariables.addProperty(name, value);
-    }
-    
-    public static void removeEnvVariable(String name) {
-        envVariables.remove(name);
-    }
-    
-    public static void saveConfig() {
-        waitForSave();
-        
-        config.add("buildVariables", buildVariables);
-        config.add("envVariables", envVariables);
-
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        String json = gson.toJson(config);
-
-        saveOperation = CompletableFuture.runAsync(() -> {
-            try {
-                Files.createDirectories(CONFIG_FILE.toPath().getParent());
-
-                Files.write(CONFIG_FILE.toPath(), json.getBytes());
-            } catch (Exception e) {
-                LOGGER.error("Failed to save toolchain config", e);
-            }
-            saveOperation = null;
-        });
-    }
-
-    public static void waitForSave() {
-        if (saveOperation != null)
-            saveOperation.join();
-    }
-    
-    private static ImString buildCommand = new ImString(getBuildCommand(), 2048);
-    private static ImString workingDirectory = new ImString(getWorkingDirectory(), 2048);
-    public static void genToolchainConfigUI() {
+    private final ImString buildCommand = new ImString(config.buildCommand, 2048);
+    private final ImString workingDirectory = new ImString(config.workingDirectory.toString(), 2048);
+    public void genToolchainConfigUI() {
         float windowWidth = ImGui.getContentRegionAvailX();
-        buildCommand.set(getBuildCommand());
-        workingDirectory.set(getWorkingDirectory());
+        buildCommand.set(config.buildCommand);
+        workingDirectory.set(config.workingDirectory.toString());
         
         ImGui.text("Build Command");
         ImGui.setNextItemWidth(windowWidth);
         if (ImGui.inputText("##Build Command", buildCommand))
-            setBuildCommand(buildCommand.get());
+            config.setBuildCommand(buildCommand.get());
         
         ImGui.text("Working Directory");
         ImGui.setNextItemWidth(windowWidth);
         
         if (ImGui.inputText("##Working Directory", workingDirectory))
-            setWorkingDirectory(workingDirectory.get());
+            config.setWorkingDirectory(Path.of(workingDirectory.get()));
         ImGui.newLine();
         
         if (ImGui.collapsingHeader("Build Variables"))
@@ -259,10 +159,10 @@ public class Toolchain {
             genEnvVariables();
     }
     
-    private static ImString newBuildVariableName = new ImString("", 64);
-    private static ImString buildVariablesInputs[] = new ImString[0];
-    private static boolean showBuildVariableWarning = false;
-    private static void genBuildVariables() {
+    private final ImString newBuildVariableName = new ImString("", 64);
+    private ImString[] buildVariablesInputs = new ImString[0];
+    private boolean showBuildVariableWarning = false;
+    private void genBuildVariables() {
         float windowWidth = ImGui.getContentRegionAvailX();
         
         ImGui.indent();
@@ -271,22 +171,25 @@ public class Toolchain {
                 + " You can use the variables in your build command by wrapping the variable name in ${}.");
         ImGui.newLine();
         
-        if (buildVariablesInputs.length != buildVariables.size())
-            buildVariablesInputs = new ImString[buildVariables.size()];
+        if (buildVariablesInputs.length != config.buildVariables.size())
+            buildVariablesInputs = new ImString[config.buildVariables.size()];
         
         int i = 0;
-        for (Map.Entry<String, JsonElement> entry : buildVariables.entrySet()) {
+        final var buildVariableIterator = config.buildVariables.entrySet().iterator();
+        while (buildVariableIterator.hasNext()) {
+            final var entry = buildVariableIterator.next();
+
             if (buildVariablesInputs[i] == null)
-                buildVariablesInputs[i] = new ImString(entry.getValue().getAsString(), 1024);
-            buildVariablesInputs[i].set(entry.getValue().getAsString());
-            
+                buildVariablesInputs[i] = new ImString(entry.getValue(), 1024);
+            buildVariablesInputs[i].set(entry.getValue());
+
             if (ImGui.inputText(entry.getKey() + "##BuildVar" + i, buildVariablesInputs[i]))
-                setBuildVariable(entry.getKey(), buildVariablesInputs[i].get());
+                config.buildVariables.put(entry.getKey(), buildVariablesInputs[i].get());
             ImGui.sameLine();
             ImGui.setCursorPosX(windowWidth - 7);
             if (ImGui.button("x##BuildVar" + entry.getKey()))
-                removeBuildVariable(entry.getKey());
-            
+                buildVariableIterator.remove();
+
             i++;
         }
         
@@ -295,9 +198,9 @@ public class Toolchain {
             showBuildVariableWarning = true;
         ImGui.sameLine();
         ImGui.setCursorPosX(windowWidth - 7);
-        ImGui.beginDisabled(newBuildVariableName.isEmpty() || buildVariables.has(newBuildVariableName.get()));
+        ImGui.beginDisabled(newBuildVariableName.isEmpty() || config.buildVariables.containsKey(newBuildVariableName.get()));
         if (ImGui.button("+##BuildVar")) {
-            setBuildVariable(newBuildVariableName.get(), "");
+            config.buildVariables.put(newBuildVariableName.get(), "");
             newBuildVariableName.set("");
             showBuildVariableWarning = false;
         }
@@ -305,7 +208,7 @@ public class Toolchain {
         if (showBuildVariableWarning) {
             if (newBuildVariableName.isEmpty())
                 ImGui.textColored(0xFF8888FF, "Name cannot be empty");
-            else if (buildVariables.has(newBuildVariableName.get()))
+            else if (config.buildVariables.containsKey(newBuildVariableName.get()))
                 ImGui.textColored(0xFF8888FF, "Name already exists");
             else
                 ImGui.newLine();
@@ -315,10 +218,10 @@ public class Toolchain {
         ImGui.unindent();
     }
     
-    private static ImString newEnvVariableName = new ImString("", 64);
-    private static ImString envVariablesInputs[] = new ImString[envVariables.size()];
-    private static boolean showEnvVariableWarning = false;
-    private static void genEnvVariables() {
+    private final ImString newEnvVariableName = new ImString("", 64);
+    private ImString[] envVariablesInputs = new ImString[config.environmentVariables.size()];
+    private boolean showEnvVariableWarning = false;
+    private void genEnvVariables() {
         float windowWidth = ImGui.getContentRegionAvailX();
 
         ImGui.indent();
@@ -327,20 +230,20 @@ public class Toolchain {
                 + " They will also apply the child processes of the command.");
         ImGui.newLine();
 
-        if (envVariablesInputs.length != envVariables.size())
-            envVariablesInputs = new ImString[envVariables.size()];
+        if (envVariablesInputs.length != config.environmentVariables.size())
+            envVariablesInputs = new ImString[config.environmentVariables.size()];
 
         int i = 0;
-        for (Map.Entry<String, JsonElement> entry : envVariables.entrySet()) {
+        for (final var entry : config.environmentVariables.entrySet()) {
             if (envVariablesInputs[i] == null)
-                envVariablesInputs[i] = new ImString(entry.getValue().getAsString(), 1024);
+                envVariablesInputs[i] = new ImString(entry.getValue(), 1024);
 
             if (ImGui.inputText(entry.getKey() + "##EnvVar" + i, envVariablesInputs[i]))
-                setEnvVariable(entry.getKey(), envVariablesInputs[i].get());
+                config.environmentVariables.put(entry.getKey(), envVariablesInputs[i].get());
             ImGui.sameLine();
             ImGui.setCursorPosX(windowWidth - 7);
             if (ImGui.button("x##EnvVar" + entry.getKey()))
-                removeEnvVariable(entry.getKey());
+                config.environmentVariables.remove(entry.getKey());
 
             i++;
         }
@@ -350,9 +253,9 @@ public class Toolchain {
             showEnvVariableWarning = true;
         ImGui.sameLine();
         ImGui.setCursorPosX(windowWidth - 7);
-        ImGui.beginDisabled(newEnvVariableName.isEmpty() || envVariables.has(newEnvVariableName.get()));
+        ImGui.beginDisabled(newEnvVariableName.isEmpty() || config.environmentVariables.containsKey(newEnvVariableName.get()));
         if (ImGui.button("+##EnvVar")) {
-            setEnvVariable(newEnvVariableName.get(), "");
+            config.environmentVariables.put(newEnvVariableName.get(), "");
             newEnvVariableName.set("");
             showEnvVariableWarning = false;
         }
@@ -360,7 +263,7 @@ public class Toolchain {
         if (showEnvVariableWarning) {
             if (newEnvVariableName.isEmpty())
                 ImGui.textColored(0xFF8888FF, "Name cannot be empty");
-            else if (envVariables.has(newEnvVariableName.get()))
+            else if (config.environmentVariables.containsKey(newEnvVariableName.get()))
                 ImGui.textColored(0xFF8888FF, "Name already exists");
             else
                 ImGui.newLine();
@@ -368,5 +271,93 @@ public class Toolchain {
             ImGui.newLine();
 
         ImGui.unindent();
+    }
+
+    public static class ToolchainConfig {
+
+        private static final Codec<ToolchainConfig> CODEC = RecordCodecBuilder.create(instance ->
+                instance.group(
+                        Codec.STRING.fieldOf("build_command").forGetter(ToolchainConfig::getBuildCommand),
+                        Codec.STRING.xmap(Path::of, Path::toString).fieldOf("working_directory").forGetter(ToolchainConfig::getWorkingDirectory),
+                        Codec.unboundedMap(Codec.STRING, Codec.STRING).fieldOf("build_variables").forGetter(ToolchainConfig::getBuildVariables),
+                        Codec.unboundedMap(Codec.STRING, Codec.STRING).fieldOf("environment_variables").forGetter(ToolchainConfig::getEnvironmentVariables)
+                ).apply(instance, ToolchainConfig::new));
+
+        public String getBuildCommand() {
+            return buildCommand;
+        }
+
+        public void setBuildCommand(String buildCommand) {
+            this.buildCommand = buildCommand;
+        }
+
+        public Path getWorkingDirectory() {
+            return workingDirectory;
+        }
+
+        public void setWorkingDirectory(Path workingDirectory) {
+            this.workingDirectory = workingDirectory;
+        }
+
+        public Map<String, String> getBuildVariables() {
+            return buildVariables;
+        }
+
+        public Map<String, String> getEnvironmentVariables() {
+            return environmentVariables;
+        }
+
+        private String buildCommand;
+        private Path workingDirectory;
+        private final Map<String, String> buildVariables = new HashMap<>();
+        private final Map<String, String> environmentVariables = new HashMap<>();
+
+        public ToolchainConfig(String buildCommand, Path workingDirectory, Map<String, String> buildVariables, Map<String, String> environmentVariables) {
+            this.buildCommand = buildCommand;
+            this.workingDirectory = workingDirectory;
+            this.buildVariables.putAll(buildVariables);
+            this.environmentVariables.putAll(environmentVariables);
+
+            LOGGER.info("AA: {}", buildVariables.getClass().getCanonicalName());
+        }
+
+        public static ToolchainConfig defaultConfig() {
+            final var buildCommand = NativesLoader.NATIVES_OS.equals("windows") ? "vasm6502_oldstyle -Fbin -dotdir ${input} -o ${output}"
+                    : "./vasm6502_oldstyle -Fbin -dotdir ${input} -o ${output}";
+
+
+            final var buildVariables = Map.of(
+                    "input", "temp/program.s",
+                    "output", "temp/output.bin");
+
+            return new ToolchainConfig(buildCommand, TOOLCHAIN_PATH, buildVariables, Map.of());
+        }
+
+        public CompletableFuture<Void> save() {
+            final var element = CODEC.encodeStart(JsonOps.INSTANCE, this).getOrThrow();
+
+            return CompletableFuture.runAsync(() -> {
+                try(var writer = new JsonWriter(new OutputStreamWriter(Files.newOutputStream(CONFIG_PATH)))) {
+                    writer.setFormattingStyle(FormattingStyle.PRETTY);
+                    GsonHelper.writeValue(writer, element, null);
+                } catch (IOException e) {
+                    LOGGER.error("Failed to save config file", e);
+                }
+            }, Util.backgroundExecutor());
+        }
+        public static ToolchainConfig load() {
+            final JsonElement element;
+            try(var reader = new JsonReader(new InputStreamReader(Files.newInputStream(CONFIG_PATH)))) {
+                element = JsonParser.parseReader(reader);
+            } catch (Exception e) {
+                LOGGER.error("Failed to load config file", e);
+                return defaultConfig();
+            }
+
+            final var result = CODEC.parse(JsonOps.INSTANCE, element);
+            return result.mapOrElse(x -> x,
+                    x -> defaultConfig());
+        }
+
     }
 }

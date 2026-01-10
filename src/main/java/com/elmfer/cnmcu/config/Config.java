@@ -1,133 +1,125 @@
 package com.elmfer.cnmcu.config;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
 
 import com.elmfer.cnmcu.CodeNodeMicrocontrollers;
 import com.elmfer.cnmcu.mcu.Sketches;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
+import com.google.gson.FormattingStyle;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.JsonOps;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.util.Util;
 
 import static com.elmfer.cnmcu.CodeNodeMicrocontrollers.LOGGER;
 
 public class Config {
-    public static final File CONFIG_FILE = new File("config/" + CodeNodeMicrocontrollers.MOD_ID + ".json");
+    public boolean isAdviseUpdates() {
+        return adviseUpdates;
+    }
 
-    private static JsonObject config = new JsonObject();
+    public void setAdviseUpdates(boolean adviseUpdates) {
+        this.adviseUpdates = adviseUpdates;
+    }
+
+    public boolean isHexRegisters() {
+        return hexRegisters;
+    }
+
+    public void setHexRegisters(boolean hexRegisters) {
+        this.hexRegisters = hexRegisters;
+    }
+
+    public boolean isShowDocs() {
+        return showDocs;
+    }
+
+    public int getMaxBackups() {
+        return maxBackups;
+    }
+
+    public void setMaxBackups(int maxBackups) {
+        this.maxBackups = maxBackups;
+    }
+
+    public String getLastSavePath() {
+        return lastSavePath;
+    }
+
+    public void setLastSavePath(String lastSavePath) {
+        this.lastSavePath = lastSavePath;
+    }
+
+    public Config(boolean adviseUpdates, boolean hexRegisters, boolean showDocs, int maxBackups, String lastSaveFilePath) {
+        this.adviseUpdates = adviseUpdates;
+        this.hexRegisters = hexRegisters;
+        this.showDocs = showDocs;
+        this.maxBackups = maxBackups;
+        this.lastSavePath = lastSaveFilePath;
+    }
+    private boolean adviseUpdates;
+    private boolean hexRegisters;
+    private boolean showDocs;
+    private int maxBackups;
+    private String lastSavePath;
+    private static final Codec<Config> CODEC = RecordCodecBuilder.create(instance ->
+            instance.group(
+                    Codec.BOOL.fieldOf("advise_updates").forGetter(Config::isAdviseUpdates),
+                    Codec.BOOL.fieldOf("hex_registers").forGetter(Config::isHexRegisters),
+                    Codec.BOOL.fieldOf("show_docs").forGetter(Config::isShowDocs),
+                    Codec.INT.fieldOf("max_backups").forGetter(Config::getMaxBackups),
+                    Codec.STRING.fieldOf("last_save_path").forGetter(Config::getLastSavePath)
+            ).apply(instance, Config::new));
+    public static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir().resolve(CodeNodeMicrocontrollers.MOD_ID + ".json");
     private static CompletableFuture<Void> saveTask;
-    private static boolean firstTimeUse = false;
 
-    static {
-        try {
-            BufferedReader reader = new BufferedReader(new FileReader(CONFIG_FILE));
-
-            config = JsonParser.parseReader(reader).getAsJsonObject();
-        } catch (FileNotFoundException e) {
-            LOGGER.warn("Config file not found, creating new one...");
-
-            config.addProperty("adviseUpdates", adviseUpdates());
-            config.addProperty("showRegistersInHex", showRegistersInHex());
-            config.addProperty("showDocs", showDocs());
-            config.addProperty("maxNumBackups", maxNumBackups());
-            config.addProperty("lastSaveFilePath", lastSaveFilePath());
-            
-            firstTimeUse = true;
-            save();
-        }
+    public static Config defaultConfig() {
+        return new Config(true, false, false, 30,
+                Sketches.SKETCHES_PATH.resolve("untitled.s").toAbsolutePath().toString());
     }
 
-    private Config() {
+    public void setShowDocs(boolean showDocs) {
+        this.showDocs = showDocs;
     }
-    
-    public static boolean isFirstTimeUse() {
-        return firstTimeUse;
-    }
-    
-    public static boolean adviseUpdates() {
-        if (config.has("adviseUpdates"))
-            return config.get("adviseUpdates").getAsBoolean();
-        
-        return true;
-    }
-    
-    public static void setAdviseUpdates(boolean adviseUpdates) {
-        config.addProperty("adviseUpdates", adviseUpdates);
-    }
-    
-    public static boolean showRegistersInHex() {
-        if (config.has("showRegistersInHex"))
-            return config.get("showRegistersInHex").getAsBoolean();
 
-        return true;
-    }
-    
-    public static void setShowRegistersInHex(boolean showRegistersInHex) {
-        config.addProperty("showRegistersInHex", showRegistersInHex);
-    }
-    
-    public static boolean showDocs() {
-        if (config.has("showDocs"))
-            return config.get("showDocs").getAsBoolean();
-
-        return false;
-    }
-    
-    public static void setShowDocs(boolean showDocs) {
-        config.addProperty("showDocs", showDocs);
-    }
-    
-    public static int maxNumBackups() {
-        if (config.has("maxNumBackups"))
-            return config.get("maxNumBackups").getAsInt();
-        
-        return 30;
-    }
-    
-    public static void setMaxNumBackups(int maxNumBackups) {
-        config.addProperty("maxNumBackups", maxNumBackups);
-    }
-    
-    public static String lastSaveFilePath() {
-        if (config.has("lastSaveFilePath"))
-            return config.get("lastSaveFilePath").getAsString();
-
-        return Paths.get(Sketches.SKETCHES_PATH, "untitled.s").toAbsolutePath().toString();
-    }
-    
-    public static void setLastSaveFilePath(String lastSaveFilePath) {
-        try {
-        	String path = Paths.get(lastSaveFilePath).toAbsolutePath().toString();
-        	config.addProperty("lastSaveFilePath", path);
-        } catch (Exception e) {
-        	LOGGER.error("Failed to add last save file path property", e);
-        }
-    }
-    
-    public static void save() {
+    public CompletableFuture<Void> save() {
         waitForSave();
 
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        String json = gson.toJson(config);
+        final var element = CODEC.encodeStart(JsonOps.INSTANCE, this).getOrThrow();
 
-        saveTask = CompletableFuture.runAsync(() -> {
-            try {
-                Files.write(CONFIG_FILE.toPath(), json.getBytes());
+        return saveTask = CompletableFuture.runAsync(() -> {
+            try(var writer = new JsonWriter(new OutputStreamWriter(Files.newOutputStream(CONFIG_PATH)))) {
+                writer.setFormattingStyle(FormattingStyle.PRETTY);
+                GsonHelper.writeValue(writer, element, null);
             } catch (IOException e) {
                 LOGGER.error("Failed to save config file", e);
             }
             saveTask = null;
-        });
+        }, Util.backgroundExecutor());
+    }
+
+    public static Config load() {
+        final JsonElement element;
+        try(var reader = new JsonReader(new InputStreamReader(Files.newInputStream(CONFIG_PATH)))) {
+            element = JsonParser.parseReader(reader);
+        } catch (Exception e) {
+            LOGGER.error("Failed to load config file", e);
+            return defaultConfig();
+        }
+        var result = CODEC.parse(JsonOps.INSTANCE, element);
+        return result.mapOrElse(x -> x,
+                x -> defaultConfig());
     }
     
-    public static void waitForSave() {
+    public void waitForSave() {
         if (saveTask != null)
             saveTask.join();
     }

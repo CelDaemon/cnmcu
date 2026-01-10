@@ -5,6 +5,7 @@ import com.elmfer.cnmcu.blocks.Blocks;
 import com.elmfer.cnmcu.config.Config;
 import com.elmfer.cnmcu.config.ModSetup;
 import com.elmfer.cnmcu.cpp.NativesLoader;
+import com.elmfer.cnmcu.mcu.Toolchain;
 import com.elmfer.cnmcu.network.Packets;
 import com.elmfer.cnmcu.ui.handler.Menus;
 import net.fabricmc.api.ModInitializer;
@@ -14,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.ref.Cleaner;
+import java.nio.file.Path;
 
 public class CodeNodeMicrocontrollers implements ModInitializer {
 
@@ -21,12 +23,18 @@ public class CodeNodeMicrocontrollers implements ModInitializer {
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
     public static final String MOD_NAME;
     public static final String MOD_VERSION;
-    public static final Cleaner CLEANER = Cleaner.create();
     static {
         var metadata = FabricLoader.getInstance().getModContainer(MOD_ID).orElseThrow().getMetadata();
         MOD_VERSION = metadata.getVersion().getFriendlyString();
         MOD_NAME = metadata.getName();
     }
+    public static final Cleaner CLEANER = Cleaner.create();
+    public static final Path DATA_PATH = FabricLoader.getInstance().getGameDir().resolve(MOD_ID);
+
+    public static final Config CONFIG = Config.load();
+    public static final Toolchain TOOLCHAIN = new Toolchain();
+
+
 
     @Override
     public void onInitialize() {
@@ -49,7 +57,7 @@ public class CodeNodeMicrocontrollers implements ModInitializer {
     }
 
     public static void checkForUpdates() {
-        if (!Config.adviseUpdates())
+        if (!CONFIG.isAdviseUpdates())
             return;
 
         ModSetup.checkForUpdates();

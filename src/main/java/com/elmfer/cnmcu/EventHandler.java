@@ -1,8 +1,6 @@
 package com.elmfer.cnmcu;
 
-import com.elmfer.cnmcu.config.Config;
 import com.elmfer.cnmcu.config.ModSetup;
-import com.elmfer.cnmcu.mcu.Toolchain;
 import imgui.ImGui;
 import imgui.ImGuiIO;
 import imgui.flag.ImGuiConfigFlags;
@@ -14,6 +12,9 @@ import net.fabricmc.fabric.api.client.rendering.v1.world.WorldTerrainRenderConte
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.contents.PlainTextContents;
+
+import static com.elmfer.cnmcu.CodeNodeMicrocontrollers.CONFIG;
+import static com.elmfer.cnmcu.CodeNodeMicrocontrollers.TOOLCHAIN;
 
 public class EventHandler {
 
@@ -49,10 +50,8 @@ public class EventHandler {
     }
 
     private static void onClientStopping(Minecraft client) {
-        Config.save();
-        Config.waitForSave();
-        Toolchain.saveConfig();
-        Toolchain.waitForSave();
+        CONFIG.save().join();
+        TOOLCHAIN.saveConfig().join();
     }
 
     private static void notifyPlayerAboutUpdate() {

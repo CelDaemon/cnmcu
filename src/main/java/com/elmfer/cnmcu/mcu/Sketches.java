@@ -8,16 +8,17 @@ import java.text.SimpleDateFormat;
 import java.util.concurrent.CompletableFuture;
 
 import com.elmfer.cnmcu.CodeNodeMicrocontrollers;
-import com.elmfer.cnmcu.config.Config;
 import com.ibm.icu.util.Calendar;
 
 import imgui.ImGui;
 import imgui.extension.texteditor.TextEditor;
 
+import static com.elmfer.cnmcu.CodeNodeMicrocontrollers.CONFIG;
+
 public class Sketches {
 
-    public static final String SKETCHES_PATH = CodeNodeMicrocontrollers.MOD_ID + "/sketches";
-    public static final String BACKUP_PATH = SKETCHES_PATH + "/backups";
+    public static final Path SKETCHES_PATH = CodeNodeMicrocontrollers.DATA_PATH.resolve("sketches");
+    public static final Path BACKUP_PATH = SKETCHES_PATH.resolve("backups");
 
     private static CompletableFuture<Void> backupSaveTask;
     
@@ -39,7 +40,7 @@ public class Sketches {
             backupSaveTask.join();
 
         backupSaveTask = CompletableFuture.runAsync(() -> {
-            Path path = Paths.get(BACKUP_PATH, getBackupFileName() + "." + fileExtension);
+            var path = BACKUP_PATH.resolve(getBackupFileName() + "." + fileExtension);
 
             try {
                 deleteOldestBackup();
@@ -53,7 +54,7 @@ public class Sketches {
 
     public static String[] listBackups() {
         try {
-            Path[] list = Files.list(Paths.get(BACKUP_PATH)).toArray(Path[]::new);
+            Path[] list = Files.list(BACKUP_PATH).toArray(Path[]::new);
             
             backups = new String[list.length];
             backupTimes = new long[list.length];
@@ -145,7 +146,7 @@ public class Sketches {
     
     public static String loadBackup(String backupName) {
         try {
-            return Files.readString(Paths.get(BACKUP_PATH, backupName));
+            return Files.readString(BACKUP_PATH.resolve(backupName));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -181,10 +182,10 @@ public class Sketches {
     }
 
     private static void deleteOldestBackup() throws IOException {
-        Path[] backups = Files.list(Paths.get(BACKUP_PATH)).toArray(Path[]::new);
+        Path[] backups = Files.list(BACKUP_PATH).toArray(Path[]::new);
 
         // If there are more than the maximum number of backups, delete the oldest one
-        if (backups.length < Config.maxNumBackups())
+        if (backups.length < CONFIG.getMaxBackups())
             return;
 
         Path oldest = backups[0];
