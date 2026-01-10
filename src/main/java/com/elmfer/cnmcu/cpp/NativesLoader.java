@@ -2,7 +2,7 @@ package com.elmfer.cnmcu.cpp;
 
 import com.elmfer.cnmcu.CodeNodeMicrocontrollers;
 
-import java.nio.file.Paths;
+import java.nio.file.Path;
 
 import static com.elmfer.cnmcu.CodeNodeMicrocontrollers.LOGGER;
 
@@ -16,7 +16,8 @@ public final class NativesLoader {
     public static final String NATIVES_BITS = getBits();
     public static final String NATIVES_EXT = getExtension();
     public static final String EXE_EXT = NATIVES_OS.equals("windows") ? ".exe" : "";
-    public static final String BINARIES_PATH = CodeNodeMicrocontrollers.MOD_ID + "/natives/" + CodeNodeMicrocontrollers.MOD_VERSION;
+    public static final Path BINARIES_PATH = CodeNodeMicrocontrollers.DATA_PATH.resolve("natives")
+            .resolve(CodeNodeMicrocontrollers.MOD_VERSION);
 
     private static boolean loaded = false;
 
@@ -30,7 +31,7 @@ public final class NativesLoader {
             throw new RuntimeException("Unable to use " + CodeNodeMicrocontrollers.MOD_NAME + " on this platform!");
 
         var libName = getBinaryFilename();
-        var libPath = Paths.get(System.getProperty("user.dir"), BINARIES_PATH, libName);
+        var libPath = Path.of(System.getProperty("user.dir")).resolve(BINARIES_PATH).resolve(libName);
 
         try {
             System.load(libPath.toString());

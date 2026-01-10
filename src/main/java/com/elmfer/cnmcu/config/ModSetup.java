@@ -147,10 +147,10 @@ public final class ModSetup {
     
     public static void createDirectories() {
         try {
-            Files.createDirectories(Paths.get(Toolchain.TOOLCHAIN_PATH));
-            Files.createDirectories(Paths.get(Toolchain.TEMP_PATH));
-            Files.createDirectories(Paths.get(NativesLoader.BINARIES_PATH));
-            Files.createDirectories(Paths.get(Sketches.BACKUP_PATH));
+            Files.createDirectories(Toolchain.TOOLCHAIN_PATH);
+            Files.createDirectories(Toolchain.TEMP_PATH);
+            Files.createDirectories(NativesLoader.BINARIES_PATH);
+            Files.createDirectories(Sketches.BACKUP_PATH);
         } catch (IOException e) {
             LOGGER.error("Failed to create directories", e);
         }
@@ -174,22 +174,22 @@ public final class ModSetup {
     }
 
     public static void downloadNatives() {
-        ensureInstallNatives(Paths.get(NativesLoader.BINARIES_PATH, NativesLoader.getBinaryFilename()),
+        ensureInstallNatives(NativesLoader.BINARIES_PATH.resolve(NativesLoader.getBinaryFilename()),
                 NativesLoader.getBinaryFilename());
     }
 
     public static void downloadToolchain() {
         final String vasmFilename = "vasm6502_oldstyle";
-        ensureInstall("vasm", Paths.get(Toolchain.TOOLCHAIN_PATH, vasmFilename + NativesLoader.EXE_EXT),
+        ensureInstall("vasm", Toolchain.TOOLCHAIN_PATH.resolve(vasmFilename + NativesLoader.EXE_EXT),
                 NativesLoader.getExecutableFilename(vasmFilename));
 
         final String vobjFilename = "vobjdump";
-        ensureInstall("vobjdump", Paths.get(Toolchain.TOOLCHAIN_PATH, vobjFilename + NativesLoader.EXE_EXT),
+        ensureInstall("vobjdump", Toolchain.TOOLCHAIN_PATH.resolve(vobjFilename + NativesLoader.EXE_EXT),
                 NativesLoader.getExecutableFilename(vobjFilename));
 
         final String cygFilename = "cygwin1.dll";
         if (NativesLoader.NATIVES_OS.equals("windows"))
-            ensureInstall("cygwin1.dll", Paths.get(Toolchain.TOOLCHAIN_PATH, cygFilename),
+            ensureInstall("cygwin1.dll", Toolchain.TOOLCHAIN_PATH.resolve(cygFilename),
                     "cygwin1.dll");
     }
 
