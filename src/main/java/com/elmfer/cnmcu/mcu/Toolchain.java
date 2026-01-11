@@ -64,11 +64,11 @@ public class Toolchain {
 		CompletableFuture.runAsync(() -> {
 			try {
                 final var workingDirectory = config.workingDirectory;
-                final var inputFile = getInputPath().orElseThrow(
-                        () -> new NoSuchElementException("Input build variable not set"));
+                final var inputFile = workingDirectory.resolve(getInputPath().orElseThrow(
+                        () -> new NoSuchElementException("Input build variable not set")));
 
-                final var outputFile = getOutputPath().orElseThrow(
-                        () -> new NoSuchElementException("Output build variable not set"));
+                final var outputFile = workingDirectory.resolve(getOutputPath().orElseThrow(
+                        () -> new NoSuchElementException("Output build variable not set")));
 
 				Files.writeString(inputFile, code);
 
