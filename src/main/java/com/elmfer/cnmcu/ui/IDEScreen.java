@@ -580,6 +580,8 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
             Sketches.saveBackup(textEditor.getText());
 
         renderTarget.destroyBuffers();
+        textEditor.destroy();
+        memoryEditor.destroy();
         ImGui.setMouseCursor(ImGuiMouseCursor.Arrow);
         CONFIG.save();
         TOOLCHAIN.saveConfig();
