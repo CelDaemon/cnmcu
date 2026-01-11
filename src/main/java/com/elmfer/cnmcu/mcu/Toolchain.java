@@ -9,6 +9,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 
@@ -47,20 +49,28 @@ public class Toolchain {
     public CompletableFuture<Void> saveConfig() {
         return config.save();
     }
-    public String getBuildVariable(String name) {
-        return config.buildVariables.get(name);
+    public Optional<Path> getInputPath() {
+        final var value = config.buildVariables.get("input");
+        return Optional.ofNullable(value).map(Path::of);
+    }
+    public Optional<Path> getOutputPath() {
+        final var value = config.buildVariables.get("output");
+        return Optional.ofNullable(value).map(Path::of);
     }
 	public CompletableFuture<byte[]> build(String code) {
 		CompletableFuture<byte[]> future = new CompletableFuture<>();
 
-		Path workingDir = config.workingDirectory;
-		
+
 		CompletableFuture.runAsync(() -> {
 			try {
-                final var codeFile = workingDir.resolve(config.buildVariables.get("input"));
-				Files.writeString(codeFile, code);
+                final var workingDirectory = config.workingDirectory;
+                final var inputFile = getInputPath().orElseThrow(
+                        () -> new NoSuchElementException("Input build variable not set"));
 
-                final var outputFile = workingDir.resolve(config.buildVariables.get("output"));
+                final var outputFile = getOutputPath().orElseThrow(
+                        () -> new NoSuchElementException("Output build variable not set"));
+
+				Files.writeString(inputFile, code);
 
 				final var shell = NativesLoader.NATIVES_OS.equals("windows") ? "cmd" : "sh";
                 final var shellFlag = NativesLoader.NATIVES_OS.equals("windows") ? "/c" : "-c";
@@ -72,7 +82,7 @@ public class Toolchain {
                 }
 
 				final var builder = new ProcessBuilder(shell, shellFlag, buildCommand);
-				builder.directory(workingDir.toFile());
+				builder.directory(workingDirectory.toFile());
 				builder.redirectErrorStream(true);
                 builder.environment().putAll(config.environmentVariables);
 
@@ -112,7 +122,7 @@ public class Toolchain {
 
                 LOGGER.error("Build failed with exception", e);
 			}
-		});
+		}, Util.backgroundExecutor());
 
 		return future;
 	}
