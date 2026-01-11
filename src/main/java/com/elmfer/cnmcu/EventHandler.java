@@ -6,6 +6,7 @@ import imgui.ImGuiIO;
 import imgui.flag.ImGuiConfigFlags;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
+import imgui.internal.ImGuiContext;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldTerrainRenderContext;
@@ -20,7 +21,8 @@ public class EventHandler {
 
     public final static ImGuiImplGlfw IMGUI_GLFW = new ImGuiImplGlfw();
     public final static ImGuiImplGl3 IMGUI_GL3 = new ImGuiImplGl3();
-
+    public static ImGuiContext IMGUI;
+    public static ImGuiIO IMGUI_IO;
     private static boolean hasNotifiedPlayerAboutUpdate = false;
 
     public static void registerClientEventHandlers() {
@@ -37,22 +39,22 @@ public class EventHandler {
     }
 
     private static void onClientStarted(Minecraft client) {
-        ImGui.createContext();
+        IMGUI = ImGui.createContext();
 
         IMGUI_GLFW.init(client.getWindow().handle(), true);
         IMGUI_GL3.init("#version 330 core");
 
-        ImGuiIO io = ImGui.getIO();
+        IMGUI_IO = ImGui.getIO();
 
-        io.setIniFilename(ModSetup.IMGUI_INI_FILE);
-        io.setDisplaySize(client.getWindow().getScreenWidth(), client.getWindow().getScreenHeight());
-        io.setConfigFlags(ImGuiConfigFlags.DockingEnable);
+        IMGUI_IO.setIniFilename(ModSetup.IMGUI_INI_FILE);
+        IMGUI_IO.setDisplaySize(client.getWindow().getScreenWidth(), client.getWindow().getScreenHeight());
+        IMGUI_IO.setConfigFlags(ImGuiConfigFlags.DockingEnable);
     }
 
     private static void onClientStopping(Minecraft client) {
         IMGUI_GL3.dispose();
         IMGUI_GLFW.dispose();
-        ImGui.destroyContext();
+        ImGui.destroyContext(IMGUI);
         CONFIG.save().join();
         TOOLCHAIN.saveConfig().join();
     }
