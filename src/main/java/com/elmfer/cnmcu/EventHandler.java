@@ -50,6 +50,9 @@ public class EventHandler {
     }
 
     private static void onClientStopping(Minecraft client) {
+        IMGUI_GL3.dispose();
+        IMGUI_GLFW.dispose();
+        ImGui.destroyContext();
         CONFIG.save().join();
         TOOLCHAIN.saveConfig().join();
     }

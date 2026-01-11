@@ -327,8 +327,6 @@ public class Toolchain {
             this.workingDirectory = workingDirectory;
             this.buildVariables.putAll(buildVariables);
             this.environmentVariables.putAll(environmentVariables);
-
-            LOGGER.info("AA: {}", buildVariables.getClass().getCanonicalName());
         }
 
         public static ToolchainConfig defaultConfig() {
