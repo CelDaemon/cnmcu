@@ -1,6 +1,7 @@
 package com.elmfer.cnmcu.ui;
 
 import java.nio.ByteBuffer;
+import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -414,7 +415,8 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
             shouldUpload = false;
         }
 
-        ImGui.text(String.format("%s %s", TOOLCHAIN.getBuildVariable("input"), saved ? "[Saved]" : "[Unsaved]"));
+        ImGui.text(String.format("%s %s", TOOLCHAIN.getInputPath().map(Path::toString).orElse("<unknown>"),
+                saved ? "[Saved]" : "[Unsaved]"));
         ImGui.setNextWindowSize(0, 400);
         textEditor.render("TextEditor");
 
