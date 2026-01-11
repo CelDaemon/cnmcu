@@ -37,7 +37,6 @@ import com.elmfer.cnmcu.network.IDEScreenSyncPayload.CPUStatus;
 import com.elmfer.cnmcu.ui.handler.IDEMenu;
 
 import imgui.ImGui;
-import imgui.ImGuiIO;
 import imgui.extension.imguifiledialog.ImGuiFileDialog;
 import imgui.extension.memedit.MemoryEditor;
 import imgui.extension.texteditor.TextEditor;
@@ -45,12 +44,12 @@ import org.lwjgl.opengl.GL30C;
 
 import static com.elmfer.cnmcu.CodeNodeMicrocontrollers.CONFIG;
 import static com.elmfer.cnmcu.CodeNodeMicrocontrollers.TOOLCHAIN;
+import static com.elmfer.cnmcu.EventHandler.IMGUI;
+import static com.elmfer.cnmcu.EventHandler.IMGUI_IO;
 
 public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
     private static final String CODE_EDITOR_NAME = "Code Editor";
     private static final String CONSOLE_NAME = "Console";
-
-    private static final ImGuiIO IO = ImGui.getIO();
 
     private final TextEditor textEditor;
     private final MemoryEditor memoryEditor;
@@ -110,6 +109,8 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
     public void render(@NotNull GuiGraphics gui, int mouseX, int mouseY, float delta) {
         sendHeartbeat();
 
+        ImGui.setCurrentContext(IMGUI);
+
         ImGui.newFrame();
 
         ImGui.pushStyleVar(ImGuiStyleVar.WindowRounding, 0.0f);
@@ -160,7 +161,7 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
     @Override
     public boolean keyPressed(@NotNull KeyEvent key) {
 
-        if (IO.getWantCaptureKeyboard())
+        if (IMGUI_IO.getWantCaptureKeyboard())
             return true;
 
         if (key.key() == GLFW.GLFW_KEY_ESCAPE || minecraft.options.keyInventory.matches(key)) {
@@ -579,6 +580,7 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
         if (!saved && !textEditor.getText().isEmpty())
             Sketches.saveBackup(textEditor.getText());
 
+        ImGui.setCurrentContext(IMGUI);
         renderTarget.destroyBuffers();
         textEditor.destroy();
         memoryEditor.destroy();
@@ -592,7 +594,7 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
     }
 
     private boolean isSaveKeybind() {
-        var mod = IO.getConfigMacOSXBehaviors() ? IO.getKeySuper() : IO.getKeyCtrl();
+        var mod = IMGUI_IO.getConfigMacOSXBehaviors() ? IMGUI_IO.getKeySuper() : IMGUI_IO.getKeyCtrl();
         return mod && ImGui.isKeyPressed('S');
     }
 
