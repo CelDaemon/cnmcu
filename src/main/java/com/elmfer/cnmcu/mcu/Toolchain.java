@@ -1,21 +1,17 @@
 package com.elmfer.cnmcu.mcu;
 
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.regex.Matcher;
 
 import com.elmfer.cnmcu.CodeNodeMicrocontrollers;
 import com.elmfer.cnmcu.cpp.NativesLoader;
+import com.elmfer.cnmcu.util.BuildProcess;
 import com.google.gson.*;
 
 import com.google.gson.stream.JsonReader;
@@ -50,81 +46,12 @@ public class Toolchain {
         return config.save();
     }
     public Optional<Path> getInputPath() {
-        final var value = config.buildVariables.get("input");
-        return Optional.ofNullable(value).map(Path::of);
+        return config.getInputPath();
     }
-    public Optional<Path> getOutputPath() {
-        final var value = config.buildVariables.get("output");
-        return Optional.ofNullable(value).map(Path::of);
-    }
-	public CompletableFuture<byte[]> build(String code) {
-		CompletableFuture<byte[]> future = new CompletableFuture<>();
-
-
-		CompletableFuture.runAsync(() -> {
-			try {
-                final var workingDirectory = config.workingDirectory;
-                final var inputFile = workingDirectory.resolve(getInputPath().orElseThrow(
-                        () -> new NoSuchElementException("Input build variable not set")));
-
-                final var outputFile = workingDirectory.resolve(getOutputPath().orElseThrow(
-                        () -> new NoSuchElementException("Output build variable not set")));
-
-				Files.writeString(inputFile, code);
-
-				final var shell = NativesLoader.NATIVES_OS.equals("windows") ? "cmd" : "sh";
-                final var shellFlag = NativesLoader.NATIVES_OS.equals("windows") ? "/c" : "-c";
-                var buildCommand = config.buildCommand;
-				
-                for (final var entry : config.buildVariables.entrySet()) {
-                    buildCommand = buildCommand.replace("${" + entry.getKey() + "}",
-                            Matcher.quoteReplacement(entry.getValue()));
-                }
-
-				final var builder = new ProcessBuilder(shell, shellFlag, buildCommand);
-				builder.directory(workingDirectory.toFile());
-				builder.redirectErrorStream(true);
-                builder.environment().putAll(config.environmentVariables);
-
-				final var process = builder.start();
-
-				final var outThread = new Thread(() -> {
-					try (final var reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-						String line;
-						while ((line = reader.readLine()) != null)
-							appendBuildStdout(line);
-					} catch (Exception e) {
-						appendBuildStdout("build", "Failed to read build output");
-					}
-				});
-				outThread.start();
-
-				int exitCode = process.waitFor();
-				outThread.join();
-
-				if (exitCode != 0) {
-                    future.completeExceptionally(new Exception("Build failed"));
-
-                    appendBuildStdout("build", "Build failed");
-                    return;
-
-				}
-
-                final var output = Files.readAllBytes(outputFile);
-
-                future.complete(output);
-
-                appendBuildStdout("build", "Build successful");
-			} catch (Exception e) {
-				future.completeExceptionally(e);
-
-				appendBuildStdout("build", "Build failed with exception: \n" + e);
-
-                LOGGER.error("Build failed with exception", e);
-			}
-		}, Util.backgroundExecutor());
-
-		return future;
+	public BuildProcess build(String code) {
+        final var process = new BuildProcess(buildStdout, config);
+        process.start(code);
+        return process;
 	}
 
 	public String getBuildStdout() {
@@ -133,10 +60,6 @@ public class Toolchain {
 
 	public void appendBuildStdout(String module, String output) {
 		buildStdout.append("[").append(module).append("] ").append(output).append("\n");
-	}
-
-	public void appendBuildStdout(String output) {
-		buildStdout.append(output).append("\n");
 	}
 
 	public void clearBuildStdout() {
@@ -293,6 +216,15 @@ public class Toolchain {
                         Codec.unboundedMap(Codec.STRING, Codec.STRING).fieldOf("environment_variables").forGetter(ToolchainConfig::getEnvironmentVariables)
                 ).apply(instance, ToolchainConfig::new));
 
+        public Optional<Path> getInputPath() {
+            final var value = buildVariables.get("input");
+            return Optional.ofNullable(value).map(Path::of);
+        }
+        public Optional<Path> getOutputPath() {
+            final var value = buildVariables.get("output");
+            return Optional.ofNullable(value).map(Path::of);
+        }
+
         public String getBuildCommand() {
             return buildCommand;
         }
@@ -368,4 +300,6 @@ public class Toolchain {
         }
 
     }
+
+
 }
