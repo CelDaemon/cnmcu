@@ -2,12 +2,12 @@ package com.elmfer.cnmcu.ui;
 
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import com.elmfer.cnmcu.mixins.GuiContextInvoker;
 import com.elmfer.cnmcu.network.*;
+import com.elmfer.cnmcu.util.BuildProcess;
 import com.mojang.blaze3d.opengl.GlDevice;
 import com.mojang.blaze3d.opengl.GlStateManager;
 import com.mojang.blaze3d.opengl.GlTexture;
@@ -24,6 +24,7 @@ import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
 
@@ -66,8 +67,8 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
 
     private final ClockTimer heartbeatTimer = new ClockTimer(1);
     private final IDEScreenHeartbeatPayload heartbeatPacket;
-
-    private CompletableFuture<byte[]> compileFuture;
+    @Nullable
+    private BuildProcess buildProcess;
     private Future<UploadROMResponsePayload> uploadPacket;
     private boolean shouldUpload = false;
 
@@ -387,7 +388,7 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
         if (isSaveKeybind())
             save();
 
-        ImGui.beginDisabled(shouldUpload || compileFuture != null);
+        ImGui.beginDisabled(shouldUpload || buildProcess != null);
         if (ImGui.button("Build"))
             build();
         ImGui.sameLine();
@@ -395,12 +396,12 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
             upload();
         ImGui.endDisabled();
 
-        if (compileFuture != null && compileFuture.isDone() && !shouldUpload)
-            compileFuture = null;
+        if (buildProcess != null && buildProcess.onFinish().isDone() && !shouldUpload)
+            buildProcess = null;
 
-        if (shouldUpload && compileFuture != null && compileFuture.isDone() && uploadPacket == null) {
+        if (shouldUpload && buildProcess != null && buildProcess.onFinish().isDone() && uploadPacket == null) {
             try {
-                uploadPacket = UploadROMRequestPayload.send(handler.getMcuID(), compileFuture.get());
+                uploadPacket = UploadROMRequestPayload.send(handler.getMcuID(), buildProcess.onFinish().get());
             } catch (Exception e) {
                 shouldUpload = false;
             }
@@ -551,7 +552,7 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
         save();
 
         TOOLCHAIN.clearBuildStdout();
-        compileFuture = TOOLCHAIN.build(textEditor.getText());
+        buildProcess = TOOLCHAIN.build(textEditor.getText());
     }
 
     private void upload() {
@@ -589,8 +590,8 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
         TOOLCHAIN.saveConfig();
         TOOLCHAIN.clearBuildStdout();
 
-        if (compileFuture != null)
-            compileFuture.cancel(true);
+        if(buildProcess != null)
+            buildProcess.cancel();
     }
 
     private boolean isSaveKeybind() {
