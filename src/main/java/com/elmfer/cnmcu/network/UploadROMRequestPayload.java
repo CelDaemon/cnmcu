@@ -15,7 +15,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Future;
 
 import static com.elmfer.cnmcu.CodeNodeMicrocontrollers.LOGGER;
 
@@ -88,7 +87,7 @@ public record UploadROMRequestPayload(
         ));
     }
 
-    public static Future<UploadROMResponsePayload> send(UUID mcuId, byte[] rom) {
+    public static CompletableFuture<UploadROMResponsePayload> send(UUID mcuId, byte[] rom) {
         var transactionId = nextTransactionId++;
         var future = new CompletableFuture<UploadROMResponsePayload>();
         TRANSACTIONS.put(transactionId, future);

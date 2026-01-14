@@ -43,8 +43,6 @@ public class CodeNodeMicrocontrollers implements ModInitializer {
         ModSetup.downloadNatives();
         ModSetup.downloadToolchain();
 
-        checkForUpdates();
-
         NativesLoader.loadNatives();
 
         Blocks.init();
@@ -54,23 +52,6 @@ public class CodeNodeMicrocontrollers implements ModInitializer {
 
         Packets.registerPackets();
         Packets.initServerPackets();
-    }
-
-    public static void checkForUpdates() {
-        if (!CONFIG.isAdviseUpdates())
-            return;
-
-        ModSetup.checkForUpdates();
-
-        if (ModSetup.isUpdateAvailable()) {
-            var latestForMCVersions = String.join(", ", ModSetup.getLatestForMinecraftVersions());
-            LOGGER.info("An update is available for CodeNode Microcontrollers: {} for Minecraft {}",
-                    ModSetup.getLatestVersion(), latestForMCVersions);
-        } else if (!ModSetup.wasAbleToCheckForUpdates()) {
-            LOGGER.info("CodeNode Microcontrollers was unable to check for updates.");
-        } else {
-            LOGGER.info("CodeNode Microcontrollers is up to date.");
-        }
     }
 
     public static Identifier id(String path) {
