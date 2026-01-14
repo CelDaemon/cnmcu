@@ -1,10 +1,7 @@
 package com.elmfer.cnmcu.ui;
 
-import java.net.URI;
-
 import com.elmfer.cnmcu.CodeNodeMicrocontrollers;
 import com.elmfer.cnmcu.animation.Timer;
-import com.elmfer.cnmcu.config.ModSetup;
 
 import imgui.ImGui;
 import imgui.flag.ImGuiTableFlags;
@@ -19,35 +16,6 @@ public final class QuickReferences {
 
     private QuickReferences() {}
 
-    public static void genUpdates() {
-        if (!ModSetup.wasAbleToCheckForUpdates()) {
-            ImGui.textColored(0xFFA2A2FF, "Failed to check for updates!");
-            ImGui.text("No internet connection or GitHub is down.");
-            return;
-        }
-        
-        if (!ModSetup.hasCheckedForUpdates()) {
-            ImGui.text("Checking for updates...");
-            ModSetup.checkForUpdatesAsync();
-            return;
-        }
-
-        if (ModSetup.isUpdateAvailable())
-            ImGui.textColored(0xFF00FF00, "An update is available!");
-        else
-            ImGui.textColored(0xFFFFA2A2, "CodeNode Microcontrollers is up to date!");
-        
-        ImGui.newLine();
-
-        String title = String.format("CodeNode Microcontrollers v%s for Minecraft %s", ModSetup.getLatestVersion(),
-                String.join(", ", ModSetup.getLatestForMinecraftVersions()));
-        ImGui.text(title);
-
-        ImGui.separator();
-        
-        ImGui.textWrapped(ModSetup.getChangelog());
-    }
-        
 
     public static void genAbout() {
         ImGui.text(String.format("CodeNode Microcontrollers v%s", CodeNodeMicrocontrollers.MOD_VERSION));

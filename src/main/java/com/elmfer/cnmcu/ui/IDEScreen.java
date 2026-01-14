@@ -73,7 +73,6 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
     private boolean shouldUpload = false;
 
     private boolean showAbout = false;
-    private boolean showUpdates = false;
     private boolean showToolchainSettings = false;
     private boolean showLoadBackup = false;
     private boolean shouldLoadDefaults = false;
@@ -227,8 +226,6 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
                 showAbout = true;
             if (ImGui.menuItem((CONFIG.isShowDocs() ? "Hide " : "Show ") + "Documentation"))
                 CONFIG.setShowDocs(!CONFIG.isShowDocs());
-            if (ImGui.menuItem("Updates"))
-                showUpdates = true;
             ImGui.endMenu();
         }
     }
@@ -237,11 +234,6 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
         if (showAbout) {
             ImGui.openPopup("About");
             showAbout = false;
-        }
-
-        if (showUpdates) {
-            ImGui.openPopup("Updates");
-            showUpdates = false;
         }
 
         if (showToolchainSettings) {
@@ -298,22 +290,6 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
             ImGui.setCursorPosY(Math.max(windowHeight, ImGui.getCursorPosY()));
             if (ImGui.button("Close"))
                 ImGui.closeCurrentPopup();
-            ImGui.endPopup();
-        }
-
-        ImGui.setNextWindowPos(centerX, centerY, ImGuiCond.Always, 0.5f, 0.5f);
-        ImGui.setNextWindowSize(800, 322, ImGuiCond.Once);
-        ImGui.setNextWindowSizeConstraints(0, 0, width, height);
-        if (ImGui.beginPopupModal("Updates")) {
-            float windowHeight = ImGui.getContentRegionAvailY();
-            QuickReferences.genUpdates();
-            ImGui.newLine();
-            ImGui.setCursorPosY(Math.max(windowHeight, ImGui.getCursorPosY()));
-            if (ImGui.button("Close"))
-                ImGui.closeCurrentPopup();
-            ImGui.sameLine();
-            if (ImGui.checkbox("Notify me of updates", CONFIG.isAdviseUpdates()))
-                CONFIG.setAdviseUpdates(!CONFIG.isAdviseUpdates());
             ImGui.endPopup();
         }
 
