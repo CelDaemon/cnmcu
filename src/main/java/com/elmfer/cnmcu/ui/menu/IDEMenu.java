@@ -1,9 +1,11 @@
-package com.elmfer.cnmcu.ui.handler;
+package com.elmfer.cnmcu.ui.menu;
 
-import java.util.UUID;
-
+import com.elmfer.cnmcu.CodeNodeMicrocontrollers;
 import com.elmfer.cnmcu.blocks.Blocks;
-import net.minecraft.core.UUIDUtil;
+import com.elmfer.cnmcu.mixins.AbstractContainerMenuAccessor;
+import com.elmfer.cnmcu.mixins.ServerPlayerContainerSynchronizerAccessor;
+import com.elmfer.cnmcu.network.IDEScreenSyncPayload;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.entity.player.Inventory;
@@ -15,45 +17,33 @@ import com.elmfer.cnmcu.blockentities.CNnanoBlockEntity;
 
 import io.netty.buffer.ByteBuf;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class IDEMenu extends AbstractContainerMenu {
+    public final String code;
+    public final ContainerLevelAccess containerAccess;
+    @Nullable
+    public final CNnanoBlockEntity blockEntity;
 
-    private final UUID mcuID;
-    private final String code;
-
-    private final ContainerLevelAccess containerAccess;
     
     public IDEMenu(int containerId, Inventory ignoredPlayerInventory, OpenData data) {
         super(Menus.IDE_MENU, containerId);
 
-        mcuID = data.mcuId;
         code = data.code;
         containerAccess = ContainerLevelAccess.NULL;
+
+        blockEntity = null;
     }
-    public IDEMenu(int containerId, UUID mcuID, ContainerLevelAccess containerAccess) {
+    public IDEMenu(int containerId, ContainerLevelAccess containerAccess, @NotNull CNnanoBlockEntity blockEntity) {
         super(Menus.IDE_MENU, containerId);
-        
-        this.mcuID = mcuID;
         this.code = "";
         this.containerAccess = containerAccess;
-    }
 
-    public UUID getMcuID() {
-        return mcuID;
-    }
-
-    public String getCode() {
-        return code;
-    }
-    
-    @Override
-    public void removed(Player player) {
-        if (!player.level().isClientSide() && CNnanoBlockEntity.SCREEN_UPDATES.containsKey(mcuID))
-            CNnanoBlockEntity.SCREEN_UPDATES.get(mcuID).removeListener(player.getUUID());
+        this.blockEntity = blockEntity;
     }
    
     @Override
-    public ItemStack quickMoveStack(Player player, int slot) {
+    public @NotNull ItemStack quickMoveStack(@NotNull Player player, int slot) {
         return ItemStack.EMPTY;
     }
 
@@ -62,12 +52,23 @@ public class IDEMenu extends AbstractContainerMenu {
         return stillValid(containerAccess, player, Blocks.CN_NANO_BLOCK);
     }
 
+    @Override
+    public void broadcastChanges() {
+        super.broadcastChanges();
+        if(blockEntity == null)
+            return;
+        var accessor = (AbstractContainerMenuAccessor) this;
+        var synchronizer = (ServerPlayerContainerSynchronizerAccessor) accessor.cnmcu$getSynchronizer();
+        if(synchronizer == null)
+            return;
+        var player = synchronizer.cnmcu$getPlayer();
+        ServerPlayNetworking.send(player, IDEScreenSyncPayload.create(blockEntity));
+    }
+
     public record OpenData(
-            UUID mcuId,
             String code
     ) {
        public static final StreamCodec<ByteBuf, OpenData> STREAM_CODEC = StreamCodec.composite(
-               UUIDUtil.STREAM_CODEC, OpenData::mcuId,
                ByteBufCodecs.STRING_UTF8, OpenData::code,
                OpenData::new
        );

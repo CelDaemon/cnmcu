@@ -29,13 +29,12 @@ import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
 
 import com.elmfer.cnmcu.EventHandler;
-import com.elmfer.cnmcu.animation.ClockTimer;
 import com.elmfer.cnmcu.cpp.NativesUtils;
 import com.elmfer.cnmcu.mcu.Sketches;
 import com.elmfer.cnmcu.network.IDEScreenMCUControlPayload.Control;
 import com.elmfer.cnmcu.network.IDEScreenSyncPayload.BusStatus;
 import com.elmfer.cnmcu.network.IDEScreenSyncPayload.CPUStatus;
-import com.elmfer.cnmcu.ui.handler.IDEMenu;
+import com.elmfer.cnmcu.ui.menu.IDEMenu;
 
 import imgui.ImGui;
 import imgui.extension.imguifiledialog.ImGuiFileDialog;
@@ -54,7 +53,6 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
 
     private final TextEditor textEditor;
     private final MemoryEditor memoryEditor;
-    private final IDEMenu handler;
     private final RenderTarget renderTarget;
 
     private boolean saved = true;
@@ -64,9 +62,6 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
     public boolean isPowered = false;
     public boolean isClockPaused = false;
     public ByteBuffer zeroPage = BufferUtils.createByteBuffer(256);
-
-    private final ClockTimer heartbeatTimer = new ClockTimer(1);
-    private final IDEScreenHeartbeatPayload heartbeatPacket;
     @Nullable
     private BuildProcess buildProcess;
     private Future<UploadROMResponsePayload> uploadPacket;
@@ -77,16 +72,13 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
     private boolean showLoadBackup = false;
     private boolean shouldLoadDefaults = false;
 
-    public IDEScreen(IDEMenu handler, Inventory inventory, Component title) {
-        super(handler, inventory, title);
+    public IDEScreen(IDEMenu menu, Inventory inventory, Component title) {
+        super(menu, inventory, title);
 
         textEditor = new TextEditor();
         memoryEditor = new MemoryEditor();
-        heartbeatPacket = new IDEScreenHeartbeatPayload(handler.getMcuID());
 
-        textEditor.setText(handler.getCode());
-
-        this.handler = handler;
+        textEditor.setText(menu.code);
 
         final var descriptor = getTargetDescriptor();
         this.renderTarget = descriptor.allocate();
@@ -107,8 +99,6 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
 
     @Override
     public void render(@NotNull GuiGraphics gui, int mouseX, int mouseY, float delta) {
-        sendHeartbeat();
-
         ImGui.setCurrentContext(IMGUI);
 
         ImGui.newFrame();
@@ -377,7 +367,7 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
 
         if (shouldUpload && buildProcess != null && buildProcess.onFinish().isDone() && uploadPacket == null) {
             try {
-                uploadPacket = UploadROMRequestPayload.send(handler.getMcuID(), buildProcess.onFinish().get());
+                uploadPacket = UploadROMRequestPayload.send(menu.containerId, buildProcess.onFinish().get());
             } catch (Exception e) {
                 shouldUpload = false;
             }
@@ -443,8 +433,6 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
             return;
         }
 
-        ImGui.text(String.format("MCU ID: %s", handler.getMcuID()));
-
         ImGui.text("Specs");
         ImGui.sameLine();
         ImGui.separator();
@@ -459,21 +447,21 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
         ImGui.sameLine();
         ImGui.separator();
         if (ImGui.checkbox("Power", isPowered))
-            ClientPlayNetworking.send(new IDEScreenMCUControlPayload(handler.getMcuID(),
+            ClientPlayNetworking.send(new IDEScreenMCUControlPayload(menu.containerId,
                     isPowered ? Control.POWER_OFF : Control.POWER_ON)
             );
         ImGui.sameLine();
         if (ImGui.button("Reset"))
-            ClientPlayNetworking.send(new IDEScreenMCUControlPayload(handler.getMcuID(), Control.RESET));
+            ClientPlayNetworking.send(new IDEScreenMCUControlPayload(menu.containerId, Control.RESET));
         ImGui.sameLine();
         ImGui.beginDisabled(!isPowered);
         if (ImGui.checkbox("Pause", isClockPaused))
-            ClientPlayNetworking.send(new IDEScreenMCUControlPayload(handler.getMcuID(),
+            ClientPlayNetworking.send(new IDEScreenMCUControlPayload(menu.containerId,
                     isClockPaused ? Control.RESUME_CLOCK : Control.PAUSE_CLOCK));
         ImGui.sameLine();
         ImGui.beginDisabled(!isClockPaused);
         if (ImGui.button("Step"))
-            ClientPlayNetworking.send(new IDEScreenMCUControlPayload(handler.getMcuID(), Control.CYCLE));
+            ClientPlayNetworking.send(new IDEScreenMCUControlPayload(menu.containerId, Control.CYCLE));
         ImGui.endDisabled();
         ImGui.endDisabled();
 
@@ -519,11 +507,6 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
         ImGui.end();
     }
 
-    private void sendHeartbeat() {
-        if (heartbeatTimer.ticksPassed() != 0)
-            ClientPlayNetworking.send(heartbeatPacket);
-    }
-
     private void build() {
         save();
 
@@ -541,7 +524,7 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
             return;
         
         saved = true;
-        ClientPlayNetworking.send(new IDEScreenSaveCodePayload(handler.getMcuID(), textEditor.getText()));
+        ClientPlayNetworking.send(new IDEScreenSaveCodePayload(menu.containerId, textEditor.getText()));
         
         if (!textEditor.getText().isEmpty())
             Sketches.saveBackup(textEditor.getText());

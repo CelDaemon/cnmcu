@@ -1,14 +1,12 @@
 package com.elmfer.cnmcu.network;
 
-import java.util.UUID;
 import java.util.function.IntFunction;
 
 import com.elmfer.cnmcu.CodeNodeMicrocontrollers;
-import com.elmfer.cnmcu.blockentities.CNnanoBlockEntity;
 
+import com.elmfer.cnmcu.ui.menu.IDEMenu;
 import io.netty.buffer.ByteBuf;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -17,13 +15,15 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.util.ByIdMap;
 import org.jetbrains.annotations.NotNull;
 
+import static com.elmfer.cnmcu.CodeNodeMicrocontrollers.LOGGER;
+
 public record IDEScreenMCUControlPayload(
-        UUID mcuId,
+        int containerId,
         Control control) implements CustomPacketPayload {
     public static final Identifier RAW_ID = CodeNodeMicrocontrollers.id("ide_screen_mcu_control");
     public static final Type<IDEScreenMCUControlPayload> ID = new Type<>(RAW_ID);
     public static final StreamCodec<FriendlyByteBuf, IDEScreenMCUControlPayload> CODEC = StreamCodec.composite(
-            UUIDUtil.STREAM_CODEC, IDEScreenMCUControlPayload::mcuId,
+            ByteBufCodecs.CONTAINER_ID, IDEScreenMCUControlPayload::containerId,
             Control.STREAM_CODEC, IDEScreenMCUControlPayload::control,
             IDEScreenMCUControlPayload::new
     );
@@ -34,35 +34,44 @@ public record IDEScreenMCUControlPayload(
     }
 
     public static void receive(IDEScreenMCUControlPayload payload, ServerPlayNetworking.Context ignoredContext) {
-        var mcuId = payload.mcuId();
-        
-        if (!CNnanoBlockEntity.SCREEN_UPDATES.containsKey(mcuId))
-            return;
+        var menu = ignoredContext.player().containerMenu;
 
+        if(menu.containerId != payload.containerId()) {
+            LOGGER.debug("Ignoring save packet with mismatched container id");
+            return;
+        }
+
+        if(!(menu instanceof IDEMenu ideMenu)) {
+            LOGGER.debug("Sent save payload with invalid menu type");
+            return;
+        }
         var control = payload.control();
-        CNnanoBlockEntity entity = CNnanoBlockEntity.SCREEN_UPDATES.get(mcuId).getEntity();
+
+        var blockEntity = ideMenu.blockEntity;
+
+        assert blockEntity != null;
         
         switch (control) {
         case POWER_ON:
-            entity.setPowered(true);
+            blockEntity.setPowered(true);
             break;
         case POWER_OFF:
-            entity.setPowered(false);
+            blockEntity.setPowered(false);
             break;
         case RESET:
-            entity.reset();
+            blockEntity.reset();
             break;
         case PAUSE_CLOCK:
-            if (entity.isPowered())
-                entity.setClockPause(true);
+            if (blockEntity.isPowered())
+                blockEntity.setClockPause(true);
             break;
         case RESUME_CLOCK:
-            if (entity.isPowered())
-                entity.setClockPause(false);
+            if (blockEntity.isPowered())
+                blockEntity.setClockPause(false);
             break;
         case CYCLE:
-            if (entity.isClockPaused())
-                entity.cycle();
+            if (blockEntity.isClockPaused())
+                blockEntity.cycle();
             break;
         }
     }

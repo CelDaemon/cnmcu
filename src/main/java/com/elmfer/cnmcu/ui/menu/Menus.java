@@ -1,4 +1,4 @@
-package com.elmfer.cnmcu.ui.handler;
+package com.elmfer.cnmcu.ui.menu;
 
 import com.elmfer.cnmcu.CodeNodeMicrocontrollers;
 
