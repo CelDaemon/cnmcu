@@ -102,6 +102,10 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
             return;
         textEditor.setText(code);
     }
+    public String getCode() {
+        // TextEditor#getText is bugged and returns an extra newline.
+        return String.join("\n", textEditor.getTextLines());
+    }
 
     @Override
     public void render(@NotNull GuiGraphics gui, int mouseX, int mouseY, float delta) {
@@ -257,7 +261,7 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
                 if (filePath == null || filePath.isEmpty())
                     return;
                 CONFIG.setLastSavePath(filePath);
-                Sketches.saveSketch(textEditor.getText(), filePath);
+                Sketches.saveSketch(getCode(), filePath);
                 save();
             }
             ImGuiFileDialog.close();
@@ -265,7 +269,7 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
         
         if (ImGuiFileDialog.display("##LoadSketchFile", 0, 0, 0, width, height)) {
             if (ImGuiFileDialog.isOk()) {
-                Sketches.saveBackup(textEditor.getText());
+                Sketches.saveBackup(getCode());
                 String filePath = ImGuiFileDialog.getFilePathName();
                 if (filePath == null || filePath.isEmpty())
                     return;
@@ -517,7 +521,7 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
         save();
 
         TOOLCHAIN.clearBuildStdout();
-        buildProcess = TOOLCHAIN.build(textEditor.getText());
+        buildProcess = TOOLCHAIN.build(getCode());
     }
 
     private void upload() {
@@ -526,14 +530,14 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
     }
 
     private void save() {
-        if (saved || textEditor.getText().isEmpty())
+        if (saved)
             return;
         
         saved = true;
-        ClientPlayNetworking.send(new IDEScreenSaveCodePayload(menu.containerId, textEditor.getText()));
+        ClientPlayNetworking.send(new IDEScreenSaveCodePayload(menu.containerId, getCode()));
         
-        if (!textEditor.getText().isEmpty())
-            Sketches.saveBackup(textEditor.getText());
+        if (!getCode().isEmpty())
+            Sketches.saveBackup(getCode());
     }
 
     @Override
@@ -543,8 +547,8 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
 
     @Override
     public void removed() {
-        if (!saved && !textEditor.getText().isEmpty())
-            Sketches.saveBackup(textEditor.getText());
+        if (!saved && !getCode().isEmpty())
+            Sketches.saveBackup(getCode());
 
         ImGui.setCurrentContext(IMGUI);
         renderTarget.destroyBuffers();
