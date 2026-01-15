@@ -181,7 +181,7 @@ public class CNnanoBlockEntity extends BlockEntity implements ExtendedScreenHand
     @Override
     public AbstractContainerMenu createMenu(int containerId, @NotNull Inventory playerInventory, @NotNull Player player) {
         assert level != null;
-        return new IDEMenu(containerId, ContainerLevelAccess.create(level, getBlockPos()), this);
+        return new IDEMenu(containerId, ContainerLevelAccess.create(level, getBlockPos()), this, (ServerPlayer) player);
     }
 
     @Override

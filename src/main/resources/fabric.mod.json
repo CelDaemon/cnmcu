@@ -32,6 +32,9 @@
 		"fabric-api": "*"
 	},
 	"mixins": [
-		"cnmcu.mixin.json"
+		{
+			"environment": "client",
+			"config": "cnmcu.mixin.json"
+		}
 	]
 }
