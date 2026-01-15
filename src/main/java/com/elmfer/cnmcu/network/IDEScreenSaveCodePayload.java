@@ -1,44 +1,53 @@
 package com.elmfer.cnmcu.network;
 
-import java.util.UUID;
-
 import com.elmfer.cnmcu.CodeNodeMicrocontrollers;
 
-import com.elmfer.cnmcu.blockentities.CNnanoBlockEntity;
+import com.elmfer.cnmcu.ui.menu.IDEMenu;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
+import org.jetbrains.annotations.NotNull;
+
+import static com.elmfer.cnmcu.CodeNodeMicrocontrollers.LOGGER;
 
 public record IDEScreenSaveCodePayload(
-        UUID mcuId,
+        int containerId,
         String code) implements CustomPacketPayload {
     public static final Identifier RAW_ID = CodeNodeMicrocontrollers.id("ide_screen_save_code");
-    public static final CustomPacketPayload.Type<IDEScreenSaveCodePayload> ID = new CustomPacketPayload.Type<>(RAW_ID);
+    public static final CustomPacketPayload.Type<IDEScreenSaveCodePayload> TYPE = new CustomPacketPayload.Type<>(RAW_ID);
     public static final StreamCodec<FriendlyByteBuf, IDEScreenSaveCodePayload> CODEC = StreamCodec.composite(
-            UUIDUtil.STREAM_CODEC, IDEScreenSaveCodePayload::mcuId,
+            ByteBufCodecs.CONTAINER_ID, IDEScreenSaveCodePayload::containerId,
             ByteBufCodecs.STRING_UTF8, IDEScreenSaveCodePayload::code,
             IDEScreenSaveCodePayload::new
     );
 
     @Override
-    public Type<? extends CustomPacketPayload> type() {
-        return ID;
+    public @NotNull Type<? extends CustomPacketPayload> type() {
+        return TYPE;
     }
 
     public static void receive(IDEScreenSaveCodePayload payload, ServerPlayNetworking.Context ignoredContext) {
-        UUID mcuId = payload.mcuId();
-
         String codeStr = payload.code();
 
+        var menu = ignoredContext.player().containerMenu;
 
-        if (CNnanoBlockEntity.SCREEN_UPDATES.containsKey(mcuId)) {
-            CNnanoBlockEntity entity = CNnanoBlockEntity.SCREEN_UPDATES.get(mcuId).getEntity();
-            entity.setCode(codeStr);
+        if(menu.containerId != payload.containerId()) {
+            LOGGER.debug("Ignoring save packet with mismatched container id");
+            return;
         }
 
+        if(!(menu instanceof IDEMenu ideMenu)) {
+            LOGGER.debug("Sent save payload with invalid menu type");
+            return;
+        }
+
+        var blockEntity = ideMenu.blockEntity;
+
+        assert blockEntity != null;
+
+        blockEntity.setCode(codeStr);
     }
 }
