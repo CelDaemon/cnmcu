@@ -11,5 +11,4 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 public interface GuiContextInvoker {
     @Invoker("submitBlit")
     void cnmcu$submitBlit(RenderPipeline pipeline, GpuTextureView texture, GpuSampler sampler, int x1, int y1, int x2, int y2, float u1, float v1, float u2, float v2, int color);
-
 }

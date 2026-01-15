@@ -2,12 +2,11 @@ package com.elmfer.cnmcu.ui.menu;
 
 import com.elmfer.cnmcu.CodeNodeMicrocontrollers;
 import com.elmfer.cnmcu.blocks.Blocks;
-import com.elmfer.cnmcu.mixins.AbstractContainerMenuAccessor;
-import com.elmfer.cnmcu.mixins.ServerPlayerContainerSynchronizerAccessor;
 import com.elmfer.cnmcu.network.IDEScreenSyncPayload;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -24,8 +23,8 @@ public class IDEMenu extends AbstractContainerMenu {
     public final ContainerLevelAccess containerAccess;
     @Nullable
     public final CNnanoBlockEntity blockEntity;
-
-    
+    @Nullable
+    public final ServerPlayer player;
     public IDEMenu(int containerId, Inventory ignoredPlayerInventory, OpenData data) {
         super(Menus.IDE_MENU, containerId);
 
@@ -33,15 +32,18 @@ public class IDEMenu extends AbstractContainerMenu {
         containerAccess = ContainerLevelAccess.NULL;
 
         blockEntity = null;
+        player = null;
     }
-    public IDEMenu(int containerId, ContainerLevelAccess containerAccess, @NotNull CNnanoBlockEntity blockEntity) {
+    public IDEMenu(int containerId, ContainerLevelAccess containerAccess, @NotNull CNnanoBlockEntity blockEntity,
+                   @NotNull ServerPlayer player) {
         super(Menus.IDE_MENU, containerId);
         this.code = "";
         this.containerAccess = containerAccess;
 
         this.blockEntity = blockEntity;
+        this.player = player;
     }
-   
+
     @Override
     public @NotNull ItemStack quickMoveStack(@NotNull Player player, int slot) {
         return ItemStack.EMPTY;
@@ -55,13 +57,8 @@ public class IDEMenu extends AbstractContainerMenu {
     @Override
     public void broadcastChanges() {
         super.broadcastChanges();
-        if(blockEntity == null)
+        if(blockEntity == null || player == null)
             return;
-        var accessor = (AbstractContainerMenuAccessor) this;
-        var synchronizer = (ServerPlayerContainerSynchronizerAccessor) accessor.cnmcu$getSynchronizer();
-        if(synchronizer == null)
-            return;
-        var player = synchronizer.cnmcu$getPlayer();
         ServerPlayNetworking.send(player, IDEScreenSyncPayload.create(blockEntity));
     }
 

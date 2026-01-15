@@ -14,6 +14,7 @@ import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 
 public record IDEScreenSyncPayload(
+        String code,
         boolean isPowered,
         boolean isClockPaused,
         CPUStatus cpuStatus,
@@ -22,6 +23,7 @@ public record IDEScreenSyncPayload(
     public static final Identifier RAW_ID = CodeNodeMicrocontrollers.id("ide_screen_sync");
     public static final CustomPacketPayload.Type<IDEScreenSyncPayload> ID = new CustomPacketPayload.Type<>(RAW_ID);
     public static final StreamCodec<FriendlyByteBuf, IDEScreenSyncPayload> CODEC = StreamCodec.composite(
+            ByteBufCodecs.STRING_UTF8, IDEScreenSyncPayload::code,
             ByteBufCodecs.BOOL, IDEScreenSyncPayload::isPowered,
             ByteBufCodecs.BOOL, IDEScreenSyncPayload::isClockPaused,
             CPUStatus.PACKET_CODEC, IDEScreenSyncPayload::cpuStatus,
@@ -36,6 +38,7 @@ public record IDEScreenSyncPayload(
         var data = new byte[256];
         dataBuffer.get(data);
         return new IDEScreenSyncPayload(
+                blockEntity.getCode(),
                 mcu.isPowered(),
                 mcu.isClockPaused(),
                 CPUStatus.create(mcu),
@@ -59,6 +62,8 @@ public record IDEScreenSyncPayload(
         screen.busStatus = busStatus;
         screen.zeroPage.clear();
         screen.zeroPage.put(payload.zeroPage());
+
+        screen.setCode(payload.code());
     }
 
     @Override

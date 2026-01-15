@@ -97,6 +97,12 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
         descriptor.prepare(renderTarget);
     }
 
+    public void setCode(String code) {
+        if(!saved)
+            return;
+        textEditor.setText(code);
+    }
+
     @Override
     public void render(@NotNull GuiGraphics gui, int mouseX, int mouseY, float delta) {
         ImGui.setCurrentContext(IMGUI);
