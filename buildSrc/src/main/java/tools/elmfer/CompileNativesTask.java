@@ -13,8 +13,6 @@ public abstract class CompileNativesTask extends DefaultTask {
 
     @InputDirectory
     public abstract DirectoryProperty getSourceDir();
-    @OutputDirectory
-    public abstract DirectoryProperty getBuildDir();
     @InputDirectory
     public abstract DirectoryProperty getBridgeDir();
     @Input
@@ -41,7 +39,6 @@ public abstract class CompileNativesTask extends DefaultTask {
     void execute() {
         final var project = getProject();
         final var sourceDir = getSourceDir();
-        final var buildDir = getBuildDir();
         final var bridgeDir = getBridgeDir();
         final var outputDir = getOutputDir();
         final var buildType = getBuildType();
@@ -50,19 +47,19 @@ public abstract class CompileNativesTask extends DefaultTask {
         if (!sourceDir.isPresent())
             throw new RuntimeException("You must specify source directory for generating native source files!");
 
-        if (!buildDir.isPresent())
-            throw new RuntimeException("You must specify build directory for generating native source files!");
         if (!outputDir.isPresent())
             throw new RuntimeException("You must specify output directory for generating native source files!");
 
         final var absSourceDir = project.file(sourceDir).getAbsolutePath();
-        final var absBuildDir = project.file(buildDir).getAbsolutePath();
+        final var absBuildDir = getTemporaryDir().getAbsolutePath();
         final var absBridgeDir = project.file(bridgeDir).getAbsolutePath();
         final var absOutputDir = project.file(outputDir).getAbsolutePath();
 
-        cmakeExec("-S", absSourceDir, "-B", absBuildDir, "-DCMAKE_BUILD_TYPE=" + buildType.get(), "-DGENERATED_SOURCES_DIR=" + absBridgeDir);
+        cmakeExec("-S", absSourceDir, "-B", absBuildDir, "-DCMAKE_BUILD_TYPE=" + buildType.get(),
+                "-DGENERATED_SOURCES_DIR=" + absBridgeDir);
 
-        cmakeExec("--build", absBuildDir, "--parallel", "4", "--target", cmakeTarget.get(), "--config", buildType.get());
+        cmakeExec("--build", absBuildDir, "--parallel", "4", "--target", cmakeTarget.get(),
+                "--config", buildType.get());
 
         cmakeExec("--install", absBuildDir, "--prefix", absOutputDir);
     }
