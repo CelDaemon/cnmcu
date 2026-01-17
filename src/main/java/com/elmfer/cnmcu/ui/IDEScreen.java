@@ -130,8 +130,6 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
         
         if (ImGui.isWindowFocused(ImGuiFocusedFlags.RootAndChildWindows) && ImGui.isKeyPressed(GLFW.GLFW_KEY_ESCAPE))
             ImGui.setWindowFocus(null);
-        
-        ImGui.end();
 
         ImGui.render();
 
@@ -227,6 +225,7 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
                 CONFIG.setShowDocs(!CONFIG.isShowDocs());
             ImGui.endMenu();
         }
+        ImGui.endMainMenuBar();
     }
 
     private void genPopups() {
@@ -333,8 +332,6 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
             }
             ImGui.endPopup();
         }
-
-        ImGui.endMenuBar();
     }
 
     private void genDocs() {
