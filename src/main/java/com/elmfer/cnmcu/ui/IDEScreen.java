@@ -563,9 +563,4 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
         var mod = IMGUI_IO.getConfigMacOSXBehaviors() ? IMGUI_IO.getKeySuper() : IMGUI_IO.getKeyCtrl();
         return mod && ImGui.isKeyPressed('S');
     }
-
-    @Override
-    public void onClose() {
-        super.onClose();
-    }
 }
