@@ -116,5 +116,5 @@ tasks.shadowJar {
 }
 
 tasks.remapJar {
-	from(tasks.getByName<Jar>("shadowJar").archiveFile)
+	inputFile = tasks.shadowJar.flatMap { it.archiveFile }
 }
