@@ -62,8 +62,7 @@ private:
     bool poweredOn;
     bool clockPaused;
 
-    static CodeNodeNano* currentInstance;
-    static uint8_t read(uint16_t address);
-    static void write(uint16_t address, uint8_t value);
-    static void cycle(mos6502* cpu);
+    uint8_t read(uint16_t address);
+    void write(uint16_t address, uint8_t value);
+    void cycle(mos6502* cpu);
 };

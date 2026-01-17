@@ -7,7 +7,8 @@
 //============================================================================
 
 #pragma once
-#include <stdint.h>
+#include <cstdint>
+#include <functional>
 
 class mos6502
 {
@@ -143,9 +144,9 @@ private:
 	static const uint16_t nmiVectorL = 0xFFFA;
 
 	// read/write/clock-cycle callbacks
-	typedef void (*BusWrite)(uint16_t, uint8_t);
-	typedef uint8_t (*BusRead)(uint16_t);
-	typedef void (*ClockCycle)(mos6502*);
+	using BusWrite = std::function<void(uint16_t, uint8_t)>;
+    using BusRead = std::function<uint8_t(uint16_t)>;
+    using ClockCycle = std::function<void(mos6502*)>;
 	BusRead Read;
 	BusWrite Write;
 	ClockCycle Cycle;
