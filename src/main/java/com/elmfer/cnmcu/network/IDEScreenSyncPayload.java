@@ -63,7 +63,7 @@ public record IDEScreenSyncPayload(
         screen.zeroPage.clear();
         screen.zeroPage.put(payload.zeroPage());
 
-        screen.setCode(payload.code());
+        screen.syncCode(payload.code());
     }
 
     @Override

@@ -96,9 +96,13 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
         descriptor.prepare(renderTarget);
     }
 
-    public void setCode(String code) {
+    public void syncCode(String code) {
         if(!saved)
             return;
+        textEditor.setText(code);
+    }
+    public void loadCode(String code) {
+        saved = false;
         textEditor.setText(code);
     }
     public String getCode() {
@@ -272,8 +276,7 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
                 if (filePath == null || filePath.isEmpty())
                     return;
                 CONFIG.setLastSavePath(filePath);
-                textEditor.setText(Sketches.loadSketch(filePath));
-                save();
+                loadCode(Sketches.loadSketch(filePath));
             }
             ImGuiFileDialog.close();
         }
@@ -328,7 +331,7 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
             ImGui.sameLine();
             if (ImGui.button("Load")) {
                 ImGui.closeCurrentPopup();
-                textEditor.setText(Sketches.getSelectedBackup());
+                loadCode(Sketches.getSelectedBackup());
             }
             ImGui.endPopup();
         }
