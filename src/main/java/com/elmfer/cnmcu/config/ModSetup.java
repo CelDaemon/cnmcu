@@ -1,29 +1,26 @@
 package com.elmfer.cnmcu.config;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Set;
 
-import net.minecraft.resources.Identifier;
 import com.elmfer.cnmcu.CodeNodeMicrocontrollers;
 import com.elmfer.cnmcu.cpp.NativesLoader;
 import com.elmfer.cnmcu.mcu.Sketches;
 import com.elmfer.cnmcu.mcu.Toolchain;
 import com.elmfer.cnmcu.util.HTTPSFetcher;
-import com.elmfer.cnmcu.util.ResourceLoader;
 import com.google.gson.JsonArray;
+import net.minecraft.server.packs.resources.ResourceManager;
+import org.jetbrains.annotations.NotNull;
 
 import static com.elmfer.cnmcu.CodeNodeMicrocontrollers.LOGGER;
 
 public final class ModSetup {
-
-    public static final String IMGUI_INI_FILE = CodeNodeMicrocontrollers.MOD_ID + "/imgui.ini";
+    public static final Path IMGUI_CONFIG_PATH = CodeNodeMicrocontrollers.DATA_PATH.resolve("imgui.ini");
 
     private static final String GITHUB_REPO_URL = "https://api.github.com/repos/elmfrain/cnmcu";
 
@@ -43,20 +40,17 @@ public final class ModSetup {
         }
     }
 
-    public static void imguiIniFile() {
-        final Identifier imguiIniId = CodeNodeMicrocontrollers.id("setup/imgui.ini");
-
-        Path configPath = Paths.get(IMGUI_INI_FILE);
-        if (Files.exists(configPath))
+    public static void copyDefaultImGuiConfig(@NotNull ResourceManager resourceLoader) {
+        if (Files.exists(IMGUI_CONFIG_PATH))
             return;
 
-        try {
-            InputStream imguiIni = ResourceLoader.getInputStream(imguiIniId);
-            Files.copy(imguiIni, configPath);
+        final var resource = resourceLoader.getResource(CodeNodeMicrocontrollers.id("setup/imgui.ini"))
+                .orElseThrow();
 
-            imguiIni.close();
+        try(final var stream = resource.open()) {
+            Files.copy(stream, IMGUI_CONFIG_PATH);
         } catch (Exception e) {
-            LOGGER.error("Failed to write defaint imgui config file", e);
+            LOGGER.error("Failed to write default imgui config file", e);
         }
     }
 

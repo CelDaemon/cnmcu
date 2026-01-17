@@ -34,6 +34,8 @@ public class EventHandler {
     }
 
     private static void onClientStarted(Minecraft client) {
+        ModSetup.copyDefaultImGuiConfig(client.getResourceManager());
+
         IMGUI = ImGui.createContext();
 
         IMGUI_GLFW.init(client.getWindow().handle(), true);
@@ -41,7 +43,7 @@ public class EventHandler {
 
         IMGUI_IO = ImGui.getIO();
 
-        IMGUI_IO.setIniFilename(ModSetup.IMGUI_INI_FILE);
+        IMGUI_IO.setIniFilename(ModSetup.IMGUI_CONFIG_PATH.toString());
         IMGUI_IO.setDisplaySize(client.getWindow().getScreenWidth(), client.getWindow().getScreenHeight());
         IMGUI_IO.setConfigFlags(ImGuiConfigFlags.DockingEnable);
     }
