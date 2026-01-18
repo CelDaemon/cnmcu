@@ -1,13 +1,6 @@
 #include "Nano.hpp"
 
 CodeNodeNano::CodeNodeNano()
-    , cyclesCounter(0)
-    , cyclesTarget(0)
-    , m_busAddress(0)
-    , m_busData(0)
-    , m_busRw(false)
-    , poweredOn(false)
-    , clockPaused(false)
     : cpu(
         [this](uint16_t address) {
             return read(address);
@@ -20,7 +13,6 @@ CodeNodeNano::CodeNodeNano()
         }
       )
 {
-    memset(pinOutputs, 0, GPIO_NUM_PINS);
 }
 
 void CodeNodeNano::tick()
@@ -40,7 +32,7 @@ void CodeNodeNano::tick()
 
     cpu.Run(cyclesTarget - cyclesCounter, cyclesCounter);
 
-    memcpy(pinOutputs, gpio.pvFrontData(), GPIO_NUM_PINS);
+    pinOutputs = gpio.pvFrontData();
     if (!gpio.isInput(uart.txPin()))
         pinOutputs[uart.txPin()] = uart.txOut(); // TX
 }
@@ -56,7 +48,7 @@ void CodeNodeNano::cycle()
     cpu.Run(1, cyclesCounter);
     cyclesTarget = cyclesCounter;
 
-    memcpy(pinOutputs, gpio.pvFrontData(), GPIO_NUM_PINS);
+    pinOutputs = gpio.pvFrontData();
 }
 
 void CodeNodeNano::reset()
@@ -66,7 +58,7 @@ void CodeNodeNano::reset()
     gpio.reset();
     el.reset();
     uart.reset();
-    memset(pinOutputs, 0, GPIO_NUM_PINS);
+    pinOutputs.fill(0);
     cpu.Reset();
     cyclesCounter = 0;
     cyclesTarget = 0;
@@ -162,7 +154,7 @@ void CodeNodeNano::write(uint16_t address, uint8_t value)
     }
     else if(0x7100 <= address && address < (0x7100 + el.size()))
     {
-        currentInstance->el.write(address - 0x7100, value);
+        el.write(address - 0x7100, value);
         return;
     }
     else if(0x7200 <= address && address < (0x7200 + uart.size()))

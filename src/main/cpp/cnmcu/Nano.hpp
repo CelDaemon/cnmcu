@@ -43,7 +43,7 @@ public:
     CNROM<ROM_SIZE>& ROM();
     CNEL<EL_SIZE>& EL();
     CNUART& UART();
-    uint8_t* pinOutputDrivers() { return pinOutputs; }
+    std::array<uint8_t, GPIO_NUM_PINS>& pinOutputDrivers() { return pinOutputs; }
 private:
     mos6502 cpu;
     CNGPIO<GPIO_NUM_PINS> gpio;
@@ -51,16 +51,16 @@ private:
     CNROM<ROM_SIZE> rom;
     CNEL<EL_SIZE> el;
     CNUART uart;
-    uint64_t cyclesCounter;
-    uint64_t cyclesTarget;
-    uint8_t pinOutputs[GPIO_NUM_PINS]; // "Pin output drivers"
+    uint64_t cyclesCounter = 0;
+    uint64_t cyclesTarget = 0;
+    std::array<uint8_t, GPIO_NUM_PINS> pinOutputs; // "Pin output drivers"
 
-    uint16_t m_busAddress;
-    uint8_t m_busData;
-    bool m_busRw;
+    uint16_t m_busAddress = 0;
+    uint8_t m_busData = 0;
+    bool m_busRw = false;
 
-    bool poweredOn;
-    bool clockPaused;
+    bool poweredOn = false;
+    bool clockPaused = false;
 
     uint8_t read(uint16_t address);
     void write(uint16_t address, uint8_t value);

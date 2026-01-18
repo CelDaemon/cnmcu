@@ -322,7 +322,7 @@ public class NanoMCU extends StrongNativeObject {
         CodeNodeNano* nano = reinterpret_cast<CodeNodeNano*>(ptr);
 
         CNGPIO<CodeNodeNano::GPIO_NUM_PINS>& gpio = nano->GPIO();
-        uint8_t* pvFront = gpio.pvFrontData();
+        std::array<uint8_t, CodeNodeNano::GPIO_NUM_PINS>& pvFront = gpio.pvFrontData();
 
         for(int i = 0; i < 4; i++) {
             if(!gpio.isInput(i))
@@ -336,7 +336,7 @@ public class NanoMCU extends StrongNativeObject {
 
         CNGPIO<CodeNodeNano::GPIO_NUM_PINS>& gpio = nano->GPIO();
 
-        uint8_t* outputPinDrivers = nano->pinOutputDrivers();
+        std::array<uint8_t, CodeNodeNano::GPIO_NUM_PINS>& outputPinDrivers = nano->pinOutputDrivers();
 
         for(int i = 0; i < 4; i++) {
             if(gpio.isInput(i)) {
@@ -415,7 +415,7 @@ public class NanoMCU extends StrongNativeObject {
     */
     private static native ByteBuffer pinOutputDrivers(long ptr); /*
         CodeNodeNano* nano = reinterpret_cast<CodeNodeNano*>(ptr);
-        return env->NewDirectByteBuffer(nano->pinOutputDrivers(), CodeNodeNano::GPIO_NUM_PINS);
+        return env->NewDirectByteBuffer(nano->pinOutputDrivers().data(), CodeNodeNano::GPIO_NUM_PINS);
     */
     
     private static native long CPU(long ptr); /*

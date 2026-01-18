@@ -8,19 +8,19 @@ class CNEL
 public:
     void reset()
     {
-        memset(iclRegisters, 0, N);
-        memset(iflRegisters, 0, N);
+        iclRegisters.fill(0);
+        iflRegisters.fill(0);
     }
 private:
-    uint8_t iclRegisters[N];
-    uint8_t iflRegisters[N];
+    std::array<uint8_t, N> iclRegisters{};
+    std::array<uint8_t, N> iflRegisters{};
 public:
-    CNEL() { reset(); }
+    CNEL() {}
 
     size_t size() const { return N * 2; }
 
-    uint8_t* iclRegistersData() { return iclRegisters; }
-    uint8_t* iflRegistersData() { return iflRegisters; }
+    std::array<uint8_t, N>& iclRegistersData() { return iclRegisters; }
+    std::array<uint8_t, N>& iflRegistersData() { return iflRegisters; }
 
     void triggerEvent(int eventId)
     {

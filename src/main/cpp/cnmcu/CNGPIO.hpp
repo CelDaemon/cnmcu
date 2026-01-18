@@ -75,31 +75,31 @@ private:
         }
     }
 
-    uint8_t gpiopvFront[N];
-    uint8_t gpiopvBack[N];
+    std::array<uint8_t, N> gpiopvFront{};
+    std::array<uint8_t, N> gpiopvBack{};
 
-    uint8_t gpiodir[N / 8];
-    uint8_t gpioint[N / 2];
-    uint8_t gpioifl[N / 8];
+    std::array<uint8_t, N / 8> gpiodir{};
+    std::array<uint8_t, N / 2> gpioint{};
+    std::array<uint8_t, N / 8> gpioifl{};
 public:
     void reset()
     {
-        memset(gpiopvFront, 0, N);
-        memset(gpiopvBack, 0, N);
-        memset(gpiodir, 0, N / 8);
-        memset(gpioint, 0, N / 2);
-        memset(gpioifl, 0, N / 8);
+        gpiopvFront.fill(0);
+        gpiopvBack.fill(0);
+        gpiodir.fill(0);
+        gpioint.fill(0);
+        gpioifl.fill(0);
     }
 
-    CNGPIO() { reset(); }
+    CNGPIO() {}
     CNGPIO(CNGPIO&& other) { *this = std::move(other); }
     CNGPIO& operator=(CNGPIO&& other)
     {
-        memcpy(gpiopvFront, other.gpiopvFront, N);
-        memcpy(gpiopvBack, other.gpiopvBack, N);
-        memcpy(gpiodir, other.gpiodir, N / 8);
-        memcpy(gpioint, other.gpioint, N / 2);
-        memcpy(gpioifl, other.gpioifl, N / 8);
+        gpiopvFront = other.gpiopvFront;
+        gpiopvBack = other.gpiopvBack;
+        gpiodir = other.gpiodir;
+        gpioint = other.gpioint;
+        gpioifl = other.gpioifl;
         return *this;
     }
 
@@ -108,11 +108,11 @@ public:
         return N + N / 8 + N / 2 + N / 8;
     }
 
-    uint8_t* pvFrontData() { return gpiopvFront; }
-    uint8_t* pvBackData() { return gpiopvBack; }
-    uint8_t* dirData() { return gpiodir; }
-    uint8_t* intData() { return gpioint; }
-    uint8_t* iflData() { return gpioifl; }
+    std::array<uint8_t, N>& pvFrontData() { return gpiopvFront; }
+    std::array<uint8_t, N>& pvBackData() { return gpiopvBack; }
+    std::array<uint8_t, N / 8>& dirData() { return gpiodir; }
+    std::array<uint8_t, N / 2>& intData() { return gpioint; }
+    std::array<uint8_t, N / 8>& iflData() { return gpioifl; }
 
     bool isInput(size_t pin) const
     {
@@ -213,7 +213,7 @@ public:
 
     void copyBuffers()
     {
-        memcpy(gpiopvBack, gpiopvFront, N);
+        gpiopvBack = gpiopvFront;
     }
 
     bool shouldInterrupt() const

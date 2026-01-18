@@ -29,7 +29,7 @@ public class CNEL extends WeakNativeObject {
     }
     
     private final long size;
-    
+
     /**
      * Called in the mod's native code, do not call directly.
      */
@@ -42,7 +42,7 @@ public class CNEL extends WeakNativeObject {
     public long getSize() {
         return size;
     }
-    
+
     public ByteBuffer getICLRegistersData() {
         return iclRegistersData(getNativePtr().orElseThrow());
     }
@@ -105,15 +105,19 @@ public class CNEL extends WeakNativeObject {
         CNEL<CodeNodeNano::EL_SIZE>* cnel = reinterpret_cast<CNEL<CodeNodeNano::EL_SIZE>*>(ptr);
         return cnel->size();
     */
-    
+
     private static native ByteBuffer iclRegistersData(long ptr); /*
         CNEL<CodeNodeNano::EL_SIZE>* cnel = reinterpret_cast<CNEL<CodeNodeNano::EL_SIZE>*>(ptr);
-        return env->NewDirectByteBuffer(cnel->iclRegistersData(), CodeNodeNano::EL_SIZE);
+
+        std::array<uint8_t, CodeNodeNano::EL_SIZE>& data = cnel->iclRegistersData();
+        return env->NewDirectByteBuffer(data.data(), data.size());
     */
     
     private static native ByteBuffer iflRegistersData(long ptr); /*
         CNEL<CodeNodeNano::EL_SIZE>* cnel = reinterpret_cast<CNEL<CodeNodeNano::EL_SIZE>*>(ptr);
-        return env->NewDirectByteBuffer(cnel->iflRegistersData(), CodeNodeNano::EL_SIZE);
+
+        std::array<uint8_t, CodeNodeNano::EL_SIZE>& data = cnel->iflRegistersData();
+        return env->NewDirectByteBuffer(data.data(), data.size());
     */
     
     private static native void triggerEvent(long ptr, int event); /*

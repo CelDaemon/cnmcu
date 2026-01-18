@@ -8,21 +8,7 @@ template <size_t N>
 class CNROM
 {
 public:
-    CNROM()
-    {
-        for(size_t i = 0; i < N; i++)
-            rom[i] = 0;
-    }
-
-    CNROM(const uint8_t* data, size_t dataSize)
-    {
-        for(size_t i = 0; i < N; i++)
-            rom[i] = 0;
-
-        size_t numBytesToRead = std::min(dataSize, N);
-        for(size_t i = 0; i < numBytesToRead; i++)
-            rom[i] = data[i];
-    }
+    CNROM() {}
 
     CNROM(CNROM&& other)
     {
@@ -31,13 +17,13 @@ public:
 
     CNROM& operator=(CNROM&& other)
     {
-        for(size_t i = 0; i < N; i++)
-            rom[i] = other.rom[i];
+        rom = other.rom;
+        writeProtect = other.writeProtect;
         return *this;
     }
 
     size_t size() { return N; }
-    uint8_t* data() { return rom; }
+    std::array<uint8_t, N>& data() { return rom; }
 
     uint8_t read(uint16_t address) const
     {
@@ -56,6 +42,6 @@ public:
     void setWriteProtect(bool writeProtect) { this->writeProtect = writeProtect; }
     bool isWriteProtected() const { return writeProtect; }
 private:
-    uint8_t rom[N];
+    std::array<uint8_t, N> rom{};
     bool writeProtect = true;
 };

@@ -86,7 +86,9 @@ public class CNROM extends WeakNativeObject {
     
     private static native ByteBuffer data(long ptr); /*
         CNROM<CodeNodeNano::ROM_SIZE>* rom = reinterpret_cast<CNROM<CodeNodeNano::ROM_SIZE>*>(ptr);
-        return env->NewDirectByteBuffer(rom->data(), CodeNodeNano::ROM_SIZE);
+
+        std::array<uint8_t, CodeNodeNano::ROM_SIZE>& data = rom->data();
+        return env->NewDirectByteBuffer(data.data(), data.size());
     */
     
     private static native byte read(long ptr, int address); /*
