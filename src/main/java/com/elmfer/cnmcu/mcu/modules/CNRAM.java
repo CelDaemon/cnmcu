@@ -71,7 +71,9 @@ public class CNRAM extends WeakNativeObject {
     
     private static native ByteBuffer data(long ptr); /*
         CNRAM<CodeNodeNano::RAM_SIZE>* ram = reinterpret_cast<CNRAM<CodeNodeNano::RAM_SIZE>*>(ptr);
-        return env->NewDirectByteBuffer(ram->data(), CodeNodeNano::RAM_SIZE);
+
+        std::array<uint8_t, CodeNodeNano::RAM_SIZE>& data = ram->data();
+        return env->NewDirectByteBuffer(data.data(), data.size());
     */
     
     private static native byte read(long ptr, int address); /*

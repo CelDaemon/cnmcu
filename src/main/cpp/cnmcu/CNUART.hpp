@@ -2,11 +2,10 @@
 
 #include <cstdint>
 #include <cstddef>
+#include <array>
 
 class CNUART
 {
-private:
-    uint8_t registers[8];
 public:
     enum ParityType : uint8_t
     {
@@ -35,6 +34,8 @@ public:
         TX_PIN_ENABLE       = 6
     };
 
+    constexpr static int REGISTER_COUNT = 8;
+
     constexpr static int STATUS_REG = 0;
     constexpr static int CONTROL_REG = 1;
     constexpr static int COMMAND_REG = 2;
@@ -48,7 +49,7 @@ public:
 
     CNUART();
 
-    constexpr size_t size() const { return sizeof(registers); }
+    constexpr size_t size() const { return REGISTER_COUNT; }
 
     void reset();
     void tick();
@@ -61,11 +62,13 @@ public:
     uint8_t txOut() const;
     void rxIn(uint8_t value);
 
-    uint8_t* registerData();
+    std::array<uint8_t, REGISTER_COUNT>& registerData();
 
     void write(uint16_t address, uint8_t value);
     uint8_t read(uint16_t address);
 private:
+    std::array<uint8_t, REGISTER_COUNT> registers{};
+
     uint8_t txOuput;
     uint8_t rxInput;
     int64_t cycles;
