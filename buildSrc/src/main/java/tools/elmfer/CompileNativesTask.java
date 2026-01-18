@@ -61,7 +61,7 @@ public abstract class CompileNativesTask extends DefaultTask {
         cmakeExec("--build", absBuildDir, "--parallel", "4", "--target", cmakeTarget.get(),
                 "--config", buildType.get());
 
-        cmakeExec("--install", absBuildDir, "--prefix", absOutputDir);
+        cmakeExec("--install", absBuildDir, "--prefix", absOutputDir, "--strip");
     }
 
     private void cmakeExec(String... args) {
