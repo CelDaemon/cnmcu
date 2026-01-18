@@ -20,6 +20,9 @@ public:
 
     CodeNodeNano();
 
+    CodeNodeNano(CodeNodeNano const&) = delete;
+    CodeNodeNano& operator=(CodeNodeNano const&) = delete;
+
     void tick();
     void cycle();
     void reset();

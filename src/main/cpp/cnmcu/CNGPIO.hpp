@@ -22,6 +22,12 @@ public:
         ANALOG_FALLING = 0x8,
         NO_CHANGE = 0x9
     };
+
+    CNGPIO() = default;
+
+    CNGPIO(CNGPIO const&) = delete;
+    CNGPIO& operator=(CNGPIO const&) = delete;
+
 private:
     constexpr static int GPIOPV = 0;
     constexpr static int GPIODIR = 1;
@@ -89,18 +95,6 @@ public:
         gpiodir.fill(0);
         gpioint.fill(0);
         gpioifl.fill(0);
-    }
-
-    CNGPIO() {}
-    CNGPIO(CNGPIO&& other) { *this = std::move(other); }
-    CNGPIO& operator=(CNGPIO&& other)
-    {
-        gpiopvFront = other.gpiopvFront;
-        gpiopvBack = other.gpiopvBack;
-        gpiodir = other.gpiodir;
-        gpioint = other.gpioint;
-        gpioifl = other.gpioifl;
-        return *this;
     }
 
     size_t size() const
