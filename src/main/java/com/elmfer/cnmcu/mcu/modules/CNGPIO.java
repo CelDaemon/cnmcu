@@ -127,27 +127,37 @@ public class CNGPIO extends WeakNativeObject {
     
     private static native ByteBuffer pvFrontData(long ptr); /*
         CNGPIO<CodeNodeNano::GPIO_NUM_PINS>* gpio = reinterpret_cast<CNGPIO<CodeNodeNano::GPIO_NUM_PINS>*>(ptr);
-        return env->NewDirectByteBuffer(gpio->pvFrontData(), CodeNodeNano::GPIO_NUM_PINS);
+
+        std::array<uint8_t, CodeNodeNano::GPIO_NUM_PINS>& data = gpio->pvFrontData();
+        return env->NewDirectByteBuffer(data.data(), data.size());
     */
     
     private static native ByteBuffer pvBackData(long ptr); /*
         CNGPIO<CodeNodeNano::GPIO_NUM_PINS>* gpio = reinterpret_cast<CNGPIO<CodeNodeNano::GPIO_NUM_PINS>*>(ptr);
-        return env->NewDirectByteBuffer(gpio->pvBackData(), CodeNodeNano::GPIO_NUM_PINS);
+
+        std::array<uint8_t, CodeNodeNano::GPIO_NUM_PINS>& data = gpio->pvBackData();
+        return env->NewDirectByteBuffer(data.data(), data.size());
     */
     
     private static native ByteBuffer dirData(long ptr); /*
         CNGPIO<CodeNodeNano::GPIO_NUM_PINS>* gpio = reinterpret_cast<CNGPIO<CodeNodeNano::GPIO_NUM_PINS>*>(ptr);
-        return env->NewDirectByteBuffer(gpio->dirData(), CodeNodeNano::GPIO_NUM_PINS / 8);
+
+        std::array<uint8_t, CodeNodeNano::GPIO_NUM_PINS / 8>& data = gpio->dirData();
+        return env->NewDirectByteBuffer(data.data(), data.size());
     */
     
     private static native ByteBuffer intData(long ptr); /*
         CNGPIO<CodeNodeNano::GPIO_NUM_PINS>* gpio = reinterpret_cast<CNGPIO<CodeNodeNano::GPIO_NUM_PINS>*>(ptr);
-        return env->NewDirectByteBuffer(gpio->intData(), CodeNodeNano::GPIO_NUM_PINS / 2);
+
+        std::array<uint8_t, CodeNodeNano::GPIO_NUM_PINS / 2>& data = gpio->intData();
+        return env->NewDirectByteBuffer(data.data(), data.size());
     */
     
     private static native ByteBuffer iflData(long ptr); /*
         CNGPIO<CodeNodeNano::GPIO_NUM_PINS>* gpio = reinterpret_cast<CNGPIO<CodeNodeNano::GPIO_NUM_PINS>*>(ptr);
-        return env->NewDirectByteBuffer(gpio->iflData(), CodeNodeNano::GPIO_NUM_PINS / 8);
+
+        std::array<uint8_t, CodeNodeNano::GPIO_NUM_PINS / 8>& data = gpio->iflData();
+        return env->NewDirectByteBuffer(data.data(), data.size());
     */
     
     private static native int read(long ptr, int address); /*

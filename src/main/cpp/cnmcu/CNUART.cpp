@@ -11,7 +11,7 @@ CNUART::CNUART()
 
 void CNUART::reset()
 {
-    memset(registers, 0, sizeof(registers));
+    registers.fill(0);
     registers[STATUS_REG] = 1 << TX_BUFFER_EMPTY;
     registers[CONTROL_REG] = 0b01110011; // 1 stop bit, 8 bites, 10 baud
     registers[RX_PIN_REG] = 1;
@@ -67,7 +67,7 @@ void CNUART::rxIn(uint8_t value)
     rxInput = value;
 }
 
-uint8_t* CNUART::registerData()
+std::array<uint8_t, CNUART::REGISTER_COUNT>& CNUART::registerData()
 {
     return registers;
 }

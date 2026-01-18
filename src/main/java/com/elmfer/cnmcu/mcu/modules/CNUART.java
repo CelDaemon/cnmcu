@@ -94,7 +94,9 @@ public class CNUART extends WeakNativeObject {
     
     private static native ByteBuffer registerData(long ptr); /*
         CNUART* uart = reinterpret_cast<CNUART*>(ptr);
-        return env->NewDirectByteBuffer(uart->registerData(), uart->size());
+
+        std::array<uint8_t, CNUART::REGISTER_COUNT>& data = uart->registerData();
+        return env->NewDirectByteBuffer(data.data(), data.size());
     */
     
     private static native void write(long ptr, int address, int data); /*
