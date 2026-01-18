@@ -27,7 +27,6 @@ set(PROJECT_SOURCES
 )
 
 set(PROJECT_INCLUDES
-  bridge
   cnmcu
   ${JNI_INCLUDE_DIRS}
   ${GENERATED_SOURCES_DIR}
@@ -38,6 +37,8 @@ add_library(${PROJECT_NAME} SHARED ${PROJECT_SOURCES})
 target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_INCLUDES})
 
 target_link_libraries(${PROJECT_NAME} ${PROJECT_LIBRARIES})
+
+# target_link_options(${PROJECT_NAME} PRIVATE "-s")
 
 # force off-tree build
 if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
