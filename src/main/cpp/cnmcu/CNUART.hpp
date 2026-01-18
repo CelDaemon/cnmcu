@@ -49,6 +49,9 @@ public:
 
     CNUART();
 
+    CNUART(CNUART const&) = delete;
+    CNUART& operator=(CNUART const&) = delete;
+
     constexpr size_t size() const { return REGISTER_COUNT; }
 
     void reset();

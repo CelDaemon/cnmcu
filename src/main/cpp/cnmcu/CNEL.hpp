@@ -11,12 +11,16 @@ public:
         iclRegisters.fill(0);
         iflRegisters.fill(0);
     }
+
+    CNEL() = default;
+
+    CNEL(CNEL const&) = delete;
+    CNEL& operator=(CNEL const&) = delete;
+
 private:
     std::array<uint8_t, N> iclRegisters{};
     std::array<uint8_t, N> iflRegisters{};
 public:
-    CNEL() {}
-
     size_t size() const { return N * 2; }
 
     std::array<uint8_t, N>& iclRegistersData() { return iclRegisters; }

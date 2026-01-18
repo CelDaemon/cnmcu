@@ -13,18 +13,10 @@ public:
         ram.fill(0);
     }
 
-    CNRAM() {}
+    CNRAM() = default;
 
-    CNRAM(CNRAM&& other)
-    {
-        *this = std::move(other);
-    }
-    
-    CNRAM& operator=(CNRAM&& other)
-    {
-        ram = other.ram;
-        return *this;
-    }
+    CNRAM(CNRAM const&) = delete;
+    CNRAM& operator=(CNRAM const&) = delete;
 
     size_t size() const { return N; }
     std::array<uint8_t, N>& data() { return ram; }

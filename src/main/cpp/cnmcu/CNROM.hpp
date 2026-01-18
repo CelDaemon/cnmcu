@@ -8,19 +8,10 @@ template <size_t N>
 class CNROM
 {
 public:
-    CNROM() {}
+    CNROM() = default;
 
-    CNROM(CNROM&& other)
-    {
-        *this = std::move(other);
-    }
-
-    CNROM& operator=(CNROM&& other)
-    {
-        rom = other.rom;
-        writeProtect = other.writeProtect;
-        return *this;
-    }
+    CNROM(CNROM const&) = delete;
+    CNROM& operator=(CNROM const&) = delete;
 
     size_t size() { return N; }
     std::array<uint8_t, N>& data() { return rom; }
@@ -39,8 +30,13 @@ public:
             rom[address] = value;
     }
 
-    void setWriteProtect(bool writeProtect) { this->writeProtect = writeProtect; }
-    bool isWriteProtected() const { return writeProtect; }
+    void setWriteProtect(bool writeProtect) {
+        this->writeProtect = writeProtect;
+    }
+
+    bool isWriteProtected() const {
+        return writeProtect;
+    }
 private:
     std::array<uint8_t, N> rom{};
     bool writeProtect = true;

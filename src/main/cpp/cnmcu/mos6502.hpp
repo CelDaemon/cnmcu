@@ -161,6 +161,10 @@ public:
 		CYCLE_COUNT,
 	};
 	mos6502(BusRead r, BusWrite w, ClockCycle c = nullptr);
+
+	mos6502(mos6502 const&) = delete;
+    mos6502& operator=(mos6502 const&) = delete;
+
 	void NMI();
 	void IRQ();
 	void Reset();
