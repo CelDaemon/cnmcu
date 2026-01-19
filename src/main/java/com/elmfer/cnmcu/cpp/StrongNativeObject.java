@@ -11,14 +11,14 @@ public abstract class StrongNativeObject extends NativeObject {
         super(nativePtr);
     }
 
-    public void deleteNativeObject() {
+    public void delete() {
         if(!isValid())
             return;
 
-        deleteNative();
+        deleteInternal();
 
         clear();
     }
 
-    protected abstract void deleteNative();
+    protected abstract void deleteInternal();
 }
