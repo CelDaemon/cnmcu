@@ -1,15 +1,6 @@
 cmake_minimum_required(VERSION 3.13)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
-set(CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
-set(CMAKE_C_VISIBILITY_PRESET "hidden")
-set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
-set(MOD_ID "cnmcu")
-
-project("${MOD_ID}-natives")
+project(cnmcu)
 
 set(JAVA_AWT_LIBRARY NotNeeded)
 set(JAVA_JVM_LIBRARY NotNeeded)
@@ -36,6 +27,15 @@ set(PROJECT_INCLUDES
 
 add_library(${PROJECT_NAME} SHARED ${PROJECT_SOURCES})
 
+set_target_properties(${PROJECT_NAME} PROPERTIES
+    CXX_STANDARD 17
+    CXX_STANDARD_REQUIRED ON
+    CXX_EXTENSIONS OFF
+    INTERPROCEDURAL_OPTIMIZATION ON
+    CXX_VISIBILITY_PRESET "hidden"
+    VISIBILITY_INLINES_HIDDEN ON
+)
+
 target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_INCLUDES})
 
 target_link_libraries(${PROJECT_NAME} ${PROJECT_LIBRARIES})
@@ -56,41 +56,30 @@ if(NOT CMAKE_BUILD_TYPE)
       FORCE)
 endif()
 
-# Determine operating system and set NATIVES_OS
-if(WIN32)
-  set(NATIVES_OS "windows")
-elseif(APPLE)
-  set(NATIVES_OS "macos")
-elseif(UNIX AND NOT APPLE)
-  set(NATIVES_OS "linux")
+# Determine target cpu architecture and set TARGET_ARCH
+
+string(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" SYSTEM_PROCESSOR)
+
+if(SYSTEM_PROCESSOR MATCHES "64" OR SYSTEM_PROCESSOR MATCHES "armv8")
+  set(IS_64BIT ON)
 else()
-  message(FATAL_ERROR "Unsupported operating system")
+  set(IS_64BIT OFF)
 endif()
 
-# Determine target platform architecture and set NATIVES_PLATFORM
-if(CMAKE_SYSTEM_PROCESSOR MATCHES "amd64|AMD64|x86_64|x86|X86|i386|i686")
-  set(NATIVES_PLATFORM "x")
-elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "arm|ARM|aarch64|AARCH64")
-  set(NATIVES_PLATFORM "arm")
+if(SYSTEM_PROCESSOR MATCHES "arm" OR SYSTEM_PROCESSOR MATCHES "aarch")
+  if(IS_64BIT)
+    set(TARGET_ARCH "arm64")
+  else()
+    set(TARGET_ARCH "arm32")
+  endif()
 else()
-  message(FATAL_ERROR "Unsupported processor architecture")
+  if(IS_64BIT)
+    set(TARGET_ARCH "x64")
+  else()
+    set(TARGET_ARCH "x86")
+  endif()
 endif()
 
-# Determine architecture and set NATIVES_BITS
-if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-  set(NATIVES_BITS "64")
-elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
-  set(NATIVES_BITS "32")
-else()
-  message(FATAL_ERROR "Unsupported architecture")
-endif()
-if(NATIVES_PLATFORM STREQUAL "x" AND NATIVES_BITS STREQUAL "32")
-  set(NATIVES_BITS "86")
-endif()
-
-set_target_properties(${PROJECT_NAME} PROPERTIES
-  PREFIX "lib"
-  OUTPUT_NAME "${MOD_ID}-${NATIVES_OS}-${NATIVES_PLATFORM}${NATIVES_BITS}"
+install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION "${TARGET_ARCH}"
+    LIBRARY DESTINATION "${TARGET_ARCH}"
 )
-
-install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION "." LIBRARY DESTINATION ".")
