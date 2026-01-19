@@ -32,7 +32,7 @@ public abstract class CompileNativesTask extends DefaultTask {
         setDescription("Compiles native source files using CMake.");
 
         getBuildType().convention("Release");
-        getCmakeTarget().convention("cnmcu-natives");
+        getCmakeTarget().convention("cnmcu");
     }
 
     @TaskAction

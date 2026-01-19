@@ -3,6 +3,7 @@ package com.elmfer.cnmcu.util;
 import com.elmfer.cnmcu.cpp.NativesLoader;
 import com.elmfer.cnmcu.mcu.Toolchain;
 import net.minecraft.util.Util;
+import org.lwjgl.system.Platform;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -39,8 +40,8 @@ public class BuildProcess {
                 throw new RuntimeException(e);
             }
 
-            final var shell = NativesLoader.NATIVES_OS.equals("windows") ? "cmd" : "sh";
-            final var shellFlag = NativesLoader.NATIVES_OS.equals("windows") ? "/c" : "-c";
+            final var shell = NativesLoader.PLATFORM == Platform.WINDOWS ? "cmd" : "sh";
+            final var shellFlag = NativesLoader.PLATFORM == Platform.WINDOWS ? "/c" : "-c";
             var buildCommand = config.getBuildCommand();
 
             for (final var entry : config.getBuildVariables().entrySet()) {

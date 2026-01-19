@@ -16,6 +16,7 @@ import com.elmfer.cnmcu.util.HTTPSFetcher;
 import com.google.gson.JsonArray;
 import net.minecraft.server.packs.resources.ResourceManager;
 import org.jetbrains.annotations.NotNull;
+import org.lwjgl.system.Platform;
 
 import static com.elmfer.cnmcu.CodeNodeMicrocontrollers.LOGGER;
 
@@ -33,7 +34,7 @@ public final class ModSetup {
         try {
             Files.createDirectories(Toolchain.TOOLCHAIN_PATH);
             Files.createDirectories(Toolchain.TEMP_PATH);
-            Files.createDirectories(NativesLoader.BINARIES_PATH);
+            Files.createDirectories(NativesLoader.NATIVES_PATH);
             Files.createDirectories(Sketches.BACKUP_PATH);
         } catch (IOException e) {
             LOGGER.error("Failed to create directories", e);
@@ -55,8 +56,8 @@ public final class ModSetup {
     }
 
     public static void downloadNatives() {
-        ensureInstallNatives(NativesLoader.BINARIES_PATH.resolve(NativesLoader.getBinaryFilename()),
-                NativesLoader.getBinaryFilename());
+        ensureInstallNatives(NativesLoader.NATIVES_PATH.resolve(NativesLoader.resolveNative()),
+                NativesLoader.resolveNative());
     }
 
     public static void downloadToolchain() {
@@ -69,7 +70,7 @@ public final class ModSetup {
                 NativesLoader.getExecutableFilename(vobjFilename));
 
         final String cygFilename = "cygwin1.dll";
-        if (NativesLoader.NATIVES_OS.equals("windows"))
+        if (NativesLoader.PLATFORM == Platform.WINDOWS)
             ensureInstall("cygwin1.dll", Toolchain.TOOLCHAIN_PATH.resolve(cygFilename),
                     "cygwin1.dll");
     }
@@ -135,7 +136,7 @@ public final class ModSetup {
         }
     }
 
-    private static void ensureInstallNatives(Path localPath, String assetName) {
+    private static void ensureInstallNatives(Path localPath, Path assetPath) {
         if (Files.exists(localPath)) {
             LOGGER.debug("Natives is already installed! Skipping extract...");
             return;
@@ -143,9 +144,9 @@ public final class ModSetup {
 
         LOGGER.info("Natives are not installed! Extracting...");
 
-        try(var inputStream = ModSetup.class.getResourceAsStream(assetName)) {
+        try(var inputStream = ModSetup.class.getResourceAsStream(assetPath.toString())) {
             if(inputStream == null)
-                throw new RuntimeException("Asset: '%s' was not found".formatted(assetName));
+                throw new RuntimeException("Asset: '%s' was not found".formatted(assetPath));
 
             Files.copy(inputStream, localPath);
         } catch (IOException e) {

@@ -23,6 +23,7 @@ import imgui.ImGui;
 import imgui.type.ImString;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Util;
+import org.lwjgl.system.Platform;
 
 import static com.elmfer.cnmcu.CodeNodeMicrocontrollers.LOGGER;
 
@@ -262,7 +263,7 @@ public class Toolchain {
         }
 
         public static ToolchainConfig defaultConfig() {
-            final var buildCommand = NativesLoader.NATIVES_OS.equals("windows") ? "vasm6502_oldstyle -Fbin -dotdir ${input} -o ${output}"
+            final var buildCommand = NativesLoader.PLATFORM == Platform.WINDOWS ? "vasm6502_oldstyle -Fbin -dotdir ${input} -o ${output}"
                     : "./vasm6502_oldstyle -Fbin -dotdir ${input} -o ${output}";
 
 
