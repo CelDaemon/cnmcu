@@ -111,8 +111,14 @@ tasks.processResources {
     }
 }
 
+tasks.jar {
+	enabled = false
+}
+
 tasks.shadowJar {
 	configurations = bundle.map { listOf(it) }
+	archiveClassifier = "dev"
+	destinationDirectory = layout.buildDirectory.dir("devlibs")
 }
 
 tasks.remapJar {
