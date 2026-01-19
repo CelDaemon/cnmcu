@@ -35,7 +35,7 @@ public class CNnanoBlockEntity extends BlockEntity implements ExtendedScreenHand
 
         var mcu = this.mcu;
 
-        CodeNodeMicrocontrollers.CLEANER.register(this, mcu::deleteNativeObject);
+        CodeNodeMicrocontrollers.CLEANER.register(this, mcu::delete);
     }
 
     public static void serverTick(@NotNull Level ignoredLevel, @NotNull BlockPos ignoredPos, @NotNull BlockState ignoredState, @NotNull CNnanoBlockEntity blockEntity) {

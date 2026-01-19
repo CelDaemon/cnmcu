@@ -12,13 +12,7 @@ public abstract class WeakNativeObject extends NativeObject {
         super(nativePtr);
     }
 
-    public void invalidateNativeObject() {
+    public void invalidate() {
         clear();
-
-        invalidateNative();
-    }
-
-    protected void invalidateNative() {
-
     }
 }

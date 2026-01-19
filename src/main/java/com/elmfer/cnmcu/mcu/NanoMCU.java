@@ -137,13 +137,14 @@ public class NanoMCU extends StrongNativeObject {
         return busRW(getNativePtr().orElseThrow());
     }
 
-    protected void deleteNative() {
-        cpu.invalidateNativeObject();
-        gpio.invalidateNativeObject();
-        ram.invalidateNativeObject();
-        rom.invalidateNativeObject();
-        el.invalidateNativeObject();
-        uart.invalidateNativeObject();
+    @Override
+    protected void deleteInternal() {
+        cpu.invalidate();
+        gpio.invalidate();
+        ram.invalidate();
+        rom.invalidate();
+        el.invalidate();
+        uart.invalidate();
 
         deleteMCU(getNativePtr().orElseThrow());
     }
