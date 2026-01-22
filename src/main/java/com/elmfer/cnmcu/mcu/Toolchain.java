@@ -287,6 +287,8 @@ public class Toolchain {
             }, Util.backgroundExecutor());
         }
         public static ToolchainConfig load() {
+            if(Files.notExists(CONFIG_PATH))
+                return defaultConfig();
             final JsonElement element;
             try(var reader = new JsonReader(new InputStreamReader(Files.newInputStream(CONFIG_PATH)))) {
                 element = JsonParser.parseReader(reader);
