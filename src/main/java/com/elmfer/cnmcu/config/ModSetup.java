@@ -61,18 +61,18 @@ public final class ModSetup {
     }
 
     public static void downloadToolchain() {
-        final String vasmFilename = "vasm6502_oldstyle";
-        ensureInstall("vasm", Toolchain.TOOLCHAIN_PATH.resolve(vasmFilename + NativesLoader.EXE_EXT),
+        final var vasmFilename = "vasm6502_oldstyle";
+        ensureInstall(vasmFilename, Toolchain.TOOLCHAIN_PATH.resolve(NativesLoader.getExecutablePath(vasmFilename)),
                 NativesLoader.getExecutableFilename(vasmFilename));
 
-        final String vobjFilename = "vobjdump";
-        ensureInstall("vobjdump", Toolchain.TOOLCHAIN_PATH.resolve(vobjFilename + NativesLoader.EXE_EXT),
+        final var vobjFilename = "vobjdump";
+        ensureInstall(vobjFilename, Toolchain.TOOLCHAIN_PATH.resolve(NativesLoader.getExecutablePath(vobjFilename)),
                 NativesLoader.getExecutableFilename(vobjFilename));
 
-        final String cygFilename = "cygwin1.dll";
+        final var cygFilename = "cygwin1.dll";
         if (NativesLoader.PLATFORM == Platform.WINDOWS)
-            ensureInstall("cygwin1.dll", Toolchain.TOOLCHAIN_PATH.resolve(cygFilename),
-                    "cygwin1.dll");
+            ensureInstall(cygFilename, Toolchain.TOOLCHAIN_PATH.resolve(cygFilename),
+                    cygFilename);
     }
 
     private static byte[] getGitHubAsset(String assetNameTarget) {
@@ -148,6 +148,7 @@ public final class ModSetup {
             if(inputStream == null)
                 throw new RuntimeException("Asset: '%s' was not found".formatted(assetPath));
 
+            Files.createDirectories(localPath.getParent());
             Files.copy(inputStream, localPath);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -170,6 +171,7 @@ public final class ModSetup {
         try {
             Set<PosixFilePermission> perms = PosixFilePermissions.fromString("rwxr-xr-x");
             FileAttribute<Set<PosixFilePermission>> attr = PosixFilePermissions.asFileAttribute(perms);
+            Files.createDirectories(localPath.getParent());
             Files.createFile(localPath, attr);
 
             Files.write(localPath, rawBinary);

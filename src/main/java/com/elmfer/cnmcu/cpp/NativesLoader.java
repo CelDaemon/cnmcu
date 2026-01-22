@@ -5,6 +5,7 @@ import org.lwjgl.system.Platform;
 
 import java.nio.file.Path;
 import java.util.Locale;
+import java.util.Optional;
 
 import static com.elmfer.cnmcu.CodeNodeMicrocontrollers.LOGGER;
 
@@ -38,6 +39,18 @@ public final class NativesLoader {
     public static String getExecutableFilename(String name) {
         final var arch = ARCHITECTURE.name().toLowerCase(Locale.ROOT);
         final var platform = PLATFORM.getName().toLowerCase(Locale.ROOT);
-        return name + "-" + platform + "-" + arch + "." + EXE_EXT;
+        final var ext = Optional.of(EXE_EXT)
+                .filter(x -> !x.isEmpty())
+                .map(x -> "." + x)
+                .orElse("");
+        return name + "-" + platform + "-" + arch + ext;
+    }
+
+    public static Path getExecutablePath(String name) {
+        final var ext = Optional.of(EXE_EXT)
+                .filter(x -> !x.isEmpty())
+                .map(x -> "." + x)
+                .orElse("");
+        return Path.of(ARCHITECTURE.name().toLowerCase(Locale.ROOT), name + ext);
     }
 }
