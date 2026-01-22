@@ -1,6 +1,5 @@
 package com.elmfer.cnmcu.ui.menu;
 
-import com.elmfer.cnmcu.CodeNodeMicrocontrollers;
 import com.elmfer.cnmcu.blocks.Blocks;
 import com.elmfer.cnmcu.network.IDEScreenSyncPayload;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -12,7 +11,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.item.ItemStack;
-import com.elmfer.cnmcu.blockentities.CNnanoBlockEntity;
+import com.elmfer.cnmcu.blockentities.NanoBlockEntity;
 
 import io.netty.buffer.ByteBuf;
 import org.jetbrains.annotations.NotNull;
@@ -22,7 +21,7 @@ public class IDEMenu extends AbstractContainerMenu {
     public final String code;
     public final ContainerLevelAccess containerAccess;
     @Nullable
-    public final CNnanoBlockEntity blockEntity;
+    public final NanoBlockEntity blockEntity;
     @Nullable
     public final ServerPlayer player;
     public IDEMenu(int containerId, Inventory ignoredPlayerInventory, OpenData data) {
@@ -34,7 +33,7 @@ public class IDEMenu extends AbstractContainerMenu {
         blockEntity = null;
         player = null;
     }
-    public IDEMenu(int containerId, ContainerLevelAccess containerAccess, @NotNull CNnanoBlockEntity blockEntity,
+    public IDEMenu(int containerId, ContainerLevelAccess containerAccess, @NotNull NanoBlockEntity blockEntity,
                    @NotNull ServerPlayer player) {
         super(Menus.IDE_MENU, containerId);
         this.code = "";

@@ -14,7 +14,7 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 
-import static com.elmfer.cnmcu.CodeNodeMicrocontrollers.LOGGER;
+import static com.elmfer.cnmcu.CNMCU.LOGGER;
 
 public class BuildProcess {
     private final StringBuffer output;

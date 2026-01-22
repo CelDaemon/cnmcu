@@ -1,7 +1,7 @@
 package com.elmfer.cnmcu.blockentities;
 
-import com.elmfer.cnmcu.CodeNodeMicrocontrollers;
-import com.elmfer.cnmcu.blocks.CNnanoBlock;
+import com.elmfer.cnmcu.CNMCU;
+import com.elmfer.cnmcu.blocks.NanoBlock;
 import com.elmfer.cnmcu.DataComponents;
 import com.elmfer.cnmcu.mcu.NanoMCU;
 import com.elmfer.cnmcu.ui.menu.IDEMenu;
@@ -25,20 +25,20 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.NotNull;
 
-public class CNnanoBlockEntity extends BlockEntity implements ExtendedScreenHandlerFactory<IDEMenu.OpenData> {
+public class NanoBlockEntity extends BlockEntity implements ExtendedScreenHandlerFactory<IDEMenu.OpenData> {
     
     public final NanoMCU mcu = new NanoMCU();
     private String code = "";
 
-    public CNnanoBlockEntity(BlockPos pos, BlockState state) {
+    public NanoBlockEntity(BlockPos pos, BlockState state) {
         super(BlockEntities.CN_NANO, pos, state);
 
         var mcu = this.mcu;
 
-        CodeNodeMicrocontrollers.CLEANER.register(this, mcu::delete);
+        CNMCU.CLEANER.register(this, mcu::delete);
     }
 
-    public static void serverTick(@NotNull Level ignoredLevel, @NotNull BlockPos ignoredPos, @NotNull BlockState ignoredState, @NotNull CNnanoBlockEntity blockEntity) {
+    public static void serverTick(@NotNull Level ignoredLevel, @NotNull BlockPos ignoredPos, @NotNull BlockState ignoredState, @NotNull NanoBlockEntity blockEntity) {
 
         var mcu = blockEntity.mcu;
 
@@ -71,7 +71,7 @@ public class CNnanoBlockEntity extends BlockEntity implements ExtendedScreenHand
         var state = getBlockState();
         var pos = getBlockPos();
 
-        var front = state.getValue(CNnanoBlock.FACING).getOpposite();
+        var front = state.getValue(NanoBlock.FACING).getOpposite();
         var right = front.getClockWise();
         var back = front.getOpposite();
         var left = front.getCounterClockWise();
@@ -88,7 +88,7 @@ public class CNnanoBlockEntity extends BlockEntity implements ExtendedScreenHand
 
         var state = getBlockState();
         var pos = getBlockPos();
-        var front = state.getValue(CNnanoBlock.FACING);
+        var front = state.getValue(NanoBlock.FACING);
 
         var block = state.getBlock();
 

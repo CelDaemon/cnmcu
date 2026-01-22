@@ -1,6 +1,6 @@
 package com.elmfer.cnmcu.network;
 
-import com.elmfer.cnmcu.CodeNodeMicrocontrollers;
+import com.elmfer.cnmcu.CNMCU;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -14,7 +14,7 @@ public record UploadROMResponsePayload(
         int bytesUploaded,
         String message) implements CustomPacketPayload {
 
-    public static final Identifier RAW_ID = CodeNodeMicrocontrollers.id(
+    public static final Identifier RAW_ID = CNMCU.id(
             "upload_rom_response");
     public static final CustomPacketPayload.Type<UploadROMResponsePayload> ID = new CustomPacketPayload.Type<>(RAW_ID);
     public static final StreamCodec<FriendlyByteBuf, UploadROMResponsePayload> CODEC = StreamCodec.composite(

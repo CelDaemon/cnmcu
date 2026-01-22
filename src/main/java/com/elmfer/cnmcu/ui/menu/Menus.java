@@ -1,6 +1,6 @@
 package com.elmfer.cnmcu.ui.menu;
 
-import com.elmfer.cnmcu.CodeNodeMicrocontrollers;
+import com.elmfer.cnmcu.CNMCU;
 
 import io.netty.buffer.ByteBuf;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerType;
@@ -16,7 +16,7 @@ public class Menus {
     private static <T extends AbstractContainerMenu, D> MenuType<T> register(
             String name, ExtendedScreenHandlerType.ExtendedFactory<T, D> factory,
             StreamCodec<ByteBuf, D> packetCodec) {
-        var id = CodeNodeMicrocontrollers.id(name);
+        var id = CNMCU.id(name);
         var type = new ExtendedScreenHandlerType<>(factory, packetCodec);
         Registry.register(BuiltInRegistries.MENU, id, type);
 

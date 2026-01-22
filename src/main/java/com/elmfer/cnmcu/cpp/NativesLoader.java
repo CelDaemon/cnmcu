@@ -1,13 +1,13 @@
 package com.elmfer.cnmcu.cpp;
 
-import com.elmfer.cnmcu.CodeNodeMicrocontrollers;
+import com.elmfer.cnmcu.CNMCU;
 import org.lwjgl.system.Platform;
 
 import java.nio.file.Path;
 import java.util.Locale;
 import java.util.Optional;
 
-import static com.elmfer.cnmcu.CodeNodeMicrocontrollers.LOGGER;
+import static com.elmfer.cnmcu.CNMCU.LOGGER;
 
 public final class NativesLoader {
 
@@ -16,8 +16,8 @@ public final class NativesLoader {
     public static final Platform PLATFORM = Platform.get();
     public static final Platform.Architecture ARCHITECTURE = Platform.getArchitecture();
     public static final String EXE_EXT = PLATFORM == Platform.WINDOWS ? ".exe" : "";
-    public static final Path NATIVES_PATH = CodeNodeMicrocontrollers.DATA_PATH.resolve("natives")
-            .resolve(CodeNodeMicrocontrollers.MOD_VERSION);
+    public static final Path NATIVES_PATH = CNMCU.DATA_PATH.resolve("natives")
+            .resolve(CNMCU.MOD_VERSION);
 
     public static void loadNatives() {
         LOGGER.debug("Loading native library...");
@@ -33,7 +33,7 @@ public final class NativesLoader {
 
     public static Path resolveNative() {
         return Path.of(ARCHITECTURE.name().toLowerCase(Locale.ROOT),
-                System.mapLibraryName(CodeNodeMicrocontrollers.MOD_ID));
+                System.mapLibraryName(CNMCU.MOD_ID));
     }
 
     public static String getExecutableFilename(String name) {

@@ -8,7 +8,7 @@ import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Set;
 
-import com.elmfer.cnmcu.CodeNodeMicrocontrollers;
+import com.elmfer.cnmcu.CNMCU;
 import com.elmfer.cnmcu.cpp.NativesLoader;
 import com.elmfer.cnmcu.mcu.Sketches;
 import com.elmfer.cnmcu.mcu.Toolchain;
@@ -18,10 +18,10 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.system.Platform;
 
-import static com.elmfer.cnmcu.CodeNodeMicrocontrollers.LOGGER;
+import static com.elmfer.cnmcu.CNMCU.LOGGER;
 
 public final class ModSetup {
-    public static final Path IMGUI_CONFIG_PATH = CodeNodeMicrocontrollers.DATA_PATH.resolve("imgui.ini");
+    public static final Path IMGUI_CONFIG_PATH = CNMCU.DATA_PATH.resolve("imgui.ini");
 
     private static final String GITHUB_REPO_URL = "https://api.github.com/repos/elmfrain/cnmcu";
 
@@ -45,7 +45,7 @@ public final class ModSetup {
         if (Files.exists(IMGUI_CONFIG_PATH))
             return;
 
-        final var resource = resourceLoader.getResource(CodeNodeMicrocontrollers.id("setup/imgui.ini"))
+        final var resource = resourceLoader.getResource(CNMCU.id("setup/imgui.ini"))
                 .orElseThrow();
 
         try(final var stream = resource.open()) {
@@ -118,7 +118,7 @@ public final class ModSetup {
         LOGGER.debug("Listing assets from GitHub...");
 
         HTTPSFetcher fetcher = new HTTPSFetcher(
-                GITHUB_REPO_URL + "/releases/tags/" + "0.0.10a-1.20.4"); // + CodeNodeMicrocontrollers.MOD_VERSION
+                GITHUB_REPO_URL + "/releases/tags/" + "0.0.10a-1.20.4"); // + CNMCU.MOD_VERSION
         fetcher.addHeader("Accept", "application/vnd.github.v3+json");
         fetcher.start();
         fetcher.waitForCompletion();

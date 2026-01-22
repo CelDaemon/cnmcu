@@ -1,6 +1,6 @@
 package com.elmfer.cnmcu.ui;
 
-import com.elmfer.cnmcu.CodeNodeMicrocontrollers;
+import com.elmfer.cnmcu.CNMCU;
 import com.elmfer.cnmcu.animation.Timer;
 
 import imgui.ImGui;
@@ -18,7 +18,7 @@ public final class QuickReferences {
 
 
     public static void genAbout() {
-        ImGui.text(String.format("CodeNode Microcontrollers v%s", CodeNodeMicrocontrollers.MOD_VERSION));
+        ImGui.text(String.format("CodeNode Microcontrollers v%s", CNMCU.MOD_VERSION));
         ImGui.text("Author: elmfer");
         ImGui.text("License: GNU GPL v3");
         ImGui.text("GitHub Repo: elmfrain/cnmcu");

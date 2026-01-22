@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 import java.lang.ref.Cleaner;
 import java.nio.file.Path;
 
-public class CodeNodeMicrocontrollers implements ModInitializer {
+public class CNMCU implements ModInitializer {
 
     public static final String MOD_ID = "cnmcu";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);

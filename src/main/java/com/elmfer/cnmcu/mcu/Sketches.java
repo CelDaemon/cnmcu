@@ -7,17 +7,17 @@ import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.concurrent.CompletableFuture;
 
-import com.elmfer.cnmcu.CodeNodeMicrocontrollers;
+import com.elmfer.cnmcu.CNMCU;
 import com.ibm.icu.util.Calendar;
 
 import imgui.ImGui;
 import imgui.extension.texteditor.TextEditor;
 
-import static com.elmfer.cnmcu.CodeNodeMicrocontrollers.CONFIG;
+import static com.elmfer.cnmcu.CNMCU.CONFIG;
 
 public class Sketches {
 
-    public static final Path SKETCHES_PATH = CodeNodeMicrocontrollers.DATA_PATH.resolve("sketches");
+    public static final Path SKETCHES_PATH = CNMCU.DATA_PATH.resolve("sketches");
     public static final Path BACKUP_PATH = SKETCHES_PATH.resolve("backups");
 
     private static CompletableFuture<Void> backupSaveTask;

@@ -12,8 +12,8 @@ import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldTerrainRenderContext;
 import net.minecraft.client.Minecraft;
 
-import static com.elmfer.cnmcu.CodeNodeMicrocontrollers.CONFIG;
-import static com.elmfer.cnmcu.CodeNodeMicrocontrollers.TOOLCHAIN;
+import static com.elmfer.cnmcu.CNMCU.CONFIG;
+import static com.elmfer.cnmcu.CNMCU.TOOLCHAIN;
 
 public class EventHandler {
 
