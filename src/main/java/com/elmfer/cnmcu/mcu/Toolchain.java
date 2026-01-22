@@ -263,8 +263,8 @@ public class Toolchain {
         }
 
         public static ToolchainConfig defaultConfig() {
-            final var buildCommand = NativesLoader.PLATFORM == Platform.WINDOWS ? "vasm6502_oldstyle -Fbin -dotdir ${input} -o ${output}"
-                    : "./vasm6502_oldstyle -Fbin -dotdir ${input} -o ${output}";
+            final var executablePath = NativesLoader.getExecutablePath("vasm6502_oldstyle");
+            final var buildCommand = executablePath + " -Fbin -dotdir ${input} -o ${output}";
 
 
             final var buildVariables = Map.of(
