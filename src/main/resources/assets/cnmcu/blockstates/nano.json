@@ -1,8 +1,0 @@
-{
-  "variants": {
-    "facing=south": { "model": "cnmcu:block/nano" },
-    "facing=west": { "model": "cnmcu:block/nano", "y": 90 },
-    "facing=north": { "model": "cnmcu:block/nano", "y": 180 },
-    "facing=east": { "model": "cnmcu:block/nano", "y": 270 }
-  }
-}
