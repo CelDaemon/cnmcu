@@ -5,7 +5,7 @@ import java.nio.file.Path;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import com.elmfer.cnmcu.mixins.GuiContextInvoker;
+import com.elmfer.cnmcu.mixins.GuiGraphicsAccessor;
 import com.elmfer.cnmcu.network.*;
 import com.elmfer.cnmcu.util.BuildProcess;
 import com.elmfer.cnmcu.network.IDEScreenMCUControlPayload.Control;
@@ -153,7 +153,7 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
         EventHandler.IMGUI_GL3.renderDrawData(ImGui.getDrawData());
         GlStateManager._glBindFramebuffer(GL30C.GL_FRAMEBUFFER, 0);
         debugLabels.popDebugGroup();
-        var guiInvoker = (GuiContextInvoker) gui;
+        var guiInvoker = (GuiGraphicsAccessor) gui;
         guiInvoker.cnmcu$submitBlit(RenderPipelines.GUI_TEXTURED, renderTarget.getColorTextureView(),
                 RenderSystem.getSamplerCache().getRepeat(FilterMode.NEAREST),
                 0, 0, width, height, .0f, 1.0f, 1.f, 0.f, -1);
