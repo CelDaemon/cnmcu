@@ -9,5 +9,6 @@ public class CNMCUDataGenerator implements DataGeneratorEntrypoint {
     public void onInitializeDataGenerator(@NotNull FabricDataGenerator fabricDataGenerator) {
         final var pack = fabricDataGenerator.createPack();
         pack.addProvider(CNMCUModelProvider::new);
+        pack.addProvider(CNMCUEnglishLangProvider::new);
     }
 }
