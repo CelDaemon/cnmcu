@@ -1,4 +1,5 @@
-import tools.elmfer.*
+import tools.elmfer.CompileNativesTask
+import tools.elmfer.GenNativeSourcesTask
 
 val modVersion: String by project
 val minecraftVersion: String by project
@@ -17,6 +18,12 @@ version = "$modVersion+$minecraftVersion"
 group = mavenGroup
 
 loom.log4jConfigs.from("log4j-dev.xml")
+
+fabricApi {
+	configureDataGeneration() {
+		client = true
+	}
+}
 
 repositories {
 	mavenCentral()
