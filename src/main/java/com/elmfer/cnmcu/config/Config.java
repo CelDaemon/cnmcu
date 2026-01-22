@@ -107,6 +107,8 @@ public class Config {
     }
 
     public static Config load() {
+        if(Files.notExists(CONFIG_PATH))
+            return defaultConfig();
         final JsonElement element;
         try(var reader = new JsonReader(new InputStreamReader(Files.newInputStream(CONFIG_PATH)))) {
             element = JsonParser.parseReader(reader);
