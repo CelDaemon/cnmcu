@@ -4,7 +4,7 @@
   "package": "com.elmfer.cnmcu.mixins",
   "compatibilityLevel": "JAVA_21",
   "client": [
-    "GuiContextInvoker"
+    "GuiGraphicsAccessor"
   ],
   "server": [],
   "injectors": {
