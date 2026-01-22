@@ -1,6 +1,6 @@
 package com.elmfer.cnmcu.network;
 
-import com.elmfer.cnmcu.CodeNodeMicrocontrollers;
+import com.elmfer.cnmcu.CNMCU;
 import com.elmfer.cnmcu.ui.menu.IDEMenu;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -14,14 +14,14 @@ import org.jetbrains.annotations.NotNull;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static com.elmfer.cnmcu.CodeNodeMicrocontrollers.LOGGER;
+import static com.elmfer.cnmcu.CNMCU.LOGGER;
 
 public record UploadROMRequestPayload(
         int transactionId,
         int containerId,
         byte[] rom
 ) implements CustomPacketPayload {
-    public static final Identifier RAW_ID = CodeNodeMicrocontrollers.id("upload_rom_request");
+    public static final Identifier RAW_ID = CNMCU.id("upload_rom_request");
     public static final CustomPacketPayload.Type<UploadROMRequestPayload> ID = new CustomPacketPayload.Type<>(RAW_ID);
 
     public static final StreamCodec<FriendlyByteBuf, UploadROMRequestPayload> CODEC = StreamCodec.composite(

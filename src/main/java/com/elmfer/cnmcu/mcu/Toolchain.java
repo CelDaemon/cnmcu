@@ -9,7 +9,7 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
-import com.elmfer.cnmcu.CodeNodeMicrocontrollers;
+import com.elmfer.cnmcu.CNMCU;
 import com.elmfer.cnmcu.cpp.NativesLoader;
 import com.elmfer.cnmcu.util.BuildProcess;
 import com.google.gson.*;
@@ -23,13 +23,12 @@ import imgui.ImGui;
 import imgui.type.ImString;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Util;
-import org.lwjgl.system.Platform;
 
-import static com.elmfer.cnmcu.CodeNodeMicrocontrollers.LOGGER;
+import static com.elmfer.cnmcu.CNMCU.LOGGER;
 
 public class Toolchain {
 
-	public static final Path TOOLCHAIN_PATH = CodeNodeMicrocontrollers.DATA_PATH
+	public static final Path TOOLCHAIN_PATH = CNMCU.DATA_PATH
             .resolve("toolchain");
 	public static final Path TEMP_PATH = TOOLCHAIN_PATH.resolve("temp");
 	public static final Path CONFIG_PATH = TOOLCHAIN_PATH.resolve("config.json");

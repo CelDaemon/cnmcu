@@ -2,7 +2,7 @@ package com.elmfer.cnmcu.network;
 
 import java.util.function.IntFunction;
 
-import com.elmfer.cnmcu.CodeNodeMicrocontrollers;
+import com.elmfer.cnmcu.CNMCU;
 
 import com.elmfer.cnmcu.ui.menu.IDEMenu;
 import io.netty.buffer.ByteBuf;
@@ -15,12 +15,12 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.util.ByIdMap;
 import org.jetbrains.annotations.NotNull;
 
-import static com.elmfer.cnmcu.CodeNodeMicrocontrollers.LOGGER;
+import static com.elmfer.cnmcu.CNMCU.LOGGER;
 
 public record IDEScreenMCUControlPayload(
         int containerId,
         Control control) implements CustomPacketPayload {
-    public static final Identifier RAW_ID = CodeNodeMicrocontrollers.id("ide_screen_mcu_control");
+    public static final Identifier RAW_ID = CNMCU.id("ide_screen_mcu_control");
     public static final Type<IDEScreenMCUControlPayload> ID = new Type<>(RAW_ID);
     public static final StreamCodec<FriendlyByteBuf, IDEScreenMCUControlPayload> CODEC = StreamCodec.composite(
             ByteBufCodecs.CONTAINER_ID, IDEScreenMCUControlPayload::containerId,

@@ -1,7 +1,7 @@
 package com.elmfer.cnmcu.network;
 
-import com.elmfer.cnmcu.CodeNodeMicrocontrollers;
-import com.elmfer.cnmcu.blockentities.CNnanoBlockEntity;
+import com.elmfer.cnmcu.CNMCU;
+import com.elmfer.cnmcu.blockentities.NanoBlockEntity;
 import com.elmfer.cnmcu.mcu.NanoMCU;
 import com.elmfer.cnmcu.ui.IDEScreen;
 
@@ -20,7 +20,7 @@ public record IDEScreenSyncPayload(
         CPUStatus cpuStatus,
         BusStatus busStatus,
         byte[] zeroPage) implements CustomPacketPayload {
-    public static final Identifier RAW_ID = CodeNodeMicrocontrollers.id("ide_screen_sync");
+    public static final Identifier RAW_ID = CNMCU.id("ide_screen_sync");
     public static final CustomPacketPayload.Type<IDEScreenSyncPayload> ID = new CustomPacketPayload.Type<>(RAW_ID);
     public static final StreamCodec<FriendlyByteBuf, IDEScreenSyncPayload> CODEC = StreamCodec.composite(
             ByteBufCodecs.STRING_UTF8, IDEScreenSyncPayload::code,
@@ -32,7 +32,7 @@ public record IDEScreenSyncPayload(
             IDEScreenSyncPayload::new
     );
 
-    public static IDEScreenSyncPayload create(CNnanoBlockEntity blockEntity) {
+    public static IDEScreenSyncPayload create(NanoBlockEntity blockEntity) {
         var mcu = blockEntity.mcu;
         var dataBuffer = mcu.getRAM().getData();
         var data = new byte[256];

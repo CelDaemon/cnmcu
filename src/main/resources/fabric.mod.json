@@ -19,10 +19,10 @@
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"com.elmfer.cnmcu.CodeNodeMicrocontrollers"
+          "com.elmfer.cnmcu.CNMCU"
 		],
 		"client": [
-			"com.elmfer.cnmcu.CodeNodeMicrocontrollersClient"
+			"com.elmfer.cnmcu.CNMCUClient"
 		]
 	},
 	"depends": {

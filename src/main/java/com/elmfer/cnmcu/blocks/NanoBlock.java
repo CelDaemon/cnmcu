@@ -1,7 +1,7 @@
 package com.elmfer.cnmcu.blocks;
 
 import com.elmfer.cnmcu.blockentities.BlockEntities;
-import com.elmfer.cnmcu.blockentities.CNnanoBlockEntity;
+import com.elmfer.cnmcu.blockentities.NanoBlockEntity;
 import com.elmfer.cnmcu.util.DirectionUtil;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
@@ -29,25 +29,25 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class CNnanoBlock extends BaseEntityBlock {
-    public static final MapCodec<CNnanoBlock> CODEC = simpleCodec(CNnanoBlock::new);
+public class NanoBlock extends BaseEntityBlock {
+    public static final MapCodec<NanoBlock> CODEC = simpleCodec(NanoBlock::new);
     private static final VoxelShape SHAPE = Block.column(16.0, 0.0, 2.0);
 
     public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
 
-    protected CNnanoBlock(Properties settings) {
+    protected NanoBlock(Properties settings) {
         super(settings);
     }
 
     @Override
     @NotNull
-    public MapCodec<CNnanoBlock> codec() {
+    public MapCodec<NanoBlock> codec() {
         return CODEC;
     }
 
     @Override
     public BlockEntity newBlockEntity(@NotNull BlockPos pos, @NotNull BlockState state) {
-        return new CNnanoBlockEntity(pos, state);
+        return new NanoBlockEntity(pos, state);
     }
 
     @Override
@@ -82,7 +82,7 @@ public class CNnanoBlock extends BaseEntityBlock {
 
         BlockEntity blockEntity = world.getBlockEntity(pos);
 
-        if (!(blockEntity instanceof CNnanoBlockEntity entity && entity.mcu.isPowered()))
+        if (!(blockEntity instanceof NanoBlockEntity entity && entity.mcu.isPowered()))
             return 0;
 
         var front = state.getValue(FACING);
@@ -109,7 +109,7 @@ public class CNnanoBlock extends BaseEntityBlock {
         if (world.isClientSide())
             return null;
 
-        return CNnanoBlock.createTickerHelper(type, BlockEntities.CN_NANO, CNnanoBlockEntity::serverTick);
+        return NanoBlock.createTickerHelper(type, BlockEntities.CN_NANO, NanoBlockEntity::serverTick);
     }
 
 

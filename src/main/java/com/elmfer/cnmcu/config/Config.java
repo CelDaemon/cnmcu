@@ -5,7 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
 
-import com.elmfer.cnmcu.CodeNodeMicrocontrollers;
+import com.elmfer.cnmcu.CNMCU;
 import com.elmfer.cnmcu.mcu.Sketches;
 import com.google.gson.FormattingStyle;
 import com.google.gson.JsonElement;
@@ -19,7 +19,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Util;
 
-import static com.elmfer.cnmcu.CodeNodeMicrocontrollers.LOGGER;
+import static com.elmfer.cnmcu.CNMCU.LOGGER;
 
 public class Config {
     public boolean isAdviseUpdates() {
@@ -78,7 +78,7 @@ public class Config {
                     Codec.INT.fieldOf("max_backups").forGetter(Config::getMaxBackups),
                     Codec.STRING.fieldOf("last_save_path").forGetter(Config::getLastSavePath)
             ).apply(instance, Config::new));
-    public static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir().resolve(CodeNodeMicrocontrollers.MOD_ID + ".json");
+    public static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir().resolve(CNMCU.MOD_ID + ".json");
     private static CompletableFuture<Void> saveTask;
 
     public static Config defaultConfig() {

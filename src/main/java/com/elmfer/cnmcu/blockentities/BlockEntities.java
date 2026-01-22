@@ -1,6 +1,6 @@
 package com.elmfer.cnmcu.blockentities;
 
-import com.elmfer.cnmcu.CodeNodeMicrocontrollers;
+import com.elmfer.cnmcu.CNMCU;
 import com.elmfer.cnmcu.blocks.Blocks;
 
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
@@ -13,7 +13,7 @@ public class BlockEntities {
         // DUMMY
     }
     
-    public static final BlockEntityType<CNnanoBlockEntity> CN_NANO = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE,
-            CodeNodeMicrocontrollers.id("nano"),
-            FabricBlockEntityTypeBuilder.create(CNnanoBlockEntity::new, Blocks.CN_NANO_BLOCK).build());
+    public static final BlockEntityType<NanoBlockEntity> CN_NANO = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE,
+            CNMCU.id("nano"),
+            FabricBlockEntityTypeBuilder.create(NanoBlockEntity::new, Blocks.CN_NANO_BLOCK).build());
 }

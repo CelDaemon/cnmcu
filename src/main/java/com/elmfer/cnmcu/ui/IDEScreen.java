@@ -29,7 +29,6 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.network.VarInt;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import org.jetbrains.annotations.NotNull;
@@ -42,8 +41,8 @@ import com.elmfer.cnmcu.EventHandler;
 import com.elmfer.cnmcu.mcu.Sketches;
 import org.lwjgl.system.MemoryUtil;
 
-import static com.elmfer.cnmcu.CodeNodeMicrocontrollers.CONFIG;
-import static com.elmfer.cnmcu.CodeNodeMicrocontrollers.TOOLCHAIN;
+import static com.elmfer.cnmcu.CNMCU.CONFIG;
+import static com.elmfer.cnmcu.CNMCU.TOOLCHAIN;
 import static com.elmfer.cnmcu.EventHandler.IMGUI;
 import static com.elmfer.cnmcu.EventHandler.IMGUI_IO;
 
