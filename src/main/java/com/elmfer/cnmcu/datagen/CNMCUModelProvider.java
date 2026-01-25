@@ -26,7 +26,7 @@ public class CNMCUModelProvider extends FabricModelProvider {
 
     @Override
     public void generateBlockStateModels(@NotNull BlockModelGenerators blockStateModelGenerator) {
-        blockStateModelGenerator.registerSimpleFlatItemModel(Blocks.NANO_BLOCK);
+        blockStateModelGenerator.registerSimpleFlatItemModel(Blocks.NANO_BLOCK.asItem());
         blockStateModelGenerator.blockStateOutput.accept(
                 MultiVariantGenerator.dispatch(Blocks.NANO_BLOCK,
                         BlockModelGenerators.plainVariant(ModelLocationUtils.getModelLocation(Blocks.NANO_BLOCK))
