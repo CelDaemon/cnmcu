@@ -1,3 +1,4 @@
 {
-  "block.cnmcu.nano": "Nano"
+  "block.cnmcu.nano": "Nano",
+  "itemGroup.cnmcu.cnmcu": "CodeNode Microcontrollers"
 }

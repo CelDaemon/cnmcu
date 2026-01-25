@@ -15,5 +15,5 @@ public class BlockEntities {
     
     public static final BlockEntityType<NanoBlockEntity> CN_NANO = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE,
             CNMCU.id("nano"),
-            FabricBlockEntityTypeBuilder.create(NanoBlockEntity::new, Blocks.CN_NANO_BLOCK).build());
+            FabricBlockEntityTypeBuilder.create(NanoBlockEntity::new, Blocks.NANO_BLOCK).build());
 }

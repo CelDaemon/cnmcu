@@ -50,7 +50,7 @@ public class IDEMenu extends AbstractContainerMenu {
 
     @Override
     public boolean stillValid(@NotNull Player player) {
-        return stillValid(containerAccess, player, Blocks.CN_NANO_BLOCK);
+        return stillValid(containerAccess, player, Blocks.NANO_BLOCK);
     }
 
     @Override

@@ -26,10 +26,10 @@ public class CNMCUModelProvider extends FabricModelProvider {
 
     @Override
     public void generateBlockStateModels(@NotNull BlockModelGenerators blockStateModelGenerator) {
-        blockStateModelGenerator.registerSimpleFlatItemModel(Blocks.CN_NANO_BLOCK.asItem());
+        blockStateModelGenerator.registerSimpleFlatItemModel(Blocks.NANO_BLOCK);
         blockStateModelGenerator.blockStateOutput.accept(
-                MultiVariantGenerator.dispatch(Blocks.CN_NANO_BLOCK,
-                        BlockModelGenerators.plainVariant(ModelLocationUtils.getModelLocation(Blocks.CN_NANO_BLOCK))
+                MultiVariantGenerator.dispatch(Blocks.NANO_BLOCK,
+                        BlockModelGenerators.plainVariant(ModelLocationUtils.getModelLocation(Blocks.NANO_BLOCK))
                 ).with(ROTATION_HORIZONTAL_FACING_ALT)
         );
     }
