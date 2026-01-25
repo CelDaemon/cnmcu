@@ -1,5 +1,6 @@
 package com.elmfer.cnmcu.datagen;
 
+import com.elmfer.cnmcu.CNMCU;
 import com.elmfer.cnmcu.blocks.Blocks;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricLanguageProvider;
@@ -15,6 +16,7 @@ public class CNMCUEnglishLangProvider extends FabricLanguageProvider {
 
     @Override
     public void generateTranslations(@NotNull HolderLookup.Provider registryLookup, @NotNull TranslationBuilder translationBuilder) {
-        translationBuilder.add(Blocks.CN_NANO_BLOCK, "Nano");
+        translationBuilder.add(Blocks.NANO_BLOCK, "Nano");
+        translationBuilder.add(Blocks.CNMCU_TAB_KEY, CNMCU.MOD_NAME);
     }
 }

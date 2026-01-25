@@ -21,7 +21,7 @@ public class CNMCUBlockLootTableProvider extends FabricBlockLootTableProvider {
     }
 
     public LootTable.Builder createNanoDrops() {
-        final var item = LootItem.lootTableItem(Blocks.CN_NANO_BLOCK)
+        final var item = LootItem.lootTableItem(Blocks.NANO_BLOCK)
                 .apply(
                         CopyComponentsFunction.copyComponentsFromBlockEntity(LootContextParams.BLOCK_ENTITY)
                                 .include(DataComponents.CODE)
@@ -35,6 +35,6 @@ public class CNMCUBlockLootTableProvider extends FabricBlockLootTableProvider {
     }
     @Override
     public void generate() {
-        add(Blocks.CN_NANO_BLOCK, createNanoDrops());
+        add(Blocks.NANO_BLOCK, createNanoDrops());
     }
 }
