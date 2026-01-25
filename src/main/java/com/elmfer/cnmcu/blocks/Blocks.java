@@ -30,7 +30,6 @@ public class Blocks {
                         .icon(() -> new ItemStack(NANO_BLOCK))
                         .displayItems((params, output) -> {
                             output.accept(NANO_BLOCK);
-                            output.accept(new ItemStack(NANO_BLOCK, 1));
                         })
         );
     }
