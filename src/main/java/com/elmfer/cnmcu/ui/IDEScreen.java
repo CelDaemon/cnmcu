@@ -60,7 +60,7 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
     public BusStatus busStatus = new BusStatus(0, 0, false);
     public boolean isPowered = false;
     public boolean isClockPaused = false;
-    public ByteBuffer zeroPage = BufferUtils.createByteBuffer(256);
+    public ByteBuffer memory = BufferUtils.createByteBuffer(512);
     @Nullable
     private BuildProcess buildProcess;
     private Future<UploadROMResponsePayload> uploadPacket;
@@ -76,6 +76,7 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
 
         textEditor = new TextEditor();
         memoryEditor = new MemoryEditor();
+        memoryEditor.setReadOnly(true); // TODO: Allow for editing memory
 
         textEditor.setText(menu.code);
 
@@ -431,8 +432,8 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
             return;
         }
 
-        zeroPage.rewind();
-        memoryEditor.drawContents(MemoryUtil.memAddressSafe(zeroPage), zeroPage.remaining());
+        memory.rewind();
+        memoryEditor.drawContents(MemoryUtil.memAddress(memory), memory.remaining());
 
         ImGui.end();
     }
