@@ -19,7 +19,7 @@ public record IDEScreenSyncPayload(
         boolean isClockPaused,
         CPUStatus cpuStatus,
         BusStatus busStatus,
-        byte[] zeroPage) implements CustomPacketPayload {
+        byte[] memory) implements CustomPacketPayload {
     public static final Identifier RAW_ID = CNMCU.id("ide_screen_sync");
     public static final CustomPacketPayload.Type<IDEScreenSyncPayload> ID = new CustomPacketPayload.Type<>(RAW_ID);
     public static final StreamCodec<FriendlyByteBuf, IDEScreenSyncPayload> CODEC = StreamCodec.composite(
@@ -28,14 +28,14 @@ public record IDEScreenSyncPayload(
             ByteBufCodecs.BOOL, IDEScreenSyncPayload::isClockPaused,
             CPUStatus.PACKET_CODEC, IDEScreenSyncPayload::cpuStatus,
             BusStatus.PACKET_CODEC, IDEScreenSyncPayload::busStatus,
-            ByteBufCodecs.byteArray(256), IDEScreenSyncPayload::zeroPage, // More than 256??
+            ByteBufCodecs.byteArray(512), IDEScreenSyncPayload::memory,
             IDEScreenSyncPayload::new
     );
 
     public static IDEScreenSyncPayload create(NanoBlockEntity blockEntity) {
         var mcu = blockEntity.mcu;
         var dataBuffer = mcu.getRAM().getData();
-        var data = new byte[256];
+        var data = new byte[512];
         dataBuffer.get(data);
         return new IDEScreenSyncPayload(
                 blockEntity.getCode(),
@@ -60,8 +60,8 @@ public record IDEScreenSyncPayload(
 
         screen.cpuStatus = cpuStatus;
         screen.busStatus = busStatus;
-        screen.zeroPage.clear();
-        screen.zeroPage.put(payload.zeroPage());
+        screen.memory.rewind();
+        screen.memory.put(payload.memory());
 
         screen.syncCode(payload.code());
     }
