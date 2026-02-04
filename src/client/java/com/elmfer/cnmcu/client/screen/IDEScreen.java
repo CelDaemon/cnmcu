@@ -1,4 +1,4 @@
-package com.elmfer.cnmcu.ui;
+package com.elmfer.cnmcu.client.screen;
 
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
@@ -7,13 +7,14 @@ import java.util.OptionalInt;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import com.elmfer.cnmcu.mixins.GuiGraphicsAccessor;
+import com.elmfer.cnmcu.client.mixin.GuiGraphicsAccessor;
 import com.elmfer.cnmcu.network.*;
 import com.elmfer.cnmcu.util.BuildProcess;
 import com.elmfer.cnmcu.network.IDEScreenMCUControlPayload.Control;
 import com.elmfer.cnmcu.network.IDEScreenSyncPayload.BusStatus;
 import com.elmfer.cnmcu.network.IDEScreenSyncPayload.CPUStatus;
-import com.elmfer.cnmcu.ui.menu.IDEMenu;
+import com.elmfer.cnmcu.menu.IDEMenu;
+import com.elmfer.cnmcu.client.network.UploadROMTransaction;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.resource.RenderTargetDescriptor;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -35,14 +36,14 @@ import org.jetbrains.annotations.Nullable;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
 
-import com.elmfer.cnmcu.EventHandler;
+import com.elmfer.cnmcu.client.EventHandler;
 import com.elmfer.cnmcu.mcu.Sketches;
 import org.lwjgl.system.MemoryUtil;
 
 import static com.elmfer.cnmcu.CNMCU.CONFIG;
 import static com.elmfer.cnmcu.CNMCU.TOOLCHAIN;
-import static com.elmfer.cnmcu.EventHandler.IMGUI;
-import static com.elmfer.cnmcu.EventHandler.IMGUI_IO;
+import static com.elmfer.cnmcu.client.EventHandler.IMGUI;
+import static com.elmfer.cnmcu.client.EventHandler.IMGUI_IO;
 
 public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
     private static final String CODE_EDITOR_NAME = "Code Editor";
@@ -365,7 +366,7 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
 
         if (shouldUpload && buildProcess != null && buildProcess.onFinish().isDone() && uploadPacket == null) {
             try {
-                uploadPacket = UploadROMRequestPayload.send(menu.containerId, buildProcess.onFinish().get());
+                uploadPacket = UploadROMTransaction.sendRequest(menu.containerId, buildProcess.onFinish().get());
             } catch (Exception e) {
                 shouldUpload = false;
             }
@@ -555,5 +556,24 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
     private boolean isSaveKeybind() {
         var mod = IMGUI_IO.getConfigMacOSXBehaviors() ? IMGUI_IO.getKeySuper() : IMGUI_IO.getKeyCtrl();
         return mod && ImGui.isKeyPressed('S');
+    }
+
+    public static void receiveSync(IDEScreenSyncPayload payload, ClientPlayNetworking.Context context) {
+        @SuppressWarnings("resource") var client = context.client();
+        if(!(client.screen instanceof IDEScreen screen))
+            return;
+
+        CPUStatus cpuStatus = payload.cpuStatus();
+        BusStatus busStatus = payload.busStatus();
+
+        screen.isPowered = payload.isPowered();
+        screen.isClockPaused = payload.isClockPaused();
+
+        screen.cpuStatus = cpuStatus;
+        screen.busStatus = busStatus;
+        screen.memory.rewind();
+        screen.memory.put(payload.memory());
+
+        screen.syncCode(payload.code());
     }
 }

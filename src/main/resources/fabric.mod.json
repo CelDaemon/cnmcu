@@ -22,10 +22,10 @@
             "com.elmfer.cnmcu.CNMCU"
 		],
 		"client": [
-			"com.elmfer.cnmcu.CNMCUClient"
+			"com.elmfer.cnmcu.client.CNMCUClient"
 		],
 		"fabric-datagen": [
-			"com.elmfer.cnmcu.datagen.CNMCUDataGenerator"
+			"com.elmfer.cnmcu.client.datagen.CNMCUDataGenerator"
 		]
 	},
 	"depends": {
@@ -37,7 +37,7 @@
 	"mixins": [
 		{
 			"environment": "client",
-			"config": "cnmcu.mixin.json"
+			"config": "cnmcu.client.mixin.json"
 		}
 	]
 }

@@ -1,8 +1,7 @@
 package com.elmfer.cnmcu.network;
 
 import com.elmfer.cnmcu.CNMCU;
-import com.elmfer.cnmcu.ui.menu.IDEMenu;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import com.elmfer.cnmcu.menu.IDEMenu;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -10,9 +9,6 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static com.elmfer.cnmcu.CNMCU.LOGGER;
 
@@ -30,9 +26,6 @@ public record UploadROMRequestPayload(
             ByteBufCodecs.BYTE_ARRAY, UploadROMRequestPayload::rom,
             UploadROMRequestPayload::new
     );
-
-    private static final ConcurrentHashMap<Integer, CompletableFuture<UploadROMResponsePayload>> TRANSACTIONS = new ConcurrentHashMap<>();
-    private static int nextTransactionId = 0;
 
     @Override
     @NotNull
@@ -87,21 +80,5 @@ public record UploadROMRequestPayload(
                 rom.length,
                 String.format("Uploaded %d bytes.", rom.length)
         ));
-    }
-
-    public static CompletableFuture<UploadROMResponsePayload> send(int containerId, byte[] rom) {
-        var transactionId = nextTransactionId++;
-        var future = new CompletableFuture<UploadROMResponsePayload>();
-        TRANSACTIONS.put(transactionId, future);
-        ClientPlayNetworking.send(new UploadROMRequestPayload(transactionId, containerId, rom));
-        return future;
-    }
-
-    public static void notifyResponse(UploadROMResponsePayload responsePayload) {
-        LOGGER.debug("Received response for transaction: {}", responsePayload.transactionId());
-        var transaction = TRANSACTIONS.remove(responsePayload.transactionId());
-        if(transaction == null)
-            return;
-        transaction.complete(responsePayload);
     }
 }

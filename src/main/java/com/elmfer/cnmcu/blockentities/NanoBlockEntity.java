@@ -4,7 +4,7 @@ import com.elmfer.cnmcu.CNMCU;
 import com.elmfer.cnmcu.blocks.NanoBlock;
 import com.elmfer.cnmcu.DataComponents;
 import com.elmfer.cnmcu.mcu.NanoMCU;
-import com.elmfer.cnmcu.ui.menu.IDEMenu;
+import com.elmfer.cnmcu.menu.IDEMenu;
 import com.elmfer.cnmcu.util.DirectionUtil;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.minecraft.core.BlockPos;

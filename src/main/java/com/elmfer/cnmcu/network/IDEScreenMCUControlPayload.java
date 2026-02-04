@@ -4,7 +4,7 @@ import java.util.function.IntFunction;
 
 import com.elmfer.cnmcu.CNMCU;
 
-import com.elmfer.cnmcu.ui.menu.IDEMenu;
+import com.elmfer.cnmcu.menu.IDEMenu;
 import io.netty.buffer.ByteBuf;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.FriendlyByteBuf;

@@ -1,4 +1,4 @@
-package com.elmfer.cnmcu.datagen;
+package com.elmfer.cnmcu.client.datagen;
 
 import com.elmfer.cnmcu.DataComponents;
 import com.elmfer.cnmcu.blocks.Blocks;

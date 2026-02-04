@@ -1,4 +1,4 @@
-package com.elmfer.cnmcu.ui.menu;
+package com.elmfer.cnmcu.menu;
 
 import com.elmfer.cnmcu.CNMCU;
 

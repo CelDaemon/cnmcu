@@ -1,4 +1,4 @@
-package com.elmfer.cnmcu.ui;
+package com.elmfer.cnmcu.client.screen;
 
 import com.elmfer.cnmcu.CNMCU;
 import com.elmfer.cnmcu.animation.Timer;

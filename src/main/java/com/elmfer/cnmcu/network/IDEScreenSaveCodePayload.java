@@ -2,7 +2,7 @@ package com.elmfer.cnmcu.network;
 
 import com.elmfer.cnmcu.CNMCU;
 
-import com.elmfer.cnmcu.ui.menu.IDEMenu;
+import com.elmfer.cnmcu.menu.IDEMenu;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;

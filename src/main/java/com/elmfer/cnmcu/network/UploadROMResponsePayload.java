@@ -1,7 +1,6 @@
 package com.elmfer.cnmcu.network;
 
 import com.elmfer.cnmcu.CNMCU;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -27,9 +26,5 @@ public record UploadROMResponsePayload(
     @Override
     public @NotNull Type<? extends CustomPacketPayload> type() {
         return ID;
-    }
-
-    public static void receive(UploadROMResponsePayload payload, ClientPlayNetworking.Context ignoredContext) {
-        UploadROMRequestPayload.notifyResponse(payload);
     }
 }

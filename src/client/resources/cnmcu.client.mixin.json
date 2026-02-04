@@ -1,12 +1,11 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "com.elmfer.cnmcu.mixins",
+  "package": "com.elmfer.cnmcu.client.mixin",
   "compatibilityLevel": "JAVA_21",
   "client": [
     "GuiGraphicsAccessor"
   ],
-  "server": [],
   "injectors": {
     "defaultRequire": 1
   },

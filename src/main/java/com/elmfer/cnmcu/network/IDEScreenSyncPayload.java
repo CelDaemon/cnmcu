@@ -3,9 +3,7 @@ package com.elmfer.cnmcu.network;
 import com.elmfer.cnmcu.CNMCU;
 import com.elmfer.cnmcu.blockentities.NanoBlockEntity;
 import com.elmfer.cnmcu.mcu.NanoMCU;
-import com.elmfer.cnmcu.ui.IDEScreen;
 
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -45,25 +43,6 @@ public record IDEScreenSyncPayload(
                 BusStatus.create(mcu),
                 data
         );
-    }
-    
-    public static void receive(IDEScreenSyncPayload payload, ClientPlayNetworking.Context context) {
-        @SuppressWarnings("resource") var client = context.client();
-        if(!(client.screen instanceof IDEScreen screen))
-            return;
-
-        CPUStatus cpuStatus = payload.cpuStatus();
-        BusStatus busStatus = payload.busStatus();
-
-        screen.isPowered = payload.isPowered();
-        screen.isClockPaused = payload.isClockPaused();
-
-        screen.cpuStatus = cpuStatus;
-        screen.busStatus = busStatus;
-        screen.memory.rewind();
-        screen.memory.put(payload.memory());
-
-        screen.syncCode(payload.code());
     }
 
     @Override

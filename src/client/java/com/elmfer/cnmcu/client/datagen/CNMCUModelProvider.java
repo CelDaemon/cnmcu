@@ -1,4 +1,4 @@
-package com.elmfer.cnmcu.datagen;
+package com.elmfer.cnmcu.client.datagen;
 
 import com.elmfer.cnmcu.blocks.Blocks;
 import net.fabricmc.fabric.api.client.datagen.v1.provider.FabricModelProvider;

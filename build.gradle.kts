@@ -17,7 +17,29 @@ plugins {
 version = "$modVersion+$minecraftVersion"
 group = mavenGroup
 
-loom.log4jConfigs.from("log4j-dev.xml")
+val bundle by configurations.registering
+
+configurations.implementation {
+	extendsFrom(bundle.get())
+}
+
+
+loom.splitEnvironmentSourceSets()
+
+val client by sourceSets.existing
+
+loom {
+	mods {
+		register("cnmcu") {
+			sourceSet(sourceSets.main.get())
+			sourceSet(client.get())
+			configuration(bundle.get())
+		}
+	}
+
+	log4jConfigs.from("log4j-dev.xml")
+}
+
 
 fabricApi {
 	configureDataGeneration() {
@@ -28,13 +50,6 @@ fabricApi {
 repositories {
 	mavenCentral()
 }
-
-val bundle by configurations.registering
-
-configurations.implementation {
-	extendsFrom(bundle.get())
-}
-
 dependencies {
 	minecraft("com.mojang:minecraft:$minecraftVersion")
 	mappings(loom.officialMojangMappings())
@@ -84,19 +99,16 @@ val compileNatives by tasks.registering(CompileNativesTask::class) {
 	finalizedBy(copyNatives)
 }
 
-var prebuiltProvider: Provider<Directory> = project.provider {
-	layout.projectDirectory.dir(project.property("prebuilt_natives") as String)
-}
-var compiledProvider: Provider<Directory> = compileNatives.flatMap { it.outputDir }
-var nativesProvider = if(project.hasProperty("prebuilt_natives")) prebuiltProvider else compiledProvider
+val nativesProvider: Provider<Directory> = provider { project.findProperty("prebuilt_natives") as String? }
+	.map { layout.projectDirectory.dir(it) }
+	.orElse(compileNatives.flatMap { it.outputDir })
 
 copyNatives {
 	inputs.files(nativesProvider)
 
 	from(nativesProvider)
 
-	into(layout.projectDirectory.dir(loom.runs.getByName("client").runDir)
-			.dir("cnmcu/natives/${version}"))
+	into(loom.runs.named("client").map { layout.projectDirectory.dir(it.runDir).dir("cnmcu/natives/${version}") })
 }
 
 tasks.processResources {
@@ -123,6 +135,7 @@ tasks.jar {
 }
 
 tasks.shadowJar {
+	from(client.map { it.output })
 	configurations = bundle.map { listOf(it) }
 	archiveClassifier = "dev"
 	destinationDirectory = layout.buildDirectory.dir("devlibs")

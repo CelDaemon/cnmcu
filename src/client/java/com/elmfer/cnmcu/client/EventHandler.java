@@ -1,4 +1,4 @@
-package com.elmfer.cnmcu;
+package com.elmfer.cnmcu.client;
 
 import com.elmfer.cnmcu.config.ModSetup;
 import imgui.ImGui;

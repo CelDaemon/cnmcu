@@ -1,11 +1,11 @@
 package com.elmfer.cnmcu.network;
 
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 
-public class Packets {
-    public static void registerPackets() {
+public class Networking {
+
+    public static void register() {
         var s2c = PayloadTypeRegistry.playS2C();
         s2c.register(IDEScreenSyncPayload.ID, IDEScreenSyncPayload.CODEC);
         s2c.register(UploadROMResponsePayload.ID, UploadROMResponsePayload.CODEC);
@@ -14,13 +14,7 @@ public class Packets {
         c2s.register(IDEScreenSaveCodePayload.TYPE, IDEScreenSaveCodePayload.CODEC);
         c2s.register(UploadROMRequestPayload.ID, UploadROMRequestPayload.CODEC);
         c2s.register(IDEScreenMCUControlPayload.ID, IDEScreenMCUControlPayload.CODEC);
-    }
-    public static void initClientPackets() {
-        ClientPlayNetworking.registerGlobalReceiver(IDEScreenSyncPayload.ID, IDEScreenSyncPayload::receive);
-        ClientPlayNetworking.registerGlobalReceiver(UploadROMResponsePayload.ID, UploadROMResponsePayload::receive);
-    }
 
-    public static void initServerPackets() {
         ServerPlayNetworking.registerGlobalReceiver(IDEScreenSaveCodePayload.TYPE, IDEScreenSaveCodePayload::receive);
         ServerPlayNetworking.registerGlobalReceiver(UploadROMRequestPayload.ID, UploadROMRequestPayload::receive);
         ServerPlayNetworking.registerGlobalReceiver(IDEScreenMCUControlPayload.ID, IDEScreenMCUControlPayload::receive);

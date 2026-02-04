@@ -6,8 +6,8 @@ import com.elmfer.cnmcu.config.Config;
 import com.elmfer.cnmcu.config.ModSetup;
 import com.elmfer.cnmcu.cpp.NativesLoader;
 import com.elmfer.cnmcu.mcu.Toolchain;
-import com.elmfer.cnmcu.network.Packets;
-import com.elmfer.cnmcu.ui.menu.Menus;
+import com.elmfer.cnmcu.network.Networking;
+import com.elmfer.cnmcu.menu.Menus;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.resources.Identifier;
@@ -50,8 +50,7 @@ public class CNMCU implements ModInitializer {
         Menus.init();
         DataComponents.init();
 
-        Packets.registerPackets();
-        Packets.initServerPackets();
+        Networking.register();
     }
 
     public static Identifier id(String path) {

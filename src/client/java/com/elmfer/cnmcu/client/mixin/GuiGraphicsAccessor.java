@@ -1,4 +1,4 @@
-package com.elmfer.cnmcu.mixins;
+package com.elmfer.cnmcu.client.mixin;
 
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.textures.GpuSampler;
