@@ -2,6 +2,8 @@ package com.elmfer.cnmcu.ui;
 
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
+import java.util.Objects;
+import java.util.OptionalInt;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -12,9 +14,6 @@ import com.elmfer.cnmcu.network.IDEScreenMCUControlPayload.Control;
 import com.elmfer.cnmcu.network.IDEScreenSyncPayload.BusStatus;
 import com.elmfer.cnmcu.network.IDEScreenSyncPayload.CPUStatus;
 import com.elmfer.cnmcu.ui.menu.IDEMenu;
-import com.mojang.blaze3d.opengl.GlDevice;
-import com.mojang.blaze3d.opengl.GlStateManager;
-import com.mojang.blaze3d.opengl.GlTexture;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.resource.RenderTargetDescriptor;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -35,7 +34,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
-import org.lwjgl.opengl.GL30C;
 
 import com.elmfer.cnmcu.EventHandler;
 import com.elmfer.cnmcu.mcu.Sketches;
@@ -140,23 +138,13 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
 
         prepareRenderTarget();
 
-        final var device = (GlDevice) RenderSystem.getDevice();
-        final var debugLabels = device.debugLabels();
-        debugLabels.pushDebugGroup(() -> "ImGui render");
-        final var texture = (GlTexture) renderTarget.getColorTexture();
-        if(texture == null)
-            throw new RuntimeException("Failed to get color texture");
+        var textureView = Objects.requireNonNull(renderTarget.getColorTextureView());
+        try(var ignored = RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "ImGui render", textureView, OptionalInt.empty())) {
+            EventHandler.IMGUI_GL3.renderDrawData(ImGui.getDrawData());
+        }
 
-        final var stateAccess = device.directStateAccess();
-        GlStateManager._glBindFramebuffer(GL30C.GL_FRAMEBUFFER, texture
-                .getFbo(stateAccess, null));
-        GlStateManager._viewport(0, 0, renderTarget.width, renderTarget.height);
-        EventHandler.IMGUI_GL3.renderDrawData(ImGui.getDrawData());
-        GlStateManager._glBindFramebuffer(GL30C.GL_FRAMEBUFFER, 0);
-        debugLabels.popDebugGroup();
-        var guiInvoker = (GuiGraphicsAccessor) gui;
-        guiInvoker.cnmcu$submitBlit(RenderPipelines.GUI_TEXTURED, renderTarget.getColorTextureView(),
-                RenderSystem.getSamplerCache().getRepeat(FilterMode.NEAREST),
+        ((GuiGraphicsAccessor) gui).cnmcu$submitBlit(RenderPipelines.GUI_TEXTURED, renderTarget.getColorTextureView(),
+                RenderSystem.getSamplerCache().getClampToEdge(FilterMode.NEAREST),
                 0, 0, width, height, .0f, 1.0f, 1.f, 0.f, -1);
     }
 
