@@ -11,7 +11,7 @@ import static com.elmfer.cnmcu.CNMCU.LOGGER;
 
 public class UploadROMTransaction {
     private static final ConcurrentHashMap<Integer, CompletableFuture<UploadROMResponsePayload>> TRANSACTIONS = new ConcurrentHashMap<>();
-    private static int nextTransactionId = 0;
+    private static int nextTransactionId;
 
     public static CompletableFuture<UploadROMResponsePayload> sendRequest(int containerId, byte[] rom) {
         var transactionId = nextTransactionId++;

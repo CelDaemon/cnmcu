@@ -77,20 +77,13 @@ public record IDEScreenMCUControlPayload(
     }
     
     public enum Control {
-        POWER_ON(0),
-        POWER_OFF(1),
-        RESET(2),
-        PAUSE_CLOCK(3),
-        RESUME_CLOCK(4),
-        CYCLE(5);
-        public static final IntFunction<Control> BY_ID = ByIdMap.continuous(Control::getId, values(), ByIdMap.OutOfBoundsStrategy.WRAP);
-        public static final StreamCodec<ByteBuf, Control> STREAM_CODEC = ByteBufCodecs.idMapper(BY_ID, Control::getId);
-        private final int id;
-        Control(int id) {
-            this.id = id;
-        }
-        public int getId() {
-            return id;
-        }
+        POWER_ON,
+        POWER_OFF,
+        RESET,
+        PAUSE_CLOCK,
+        RESUME_CLOCK,
+        CYCLE;
+        public static final IntFunction<Control> BY_ID = ByIdMap.continuous(Control::ordinal, values(), ByIdMap.OutOfBoundsStrategy.WRAP);
+        public static final StreamCodec<ByteBuf, Control> STREAM_CODEC = ByteBufCodecs.idMapper(BY_ID, Control::ordinal);
     }
 }
