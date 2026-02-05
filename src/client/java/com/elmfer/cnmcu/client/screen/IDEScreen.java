@@ -1,20 +1,18 @@
 package com.elmfer.cnmcu.client.screen;
 
-import java.nio.ByteBuffer;
-import java.nio.file.Path;
-import java.util.Objects;
-import java.util.OptionalInt;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-
+import com.elmfer.cnmcu.client.EventHandler;
 import com.elmfer.cnmcu.client.mixin.GuiGraphicsAccessor;
-import com.elmfer.cnmcu.network.*;
-import com.elmfer.cnmcu.util.BuildProcess;
+import com.elmfer.cnmcu.client.network.UploadROMTransaction;
+import com.elmfer.cnmcu.client.toolchain.BuildProcess;
+import com.elmfer.cnmcu.client.toolchain.Sketches;
+import com.elmfer.cnmcu.menu.IDEMenu;
+import com.elmfer.cnmcu.network.IDEScreenMCUControlPayload;
 import com.elmfer.cnmcu.network.IDEScreenMCUControlPayload.Control;
+import com.elmfer.cnmcu.network.IDEScreenSaveCodePayload;
+import com.elmfer.cnmcu.network.IDEScreenSyncPayload;
 import com.elmfer.cnmcu.network.IDEScreenSyncPayload.BusStatus;
 import com.elmfer.cnmcu.network.IDEScreenSyncPayload.CPUStatus;
-import com.elmfer.cnmcu.menu.IDEMenu;
-import com.elmfer.cnmcu.client.network.UploadROMTransaction;
+import com.elmfer.cnmcu.network.UploadROMResponsePayload;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.resource.RenderTargetDescriptor;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -35,13 +33,17 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
-
-import com.elmfer.cnmcu.client.EventHandler;
-import com.elmfer.cnmcu.mcu.Sketches;
 import org.lwjgl.system.MemoryUtil;
 
-import static com.elmfer.cnmcu.CNMCU.CONFIG;
-import static com.elmfer.cnmcu.CNMCU.TOOLCHAIN;
+import java.nio.ByteBuffer;
+import java.nio.file.Path;
+import java.util.Objects;
+import java.util.OptionalInt;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+
+import static com.elmfer.cnmcu.client.CNMCUClient.CONFIG;
+import static com.elmfer.cnmcu.client.CNMCUClient.TOOLCHAIN;
 import static com.elmfer.cnmcu.client.EventHandler.IMGUI;
 import static com.elmfer.cnmcu.client.EventHandler.IMGUI_IO;
 

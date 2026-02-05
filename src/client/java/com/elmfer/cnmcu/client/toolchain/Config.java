@@ -1,12 +1,6 @@
-package com.elmfer.cnmcu.config;
-
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.concurrent.CompletableFuture;
+package com.elmfer.cnmcu.client.toolchain;
 
 import com.elmfer.cnmcu.CNMCU;
-import com.elmfer.cnmcu.mcu.Sketches;
 import com.google.gson.FormattingStyle;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
@@ -19,16 +13,16 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Util;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.concurrent.CompletableFuture;
+
 import static com.elmfer.cnmcu.CNMCU.LOGGER;
 
 public class Config {
-    public boolean isAdviseUpdates() {
-        return adviseUpdates;
-    }
-
-    public void setAdviseUpdates(boolean adviseUpdates) {
-        this.adviseUpdates = adviseUpdates;
-    }
 
     public boolean isHexRegisters() {
         return hexRegisters;
@@ -58,21 +52,18 @@ public class Config {
         this.lastSavePath = lastSavePath;
     }
 
-    public Config(boolean adviseUpdates, boolean hexRegisters, boolean showDocs, int maxBackups, String lastSaveFilePath) {
-        this.adviseUpdates = adviseUpdates;
+    public Config(boolean hexRegisters, boolean showDocs, int maxBackups, String lastSaveFilePath) {
         this.hexRegisters = hexRegisters;
         this.showDocs = showDocs;
         this.maxBackups = maxBackups;
         this.lastSavePath = lastSaveFilePath;
     }
-    private boolean adviseUpdates;
     private boolean hexRegisters;
     private boolean showDocs;
     private int maxBackups;
     private String lastSavePath;
     private static final Codec<Config> CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
-                    Codec.BOOL.fieldOf("advise_updates").forGetter(Config::isAdviseUpdates),
                     Codec.BOOL.fieldOf("hex_registers").forGetter(Config::isHexRegisters),
                     Codec.BOOL.fieldOf("show_docs").forGetter(Config::isShowDocs),
                     Codec.INT.fieldOf("max_backups").forGetter(Config::getMaxBackups),
@@ -82,8 +73,9 @@ public class Config {
     private static CompletableFuture<Void> saveTask;
 
     public static Config defaultConfig() {
-        return new Config(true, false, false, 30,
-                Sketches.SKETCHES_PATH.resolve("untitled.s").toAbsolutePath().toString());
+        return new Config(false, false, 30,
+                Sketches.SKETCHES_PATH.resolve("untitled.s").toAbsolutePath().toString()
+        );
     }
 
     public void setShowDocs(boolean showDocs) {
@@ -117,8 +109,9 @@ public class Config {
             return defaultConfig();
         }
         var result = CODEC.parse(JsonOps.INSTANCE, element);
-        return result.mapOrElse(x -> x,
-                x -> defaultConfig());
+        if (result.isError())
+            return defaultConfig();
+        return result.result().orElseGet(Config::defaultConfig);
     }
     
     public void waitForSave() {

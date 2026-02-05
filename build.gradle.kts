@@ -17,23 +17,21 @@ plugins {
 version = "$modVersion+$minecraftVersion"
 group = mavenGroup
 
-val bundle by configurations.registering
-
-configurations.implementation {
-	extendsFrom(bundle.get())
-}
-
+val clientShade by configurations.registering
 
 loom.splitEnvironmentSourceSets()
 
 val client by sourceSets.existing
+
+configurations.named("clientImplementation") {
+	extendsFrom(clientShade.get())
+}
 
 loom {
 	mods {
 		register("cnmcu") {
 			sourceSet(sourceSets.main.get())
 			sourceSet(client.get())
-			configuration(bundle.get())
 		}
 	}
 
@@ -42,7 +40,7 @@ loom {
 
 
 fabricApi {
-	configureDataGeneration() {
+	configureDataGeneration {
 		client = true
 	}
 }
@@ -57,15 +55,14 @@ dependencies {
 
 	modImplementation("net.fabricmc.fabric-api:fabric-api:$fabricVersion")
 
+	clientShade("io.github.spair:imgui-java-binding:$imguiVersion")
+	clientShade("io.github.spair:imgui-java-lwjgl3:$imguiVersion") {
+		exclude(group = "org.lwjgl") // Do not include transitive LWJGL3 dependency.
+	}
 
-	bundle("io.github.spair:imgui-java-binding:$imguiVersion")
-	bundle("io.github.spair:imgui-java-lwjgl3:$imguiVersion") {
-        exclude(group = "org.lwjgl") // Do not include transitive LWJGL3 dependency.
-    }
-
-	bundle("io.github.spair:imgui-java-natives-windows:$imguiVersion")
-	bundle("io.github.spair:imgui-java-natives-linux:$imguiVersion")
-	bundle("io.github.spair:imgui-java-natives-macos:$imguiVersion")
+	clientShade("io.github.spair:imgui-java-natives-windows:$imguiVersion")
+	clientShade("io.github.spair:imgui-java-natives-linux:$imguiVersion")
+	clientShade("io.github.spair:imgui-java-natives-macos:$imguiVersion")
 }
 
 tasks.withType<JavaCompile>().configureEach {
@@ -136,9 +133,13 @@ tasks.jar {
 
 tasks.shadowJar {
 	from(client.map { it.output })
-	configurations = bundle.map { listOf(it) }
+	configurations = clientShade.map { listOf(it) }
 	archiveClassifier = "dev"
 	destinationDirectory = layout.buildDirectory.dir("devlibs")
+}
+
+tasks.named<Jar>("sourcesJar") {
+	archiveClassifier = "dev-sources"
 }
 
 tasks.remapJar {

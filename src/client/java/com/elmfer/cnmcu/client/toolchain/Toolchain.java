@@ -1,19 +1,11 @@
-package com.elmfer.cnmcu.mcu;
+package com.elmfer.cnmcu.client.toolchain;
 
-
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
 
 import com.elmfer.cnmcu.CNMCU;
 import com.elmfer.cnmcu.cpp.NativesLoader;
-import com.elmfer.cnmcu.util.BuildProcess;
-import com.google.gson.*;
-
+import com.google.gson.FormattingStyle;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import com.mojang.serialization.Codec;
@@ -23,6 +15,16 @@ import imgui.ImGui;
 import imgui.type.ImString;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Util;
+
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import static com.elmfer.cnmcu.CNMCU.LOGGER;
 

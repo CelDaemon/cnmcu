@@ -2,12 +2,10 @@ package com.elmfer.cnmcu;
 
 import com.elmfer.cnmcu.blockentities.BlockEntities;
 import com.elmfer.cnmcu.blocks.Blocks;
-import com.elmfer.cnmcu.config.Config;
 import com.elmfer.cnmcu.config.ModSetup;
 import com.elmfer.cnmcu.cpp.NativesLoader;
-import com.elmfer.cnmcu.mcu.Toolchain;
-import com.elmfer.cnmcu.network.Networking;
 import com.elmfer.cnmcu.menu.Menus;
+import com.elmfer.cnmcu.network.Networking;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.resources.Identifier;
@@ -31,9 +29,6 @@ public class CNMCU implements ModInitializer {
     public static final Cleaner CLEANER = Cleaner.create();
     public static final Path DATA_PATH = FabricLoader.getInstance().getGameDir().resolve(MOD_ID);
 
-    public static final Config CONFIG = Config.load();
-    public static final Toolchain TOOLCHAIN = new Toolchain();
-
 
 
     @Override
@@ -41,7 +36,6 @@ public class CNMCU implements ModInitializer {
 
         ModSetup.createDirectories();
         ModSetup.downloadNatives();
-        ModSetup.downloadToolchain();
 
         NativesLoader.loadNatives();
 

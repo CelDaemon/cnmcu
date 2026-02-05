@@ -1,7 +1,6 @@
-package com.elmfer.cnmcu.util;
+package com.elmfer.cnmcu.client.toolchain;
 
 import com.elmfer.cnmcu.cpp.NativesLoader;
-import com.elmfer.cnmcu.mcu.Toolchain;
 import net.minecraft.util.Util;
 import org.lwjgl.system.Platform;
 

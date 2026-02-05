@@ -1,22 +1,15 @@
 package com.elmfer.cnmcu.config;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.attribute.FileAttribute;
-import java.nio.file.attribute.PosixFilePermission;
-import java.nio.file.attribute.PosixFilePermissions;
-import java.util.Set;
-
 import com.elmfer.cnmcu.CNMCU;
 import com.elmfer.cnmcu.cpp.NativesLoader;
-import com.elmfer.cnmcu.mcu.Sketches;
-import com.elmfer.cnmcu.mcu.Toolchain;
 import com.elmfer.cnmcu.util.HTTPSFetcher;
 import com.google.gson.JsonArray;
 import net.minecraft.server.packs.resources.ResourceManager;
 import org.jetbrains.annotations.NotNull;
-import org.lwjgl.system.Platform;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static com.elmfer.cnmcu.CNMCU.LOGGER;
 
@@ -32,10 +25,7 @@ public final class ModSetup {
 
     public static void createDirectories() {
         try {
-            Files.createDirectories(Toolchain.TOOLCHAIN_PATH);
-            Files.createDirectories(Toolchain.TEMP_PATH);
             Files.createDirectories(NativesLoader.NATIVES_PATH);
-            Files.createDirectories(Sketches.BACKUP_PATH);
         } catch (IOException e) {
             LOGGER.error("Failed to create directories", e);
         }
@@ -60,22 +50,7 @@ public final class ModSetup {
                 NativesLoader.resolveNative());
     }
 
-    public static void downloadToolchain() {
-        final var vasmFilename = "vasm6502_oldstyle";
-        ensureInstall(vasmFilename, Toolchain.TOOLCHAIN_PATH.resolve(NativesLoader.getExecutablePath(vasmFilename)),
-                NativesLoader.getExecutableFilename(vasmFilename));
-
-        final var vobjFilename = "vobjdump";
-        ensureInstall(vobjFilename, Toolchain.TOOLCHAIN_PATH.resolve(NativesLoader.getExecutablePath(vobjFilename)),
-                NativesLoader.getExecutableFilename(vobjFilename));
-
-        final var cygFilename = "cygwin1.dll";
-        if (NativesLoader.PLATFORM == Platform.WINDOWS)
-            ensureInstall(cygFilename, Toolchain.TOOLCHAIN_PATH.resolve(cygFilename),
-                    cygFilename);
-    }
-
-    private static byte[] getGitHubAsset(String assetNameTarget) {
+    public static byte[] getGitHubAsset(String assetNameTarget) {
         LOGGER.info("Downloading asset from GitHub... {}", assetNameTarget);
 
         listGitHubAssets();
@@ -152,31 +127,6 @@ public final class ModSetup {
             Files.copy(inputStream, localPath);
         } catch (IOException e) {
             throw new RuntimeException(e);
-        }
-    }
-
-    private static void ensureInstall(String moduleName, Path localPath, String assetName) {
-        if (Files.exists(localPath)) {
-            LOGGER.debug("{} is already installed! Skipping download...", moduleName);
-            return;
-        }
-
-        LOGGER.info("{} is not installed! Downloading...", moduleName);
-
-        var rawBinary = getGitHubAsset(assetName);
-
-        if (rawBinary == null)
-            throw new RuntimeException("Failed to download " + moduleName + "!");
-
-        try {
-            Set<PosixFilePermission> perms = PosixFilePermissions.fromString("rwxr-xr-x");
-            FileAttribute<Set<PosixFilePermission>> attr = PosixFilePermissions.asFileAttribute(perms);
-            Files.createDirectories(localPath.getParent());
-            Files.createFile(localPath, attr);
-
-            Files.write(localPath, rawBinary);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to write " + moduleName + " to disk!", e);
         }
     }
 

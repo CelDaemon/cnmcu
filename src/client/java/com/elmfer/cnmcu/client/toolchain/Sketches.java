@@ -1,4 +1,9 @@
-package com.elmfer.cnmcu.mcu;
+package com.elmfer.cnmcu.client.toolchain;
+
+import com.elmfer.cnmcu.CNMCU;
+import com.ibm.icu.util.Calendar;
+import imgui.ImGui;
+import imgui.extension.texteditor.TextEditor;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -7,13 +12,7 @@ import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.concurrent.CompletableFuture;
 
-import com.elmfer.cnmcu.CNMCU;
-import com.ibm.icu.util.Calendar;
-
-import imgui.ImGui;
-import imgui.extension.texteditor.TextEditor;
-
-import static com.elmfer.cnmcu.CNMCU.CONFIG;
+import static com.elmfer.cnmcu.client.CNMCUClient.CONFIG;
 
 public class Sketches {
 
@@ -22,7 +21,7 @@ public class Sketches {
 
     private static CompletableFuture<Void> backupSaveTask;
     
-    private static TextEditor filePreview = new TextEditor();
+    private static final TextEditor filePreview = new TextEditor();
     private static String[] backups = new String[0];
     private static long[] backupTimes = new long[0];
     
@@ -127,8 +126,7 @@ public class Sketches {
     
     public static String loadSketch(String path) {
         try {
-            String code = Files.readString(Paths.get(path));
-            return code;
+            return Files.readString(Paths.get(path));
         } catch (IOException e) {
             e.printStackTrace();
         }
