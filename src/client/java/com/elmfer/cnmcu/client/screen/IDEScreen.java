@@ -131,7 +131,7 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
         genMCUStatus();
         genCPUStatus();
         genMemoryViewer();
-        if (CONFIG.isShowDocs())
+        if (CONFIG.getShowDocs())
             genDocs();
         
         if (ImGui.isWindowFocused(ImGuiFocusedFlags.RootAndChildWindows) && ImGui.isKeyPressed(GLFW.GLFW_KEY_ESCAPE))
@@ -173,12 +173,12 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
             if (ImGui.menuItem("Load Backup##File"))
                 showLoadBackup = true;
             if (ImGui.menuItem("Load File"))
-                ImGuiFileDialog.openModal("##LoadSketchFile", "Load File", ".s,.asm,.c,.cpp", CONFIG.getLastSavePath(), 1, 0, 0);
+                ImGuiFileDialog.openModal("##LoadSketchFile", "Load File", ".s,.asm,.c,.cpp", CONFIG.getLastSaved().toString(), 1, 0, 0);
             ImGui.separator();
             if (ImGui.menuItem("Save", "CTRL+S"))
                 save();
             if (ImGui.menuItem("Save As"))
-                ImGuiFileDialog.openModal("##SaveSketchFile", "Save As", ".s,.asm,.c,.cpp", CONFIG.getLastSavePath(), 1, 0, 0);
+                ImGuiFileDialog.openModal("##SaveSketchFile", "Save As", ".s,.asm,.c,.cpp", CONFIG.getLastSaved().toString(), 1, 0, 0);
 
             ImGui.endMenu();
         }
@@ -217,8 +217,8 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
         if (ImGui.beginMenu("Help")) {
             if (ImGui.menuItem("About"))
                 showAbout = true;
-            if (ImGui.menuItem((CONFIG.isShowDocs() ? "Hide " : "Show ") + "Documentation"))
-                CONFIG.setShowDocs(!CONFIG.isShowDocs());
+            if (ImGui.menuItem((CONFIG.getShowDocs() ? "Hide " : "Show ") + "Documentation"))
+                CONFIG.setShowDocs(!CONFIG.getShowDocs());
             ImGui.endMenu();
         }
         ImGui.endMainMenuBar();
@@ -251,10 +251,8 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
         
         if (ImGuiFileDialog.display("##SaveSketchFile", 0, 0, 0, width, height)) {
             if (ImGuiFileDialog.isOk()) {
-                String filePath = ImGuiFileDialog.getFilePathName();
-                if (filePath == null || filePath.isEmpty())
-                    return;
-                CONFIG.setLastSavePath(filePath);
+                final var filePath = Path.of(ImGuiFileDialog.getFilePathName());
+                CONFIG.setLastSaved(filePath);
                 Sketches.saveSketch(getCode(), filePath);
                 save();
             }
@@ -264,10 +262,8 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
         if (ImGuiFileDialog.display("##LoadSketchFile", 0, 0, 0, width, height)) {
             if (ImGuiFileDialog.isOk()) {
                 Sketches.saveBackup(getCode());
-                String filePath = ImGuiFileDialog.getFilePathName();
-                if (filePath == null || filePath.isEmpty())
-                    return;
-                CONFIG.setLastSavePath(filePath);
+                final var filePath = Path.of(ImGuiFileDialog.getFilePathName());
+                CONFIG.setLastSaved(filePath);
                 loadCode(Sketches.loadSketch(filePath));
             }
             ImGuiFileDialog.close();
@@ -298,12 +294,12 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
                 ImGui.closeCurrentPopup();
             ImGui.sameLine();
             if (ImGui.button("Refresh"))
-                TOOLCHAIN.reloadConfig();
+                CONFIG.read();
             ImGui.pushStyleColor(ImGuiCol.Text, shouldLoadDefaults ? 0xFF5555FF : 0xFFFFFFFF);
             ImGui.sameLine();
             if (ImGui.button(!shouldLoadDefaults ? "Load Defaults" : "Are you sure?")) {
                 if (shouldLoadDefaults)
-                    TOOLCHAIN.loadDefaults();
+                    CONFIG.read();
                 shouldLoadDefaults = !shouldLoadDefaults;
             }
             ImGui.popStyleColor();
@@ -384,7 +380,7 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
             shouldUpload = false;
         }
 
-        ImGui.text(String.format("%s %s", TOOLCHAIN.getInputPath().map(Path::toString).orElse("<unknown>"),
+        ImGui.text(String.format("%s %s", TOOLCHAIN.getInputPath(),
                 saved ? "[Saved]" : "[Unsaved]"));
         ImGui.setNextWindowSize(0, 400);
         textEditor.render("TextEditor");
@@ -476,10 +472,10 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
             return;
         }
 
-        if (ImGui.checkbox("Registers in Hex", CONFIG.isHexRegisters()))
-            CONFIG.setHexRegisters(!CONFIG.isHexRegisters());
+        if (ImGui.checkbox("Registers in Hex", CONFIG.getHexRegisters()))
+            CONFIG.setHexRegisters(!CONFIG.getHexRegisters());
 
-        if (CONFIG.isHexRegisters()) {
+        if (CONFIG.getHexRegisters()) {
             ImGui.text(String.format("A: 0x%02X", cpuStatus.a()));
             ImGui.text(String.format("X: 0x%02X", cpuStatus.x()));
             ImGui.text(String.format("Y: 0x%02X", cpuStatus.y()));
@@ -547,8 +543,7 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
         textEditor.destroy();
         memoryEditor.destroy();
         ImGui.setMouseCursor(ImGuiMouseCursor.Arrow);
-        CONFIG.save();
-        TOOLCHAIN.saveConfig();
+        CONFIG.write();
         TOOLCHAIN.clearBuildStdout();
 
         if(buildProcess != null)

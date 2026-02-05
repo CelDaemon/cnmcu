@@ -8,7 +8,6 @@ import imgui.extension.texteditor.TextEditor;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.concurrent.CompletableFuture;
 
@@ -123,20 +122,20 @@ public class Sketches {
         
         filePreview.render("SketchBackupPreview");
     }
-    
-    public static String loadSketch(String path) {
+
+    public static String loadSketch(Path path) {
         try {
-            return Files.readString(Paths.get(path));
+            return Files.readString(path);
         } catch (IOException e) {
             e.printStackTrace();
         }
         
         return "";
     }
-    
-    public static void saveSketch(String code, String path) {
+
+    public static void saveSketch(String code, Path path) {
         try {
-            Files.write(Paths.get(path), code.getBytes());
+            Files.write(path, code.getBytes());
         } catch (IOException e) {
             e.printStackTrace();
         }

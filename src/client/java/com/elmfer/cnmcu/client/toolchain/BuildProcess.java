@@ -1,37 +1,35 @@
 package com.elmfer.cnmcu.client.toolchain;
 
-import com.elmfer.cnmcu.cpp.NativesLoader;
+import com.elmfer.cnmcu.client.config.ToolchainConfig;
 import net.minecraft.util.Util;
-import org.lwjgl.system.Platform;
+import org.jspecify.annotations.NonNull;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
-import java.util.NoSuchElementException;
-import java.util.Objects;
+import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
-import java.util.regex.Matcher;
 
 import static com.elmfer.cnmcu.CNMCU.LOGGER;
 
 public class BuildProcess {
     private final StringBuffer output;
-    private final Toolchain.ToolchainConfig config;
+    private final ToolchainConfig config;
     private final CompletableFuture<Process> processFuture = new CompletableFuture<>();
     private final CompletableFuture<byte[]> future = new CompletableFuture<>();
-    public BuildProcess(StringBuffer output, Toolchain.ToolchainConfig config) {
+
+    public BuildProcess(StringBuffer output, ToolchainConfig config) {
         this.output = output;
         this.config = config;
     }
     public void start(String code) {
         future.completeAsync(() -> {
             final var workingDirectory = config.getWorkingDirectory();
-            final var inputFile = workingDirectory.resolve(config.getInputPath().orElseThrow(
-                    () -> new NoSuchElementException("Input build variable not set")));
+            final var inputFile = workingDirectory.resolve(config.getInputPath());
 
-            final var outputFile = workingDirectory.resolve(config.getOutputPath().orElseThrow(
-                    () -> new NoSuchElementException("Output build variable not set")));
+            final var outputFile = workingDirectory.resolve(config.getOutputPath());
 
             try {
                 Files.writeString(inputFile, code);
@@ -39,19 +37,7 @@ public class BuildProcess {
                 throw new RuntimeException(e);
             }
 
-            final var shell = NativesLoader.PLATFORM == Platform.WINDOWS ? "cmd" : "sh";
-            final var shellFlag = NativesLoader.PLATFORM == Platform.WINDOWS ? "/c" : "-c";
-            var buildCommand = config.getBuildCommand();
-
-            for (final var entry : config.getBuildVariables().entrySet()) {
-                buildCommand = buildCommand.replace("${" + entry.getKey() + "}",
-                        Matcher.quoteReplacement(entry.getValue()));
-            }
-
-            final var builder = new ProcessBuilder(shell, shellFlag, buildCommand);
-            builder.directory(workingDirectory.toFile());
-            builder.redirectErrorStream(true);
-            builder.environment().putAll(config.getEnvironmentVariables());
+            final var builder = getProcessBuilder(inputFile, outputFile, workingDirectory);
 
             final Process process;
 
@@ -99,8 +85,26 @@ public class BuildProcess {
         });
     }
 
+    private @NonNull ProcessBuilder getProcessBuilder(Path inputFile, Path outputFile, Path workingDirectory) {
+        var arguments = config.getArguments();
+
+        arguments = arguments.replace("${input}", inputFile.toString());
+        arguments = arguments.replace("${output}", outputFile.toString());
+
+        for (final var entry : config.getVariables().entrySet()) {
+            arguments = arguments.replace("${" + entry.getKey() + "}",
+                    entry.getValue());
+        }
+        final var builder = new ProcessBuilder(config.getExecutable().toString());
+        builder.command().addAll(Arrays.asList(arguments.split("\\s+")));
+        builder.directory(workingDirectory.toFile());
+        builder.environment().putAll(config.getEnvironment());
+        builder.redirectErrorStream(true);
+        return builder;
+    }
+
     public CompletableFuture<byte[]> onFinish() {
-        return Objects.requireNonNullElseGet(future, CompletableFuture::new);
+        return future;
     }
 
     public void cancel() {

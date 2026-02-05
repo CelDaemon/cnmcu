@@ -2,54 +2,22 @@ package com.elmfer.cnmcu.client.toolchain;
 
 
 import com.elmfer.cnmcu.CNMCU;
-import com.elmfer.cnmcu.cpp.NativesLoader;
-import com.google.gson.FormattingStyle;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.JsonOps;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.elmfer.cnmcu.client.config.ToolchainConfig;
 import imgui.ImGui;
 import imgui.type.ImString;
-import net.minecraft.util.GsonHelper;
-import net.minecraft.util.Util;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-
-import static com.elmfer.cnmcu.CNMCU.LOGGER;
 
 public class Toolchain {
 
 	public static final Path TOOLCHAIN_PATH = CNMCU.DATA_PATH
             .resolve("toolchain");
 	public static final Path TEMP_PATH = TOOLCHAIN_PATH.resolve("temp");
-	public static final Path CONFIG_PATH = TOOLCHAIN_PATH.resolve("config.json");
 
 	private final StringBuffer buildStdout = new StringBuffer();
-    private ToolchainConfig config = ToolchainConfig.load();
-	
-	public void loadDefaults() {
-	    config = ToolchainConfig.defaultConfig();
-	}
-    public void reloadConfig() {
-        config = ToolchainConfig.load();
-    }
-    public CompletableFuture<Void> saveConfig() {
-        return config.save();
-    }
-    public Optional<Path> getInputPath() {
-        return config.getInputPath();
-    }
+    private final ToolchainConfig config;
+    private final ImString executable;
+    private final ImString arguments;
 	public BuildProcess build(String code) {
         final var process = new BuildProcess(buildStdout, config);
         process.start(code);
@@ -67,50 +35,90 @@ public class Toolchain {
 	public void clearBuildStdout() {
 		buildStdout.setLength(0);
 	}
-    
-    private final ImString buildCommand = new ImString(config.buildCommand, 2048);
-    private final ImString workingDirectory = new ImString(config.workingDirectory.toString(), 2048);
-    public void genToolchainConfigUI() {
-        float windowWidth = ImGui.getContentRegionAvailX();
-        buildCommand.set(config.buildCommand);
-        workingDirectory.set(config.workingDirectory.toString());
-        
-        ImGui.text("Build Command");
-        ImGui.setNextItemWidth(windowWidth);
-        if (ImGui.inputText("##Build Command", buildCommand))
-            config.setBuildCommand(buildCommand.get());
-        
-        ImGui.text("Working Directory");
-        ImGui.setNextItemWidth(windowWidth);
-        
-        if (ImGui.inputText("##Working Directory", workingDirectory))
-            config.setWorkingDirectory(Path.of(workingDirectory.get()));
-        ImGui.newLine();
-        
-        if (ImGui.collapsingHeader("Build Variables"))
-            genBuildVariables();
-        
-        if (ImGui.collapsingHeader("Environment Variables"))
-            genEnvVariables();
+    private final ImString workingDirectory;
+    private final ImString inputPath;
+    private final ImString outputPath;
+    private ImString[] envVariablesInputs;
+    public Toolchain(ToolchainConfig config) {
+        this.config = config;
+
+        executable = new ImString(config.getExecutable().toString());
+        arguments = new ImString(config.getArguments());
+        workingDirectory = new ImString(config.getWorkingDirectory().toString());
+        inputPath = new ImString(config.getInputPath().toString());
+        outputPath = new ImString(config.getOutputPath().toString());
+
+        envVariablesInputs = new ImString[config.getEnvironment().size()];
+    }
+
+    public Path getInputPath() {
+        return config.getInputPath();
     }
     
     private final ImString newBuildVariableName = new ImString("", 64);
     private ImString[] buildVariablesInputs = new ImString[0];
     private boolean showBuildVariableWarning = false;
-    private void genBuildVariables() {
+
+    public void genToolchainConfigUI() {
         float windowWidth = ImGui.getContentRegionAvailX();
-        
+        executable.set(config.getExecutable().toString());
+        arguments.set(config.getArguments());
+        workingDirectory.set(config.getWorkingDirectory().toString());
+
+        ImGui.text("Executable");
+        ImGui.setNextItemWidth(windowWidth);
+        if (ImGui.inputText("##Executable", executable))
+            config.setExecutable(Path.of(executable.get()));
+
+        ImGui.text("Arguments");
+        ImGui.setNextItemWidth(windowWidth);
+        if (ImGui.inputText("##Arguments", arguments))
+            config.setArguments(arguments.get());
+
+        ImGui.text("Working Directory");
+        ImGui.setNextItemWidth(windowWidth);
+
+        if (ImGui.inputText("##Working Directory", workingDirectory))
+            config.setWorkingDirectory(Path.of(workingDirectory.get()));
+
+        ImGui.text("Input Path");
+
+        ImGui.setNextItemWidth(ImGui.getContentRegionAvailX());
+        if (ImGui.inputText("##Input Path", inputPath))
+            config.setInputPath(Path.of(inputPath.get()));
+
+        ImGui.text("Output Path");
+
+        ImGui.setNextItemWidth(ImGui.getContentRegionAvailX());
+        if (ImGui.inputText("##Output Path", outputPath))
+            config.setOutputPath(Path.of(outputPath.get()));
+
+        ImGui.newLine();
+
+        if (ImGui.collapsingHeader("Build Variables"))
+            genBuildVariables();
+
+        if (ImGui.collapsingHeader("Environment Variables"))
+            genEnvVariables();
+    }
+    
+    private final ImString newEnvVariableName = new ImString("", 64);
+
+    private void genBuildVariables() {
+        final var variables = config.getVariables();
+        float windowWidth = ImGui.getContentRegionAvailX();
+
         ImGui.indent();
-        
+
         ImGui.textWrapped("Create and use build variables for them to be use in your build command."
                 + " You can use the variables in your build command by wrapping the variable name in ${}.");
         ImGui.newLine();
-        
-        if (buildVariablesInputs.length != config.buildVariables.size())
-            buildVariablesInputs = new ImString[config.buildVariables.size()];
-        
+
+        if (buildVariablesInputs.length != variables.size())
+            buildVariablesInputs = new ImString[variables.size()];
+
         int i = 0;
-        final var buildVariableIterator = config.buildVariables.entrySet().iterator();
+        final var buildVariableIterator = variables.entrySet().iterator();
         while (buildVariableIterator.hasNext()) {
             final var entry = buildVariableIterator.next();
 
@@ -119,7 +127,7 @@ public class Toolchain {
             buildVariablesInputs[i].set(entry.getValue());
 
             if (ImGui.inputText(entry.getKey() + "##BuildVar" + i, buildVariablesInputs[i]))
-                config.buildVariables.put(entry.getKey(), buildVariablesInputs[i].get());
+                variables.put(entry.getKey(), buildVariablesInputs[i].get());
             ImGui.sameLine();
             ImGui.setCursorPosX(windowWidth - 7);
             if (ImGui.button("x##BuildVar" + entry.getKey()))
@@ -127,15 +135,15 @@ public class Toolchain {
 
             i++;
         }
-        
+
         ImGui.text("New Build Variable");
         if (ImGui.inputText("Name##BuildVar", newBuildVariableName))
             showBuildVariableWarning = true;
         ImGui.sameLine();
         ImGui.setCursorPosX(windowWidth - 7);
-        ImGui.beginDisabled(newBuildVariableName.isEmpty() || config.buildVariables.containsKey(newBuildVariableName.get()));
+        ImGui.beginDisabled(newBuildVariableName.isEmpty() || variables.containsKey(newBuildVariableName.get()));
         if (ImGui.button("+##BuildVar")) {
-            config.buildVariables.put(newBuildVariableName.get(), "");
+            variables.put(newBuildVariableName.get(), "");
             newBuildVariableName.set("");
             showBuildVariableWarning = false;
         }
@@ -143,20 +151,19 @@ public class Toolchain {
         if (showBuildVariableWarning) {
             if (newBuildVariableName.isEmpty())
                 ImGui.textColored(0xFF8888FF, "Name cannot be empty");
-            else if (config.buildVariables.containsKey(newBuildVariableName.get()))
+            else if (variables.containsKey(newBuildVariableName.get()))
                 ImGui.textColored(0xFF8888FF, "Name already exists");
             else
                 ImGui.newLine();
         } else
             ImGui.newLine();
-        
+
         ImGui.unindent();
     }
-    
-    private final ImString newEnvVariableName = new ImString("", 64);
-    private ImString[] envVariablesInputs = new ImString[config.environmentVariables.size()];
     private boolean showEnvVariableWarning = false;
+
     private void genEnvVariables() {
+        final var environment = config.getEnvironment();
         float windowWidth = ImGui.getContentRegionAvailX();
 
         ImGui.indent();
@@ -165,20 +172,20 @@ public class Toolchain {
                 + " They will also apply the child processes of the command.");
         ImGui.newLine();
 
-        if (envVariablesInputs.length != config.environmentVariables.size())
-            envVariablesInputs = new ImString[config.environmentVariables.size()];
+        if (envVariablesInputs.length != environment.size())
+            envVariablesInputs = new ImString[environment.size()];
 
         int i = 0;
-        for (final var entry : config.environmentVariables.entrySet()) {
+        for (final var entry : environment.entrySet()) {
             if (envVariablesInputs[i] == null)
                 envVariablesInputs[i] = new ImString(entry.getValue(), 1024);
 
             if (ImGui.inputText(entry.getKey() + "##EnvVar" + i, envVariablesInputs[i]))
-                config.environmentVariables.put(entry.getKey(), envVariablesInputs[i].get());
+                environment.put(entry.getKey(), envVariablesInputs[i].get());
             ImGui.sameLine();
             ImGui.setCursorPosX(windowWidth - 7);
             if (ImGui.button("x##EnvVar" + entry.getKey()))
-                config.environmentVariables.remove(entry.getKey());
+                environment.remove(entry.getKey());
 
             i++;
         }
@@ -188,9 +195,9 @@ public class Toolchain {
             showEnvVariableWarning = true;
         ImGui.sameLine();
         ImGui.setCursorPosX(windowWidth - 7);
-        ImGui.beginDisabled(newEnvVariableName.isEmpty() || config.environmentVariables.containsKey(newEnvVariableName.get()));
+        ImGui.beginDisabled(newEnvVariableName.isEmpty() || environment.containsKey(newEnvVariableName.get()));
         if (ImGui.button("+##EnvVar")) {
-            config.environmentVariables.put(newEnvVariableName.get(), "");
+            environment.put(newEnvVariableName.get(), "");
             newEnvVariableName.set("");
             showEnvVariableWarning = false;
         }
@@ -198,7 +205,7 @@ public class Toolchain {
         if (showEnvVariableWarning) {
             if (newEnvVariableName.isEmpty())
                 ImGui.textColored(0xFF8888FF, "Name cannot be empty");
-            else if (config.environmentVariables.containsKey(newEnvVariableName.get()))
+            else if (environment.containsKey(newEnvVariableName.get()))
                 ImGui.textColored(0xFF8888FF, "Name already exists");
             else
                 ImGui.newLine();
@@ -206,103 +213,6 @@ public class Toolchain {
             ImGui.newLine();
 
         ImGui.unindent();
-    }
-
-    public static class ToolchainConfig {
-
-        private static final Codec<ToolchainConfig> CODEC = RecordCodecBuilder.create(instance ->
-                instance.group(
-                        Codec.STRING.fieldOf("build_command").forGetter(ToolchainConfig::getBuildCommand),
-                        Codec.STRING.xmap(Path::of, Path::toString).fieldOf("working_directory").forGetter(ToolchainConfig::getWorkingDirectory),
-                        Codec.unboundedMap(Codec.STRING, Codec.STRING).fieldOf("build_variables").forGetter(ToolchainConfig::getBuildVariables),
-                        Codec.unboundedMap(Codec.STRING, Codec.STRING).fieldOf("environment_variables").forGetter(ToolchainConfig::getEnvironmentVariables)
-                ).apply(instance, ToolchainConfig::new));
-
-        public Optional<Path> getInputPath() {
-            final var value = buildVariables.get("input");
-            return Optional.ofNullable(value).map(Path::of);
-        }
-        public Optional<Path> getOutputPath() {
-            final var value = buildVariables.get("output");
-            return Optional.ofNullable(value).map(Path::of);
-        }
-
-        public String getBuildCommand() {
-            return buildCommand;
-        }
-
-        public void setBuildCommand(String buildCommand) {
-            this.buildCommand = buildCommand;
-        }
-
-        public Path getWorkingDirectory() {
-            return workingDirectory;
-        }
-
-        public void setWorkingDirectory(Path workingDirectory) {
-            this.workingDirectory = workingDirectory;
-        }
-
-        public Map<String, String> getBuildVariables() {
-            return buildVariables;
-        }
-
-        public Map<String, String> getEnvironmentVariables() {
-            return environmentVariables;
-        }
-
-        private String buildCommand;
-        private Path workingDirectory;
-        private final Map<String, String> buildVariables = new HashMap<>();
-        private final Map<String, String> environmentVariables = new HashMap<>();
-
-        public ToolchainConfig(String buildCommand, Path workingDirectory, Map<String, String> buildVariables, Map<String, String> environmentVariables) {
-            this.buildCommand = buildCommand;
-            this.workingDirectory = workingDirectory;
-            this.buildVariables.putAll(buildVariables);
-            this.environmentVariables.putAll(environmentVariables);
-        }
-
-        public static ToolchainConfig defaultConfig() {
-            final var executablePath = NativesLoader.getExecutablePath("vasm6502_oldstyle");
-            final var buildCommand = executablePath + " -Fbin -dotdir ${input} -o ${output}";
-
-
-            final var buildVariables = Map.of(
-                    "input", "temp/program.s",
-                    "output", "temp/output.bin");
-
-            return new ToolchainConfig(buildCommand, TOOLCHAIN_PATH, buildVariables, Map.of());
-        }
-
-        public CompletableFuture<Void> save() {
-            final var element = CODEC.encodeStart(JsonOps.INSTANCE, this).getOrThrow();
-
-            return CompletableFuture.runAsync(() -> {
-                try(var writer = new JsonWriter(new OutputStreamWriter(Files.newOutputStream(CONFIG_PATH)))) {
-                    writer.setFormattingStyle(FormattingStyle.PRETTY);
-                    GsonHelper.writeValue(writer, element, null);
-                } catch (IOException e) {
-                    LOGGER.error("Failed to save config file", e);
-                }
-            }, Util.backgroundExecutor());
-        }
-        public static ToolchainConfig load() {
-            if(Files.notExists(CONFIG_PATH))
-                return defaultConfig();
-            final JsonElement element;
-            try(var reader = new JsonReader(new InputStreamReader(Files.newInputStream(CONFIG_PATH)))) {
-                element = JsonParser.parseReader(reader);
-            } catch (Exception e) {
-                LOGGER.error("Failed to load config file", e);
-                return defaultConfig();
-            }
-
-            final var result = CODEC.parse(JsonOps.INSTANCE, element);
-            return result.mapOrElse(x -> x,
-                    x -> defaultConfig());
-        }
-
     }
 
 

@@ -12,10 +12,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldTerrainRenderContext;
 import net.minecraft.client.Minecraft;
 
-import java.util.concurrent.CompletableFuture;
-
 import static com.elmfer.cnmcu.client.CNMCUClient.CONFIG;
-import static com.elmfer.cnmcu.client.CNMCUClient.TOOLCHAIN;
 
 public class EventHandler {
 
@@ -54,6 +51,6 @@ public class EventHandler {
         IMGUI_GL3.shutdown();
         IMGUI_GLFW.shutdown();
         ImGui.destroyContext(IMGUI);
-        CompletableFuture.allOf(CONFIG.save(), TOOLCHAIN.saveConfig()).join();
+        CONFIG.write().join();
     }
 }
