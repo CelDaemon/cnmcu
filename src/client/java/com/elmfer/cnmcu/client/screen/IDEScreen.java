@@ -50,7 +50,6 @@ import static com.elmfer.cnmcu.client.EventHandler.IMGUI_IO;
 public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
     private static final String CODE_EDITOR_NAME = "Code Editor";
     private static final String CONSOLE_NAME = "Console";
-
     private final TextEditor textEditor;
     private final MemoryEditor memoryEditor;
     private final RenderTarget renderTarget;
@@ -101,10 +100,16 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
     public void syncCode(String code) {
         if(!saved)
             return;
-        textEditor.setText(code);
+        setCode(code);
     }
     public void loadCode(String code) {
         saved = false;
+        setCode(code);
+    }
+
+    private void setCode(String code) {
+        if (getCode().equals(code))
+            return;
         textEditor.setText(code);
     }
     public String getCode() {
