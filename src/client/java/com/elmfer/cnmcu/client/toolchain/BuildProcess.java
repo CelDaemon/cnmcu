@@ -26,7 +26,7 @@ public class BuildProcess {
     }
     public void start(String code) {
         future.completeAsync(() -> {
-            final var workingDirectory = config.getWorkingDirectory();
+            final var workingDirectory = Toolchain.BUILD_PATH.resolve(config.getWorkingDirectory());
             final var inputFile = workingDirectory.resolve(config.getInputPath());
 
             final var outputFile = workingDirectory.resolve(config.getOutputPath());
@@ -95,7 +95,7 @@ public class BuildProcess {
             arguments = arguments.replace("${" + entry.getKey() + "}",
                     entry.getValue());
         }
-        final var builder = new ProcessBuilder(config.getExecutable().toString());
+        final var builder = new ProcessBuilder(Toolchain.TOOLCHAIN_PATH.resolve(config.getExecutable()).toString());
         builder.command().addAll(Arrays.asList(arguments.split("\\s+")));
         builder.directory(workingDirectory.toFile());
         builder.environment().putAll(config.getEnvironment());

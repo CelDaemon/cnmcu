@@ -12,7 +12,7 @@ public class Toolchain {
 
 	public static final Path TOOLCHAIN_PATH = CNMCU.DATA_PATH
             .resolve("toolchain");
-	public static final Path TEMP_PATH = TOOLCHAIN_PATH.resolve("temp");
+    public static final Path BUILD_PATH = TOOLCHAIN_PATH.resolve("build");
 
 	private final StringBuffer buildStdout = new StringBuffer();
     private final ToolchainConfig config;
@@ -43,10 +43,15 @@ public class Toolchain {
         this.config = config;
 
         executable = new ImString(config.getExecutable().toString());
+        executable.inputData.isResizable = true;
         arguments = new ImString(config.getArguments());
+        arguments.inputData.isResizable = true;
         workingDirectory = new ImString(config.getWorkingDirectory().toString());
+        workingDirectory.inputData.isResizable = true;
         inputPath = new ImString(config.getInputPath().toString());
+        inputPath.inputData.isResizable = true;
         outputPath = new ImString(config.getOutputPath().toString());
+        outputPath.inputData.isResizable = true;
 
         envVariablesInputs = new ImString[config.getEnvironment().size()];
     }

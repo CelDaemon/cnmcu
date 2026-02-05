@@ -21,7 +21,7 @@ public class ClientModSetup {
     public static void createDirectories() {
         try {
             Files.createDirectories(Toolchain.TOOLCHAIN_PATH);
-            Files.createDirectories(Toolchain.TEMP_PATH);
+            Files.createDirectories(Toolchain.BUILD_PATH);
             Files.createDirectories(Sketches.BACKUP_PATH);
         } catch (IOException e) {
             LOGGER.error("Failed to create directories", e);

@@ -1,6 +1,5 @@
 package com.elmfer.cnmcu.client.config;
 
-import com.elmfer.cnmcu.client.toolchain.Toolchain;
 import com.elmfer.cnmcu.cpp.NativesLoader;
 
 import java.nio.file.Path;
@@ -74,10 +73,10 @@ public class ToolchainConfig {
 
         arguments = "-Fbin -dotdir ${input} -o ${output}";
 
-        workingDirectory = Toolchain.TOOLCHAIN_PATH;
+        workingDirectory = Path.of("");
 
-        inputPath = Path.of("temp/program.s");
-        outputPath = Path.of("temp/output.bin");
+        inputPath = Path.of("program.s");
+        outputPath = Path.of("output.bin");
 
         variables.clear();
 
