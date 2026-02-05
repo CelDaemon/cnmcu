@@ -299,7 +299,7 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
             ImGui.sameLine();
             if (ImGui.button(!shouldLoadDefaults ? "Load Defaults" : "Are you sure?")) {
                 if (shouldLoadDefaults)
-                    CONFIG.read();
+                    CONFIG.reset();
                 shouldLoadDefaults = !shouldLoadDefaults;
             }
             ImGui.popStyleColor();
