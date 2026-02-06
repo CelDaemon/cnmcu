@@ -86,17 +86,18 @@ public class BuildProcess {
     }
 
     private @NonNull ProcessBuilder getProcessBuilder(Path inputFile, Path outputFile, Path workingDirectory) {
-        var arguments = config.getArguments();
+        final var args = Arrays.stream(config.getArguments().split("\\s+")).map(x -> {
+            x = x.replace("${input}", inputFile.toString());
+            x = x.replace("${output}", outputFile.toString());
+            for (final var entry : config.getVariables().entrySet()) {
+                x = x.replace("${" + entry.getKey() + "}",
+                        entry.getValue());
+            }
+            return x;
+        }).toList();
 
-        arguments = arguments.replace("${input}", inputFile.toString());
-        arguments = arguments.replace("${output}", outputFile.toString());
-
-        for (final var entry : config.getVariables().entrySet()) {
-            arguments = arguments.replace("${" + entry.getKey() + "}",
-                    entry.getValue());
-        }
         final var builder = new ProcessBuilder(Toolchain.TOOLCHAIN_PATH.resolve(config.getExecutable()).toString());
-        builder.command().addAll(Arrays.asList(arguments.split("\\s+")));
+        builder.command().addAll(args);
         builder.directory(workingDirectory.toFile());
         builder.environment().putAll(config.getEnvironment());
         builder.redirectErrorStream(true);
