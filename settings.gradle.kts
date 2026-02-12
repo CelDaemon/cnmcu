@@ -14,3 +14,7 @@ pluginManagement {
 		gradlePluginPortal()
 	}
 }
+
+include("natives", "bindings")
+
+rootProject.name = "cnmcu"

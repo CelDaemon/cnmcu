@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.13)
 
 project(cnmcu)
 
+set(GENERATED_SOURCES_DIR OFF CACHE STRING "The generated sources")
+
 set(JAVA_AWT_LIBRARY NotNeeded)
 set(JAVA_JVM_LIBRARY NotNeeded)
 find_package(JNI REQUIRED)
@@ -80,6 +82,10 @@ else()
   endif()
 endif()
 
-install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION "${TARGET_ARCH}"
-    LIBRARY DESTINATION "${TARGET_ARCH}"
+string(TOLOWER "${CMAKE_HOST_SYSTEM_NAME}" TARGET_OS)
+
+set(TARGET_DIR "${TARGET_OS}/${TARGET_ARCH}")
+
+install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION "${TARGET_DIR}"
+    LIBRARY DESTINATION "${TARGET_DIR}"
 )
