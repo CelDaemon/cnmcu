@@ -32,7 +32,7 @@ abstract class Compile : DefaultTask() {
 
     init {
         sourceDirectory.convention(layout.projectDirectory.dir("src"))
-        outputDirectory.convention(layout.projectDirectory.dir("bin"))
+        outputDirectory.convention(layout.buildDirectory.dir("bin"))
     }
 
     @TaskAction
