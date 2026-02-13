@@ -1,4 +1,4 @@
-import tools.elmfer.GenNativeSourcesTask
+import tools.elmfer.GenerateSources
 
 plugins {
     id("net.fabricmc.fabric-loom-remap")
@@ -11,15 +11,13 @@ tasks.withType<JavaCompile>().configureEach {
     options.release = 21
 }
 
-val generateNativesSources by tasks.registering(GenNativeSourcesTask::class)
+val generateNativesSources by tasks.registering(GenerateSources::class)
 
 val nativesSourcesElements by configurations.registering {
     isCanBeConsumed = true
 }
 
 java {
-    withSourcesJar()
-
     sourceCompatibility = JavaVersion.VERSION_21
     targetCompatibility = JavaVersion.VERSION_21
 }
