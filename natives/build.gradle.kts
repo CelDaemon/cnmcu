@@ -4,7 +4,9 @@ plugins {
     `lifecycle-base`
 }
 
-val a = layout.projectDirectory.dir("generated")
+val generatedNativesSources by configurations.registering {
+    isCanBeResolved = true
+}
 
 abstract class Cmake : DefaultTask() {
     @get:Inject
@@ -44,7 +46,7 @@ abstract class Cmake : DefaultTask() {
             args(
                 "-S", sourceDirectory,
                 "-B", temporaryDir,
-                "-DGENERATED_SOURCES_DIR=${generatedDirectory}"
+                "-DGENERATED_SOURCES_DIR=${generatedDirectory.get().asFile.absolutePath}"
             )
         }
 
@@ -67,11 +69,17 @@ abstract class Cmake : DefaultTask() {
 }
 
 val compile by tasks.registering(Cmake::class) {
-    generatedDirectory = file("a")
+    inputs.files(generatedNativesSources.map { it.incoming.files })
+
+    generatedDirectory = generatedNativesSources.map { it.singleFile }.get()
 }
 
 tasks.assemble {
     dependsOn(compile)
+}
+
+dependencies {
+    generatedNativesSources(project(":bindings", "nativesSourcesElements"))
 }
 
 val default by configurations.registering

@@ -2,8 +2,7 @@ package com.elmfer.cnmcu.network;
 
 import com.elmfer.cnmcu.CNMCU;
 import com.elmfer.cnmcu.blockentities.NanoBlockEntity;
-import com.elmfer.cnmcu.mcu.NanoMCU;
-
+import com.elmfer.cnmcu.natives.NanoMCU;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;

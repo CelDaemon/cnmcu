@@ -1,6 +1,6 @@
 package com.elmfer.cnmcu;
 
-import com.elmfer.cnmcu.mcu.NanoMCU;
+import com.elmfer.cnmcu.natives.NanoMCU;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;

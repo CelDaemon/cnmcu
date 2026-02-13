@@ -4,6 +4,7 @@ import com.badlogic.gdx.jnigen.NativeCodeGenerator;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.DirectoryProperty;
+import org.gradle.api.file.ProjectLayout;
 import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.tasks.*;
 import org.gradle.internal.file.Deleter;
@@ -22,12 +23,12 @@ public abstract class GenNativeSourcesTask extends DefaultTask {
     @OutputDirectory
     public abstract DirectoryProperty getBridgeDir();
 
-    private final Deleter deleter;
-
     @Inject
-    public GenNativeSourcesTask(Deleter deleter) {
-        this.deleter = deleter;
+    public abstract ProjectLayout getLayout();
+    @Inject
+    public abstract Deleter getDeleter();
 
+    public GenNativeSourcesTask() {
         setGroup(GROUP);
         setDescription(DESCRIPTION);
 
@@ -37,10 +38,12 @@ public abstract class GenNativeSourcesTask extends DefaultTask {
                 .getSourceSets()
                 .getByName(SourceSet.MAIN_SOURCE_SET_NAME);
 
+        getSourceDir().convention(getLayout().dir(project.provider(() -> mainSourceSet.getJava().getSrcDirs().stream().findFirst().orElseThrow())));
+
         getClassPath().convention(project.files(mainSourceSet.getCompileClasspath(),
                 mainSourceSet.getOutput().getClassesDirs()));
 
-        getBridgeDir().convention(project.getLayout().getBuildDirectory().dir("generated/sources/cpp"));
+        getBridgeDir().convention(project.getLayout().getBuildDirectory().dir("generated/sources/natives"));
     }
     
     @TaskAction
@@ -54,7 +57,7 @@ public abstract class GenNativeSourcesTask extends DefaultTask {
         if (!bridgeDir.isPresent())
             throw new RuntimeException("You must specify bridge directory for generating native source files!");
 
-        deleter.ensureEmptyDirectory(bridgeDir.getAsFile().get());
+        getDeleter().ensureEmptyDirectory(bridgeDir.getAsFile().get());
 
         final var srcGen = new NativeCodeGenerator();
         srcGen.generate(getSourceDir().get().getAsFile().getAbsolutePath(), classPath.getAsPath(), getBridgeDir().get().getAsFile().getAbsolutePath());

@@ -1,4 +1,4 @@
-package com.elmfer.cnmcu.mcu.modules;
+package com.elmfer.cnmcu.natives.modules;
 
 import com.elmfer.cnmcu.natives.WeakNativeObject;
 import com.mojang.serialization.Codec;
