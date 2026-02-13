@@ -1,11 +1,10 @@
 package com.elmfer.cnmcu.mcu.modules;
 
-import java.nio.ByteBuffer;
-
-import com.elmfer.cnmcu.cpp.WeakNativeObject;
-
+import com.elmfer.cnmcu.natives.WeakNativeObject;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+
+import java.nio.ByteBuffer;
 
 /*
  * Reference to a CNUART object.

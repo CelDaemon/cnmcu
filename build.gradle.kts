@@ -1,6 +1,3 @@
-import tools.elmfer.CompileNativesTask
-import tools.elmfer.GenNativeSourcesTask
-
 val modVersion: String by project
 val minecraftVersion: String by project
 val mavenGroup: String by project
@@ -18,6 +15,8 @@ version = "$modVersion+$minecraftVersion"
 group = mavenGroup
 
 val clientShade by configurations.registering
+val shade by configurations.registering
+val nativesDependencies by configurations.registering
 
 loom.splitEnvironmentSourceSets()
 
@@ -25,6 +24,10 @@ val client by sourceSets.existing
 
 configurations.named("clientImplementation") {
 	extendsFrom(clientShade.get())
+}
+
+configurations.implementation {
+	extendsFrom(shade.get())
 }
 
 loom {
@@ -63,6 +66,10 @@ dependencies {
 	clientShade("io.github.spair:imgui-java-natives-windows:$imguiVersion")
 	clientShade("io.github.spair:imgui-java-natives-linux:$imguiVersion")
 	clientShade("io.github.spair:imgui-java-natives-macos:$imguiVersion")
+
+	shade(project(":bindings", "namedElements"))
+
+	nativesDependencies(project(":natives"))
 }
 
 tasks.withType<JavaCompile>().configureEach {
@@ -82,31 +89,9 @@ tasks.jar {
 	}
 }
 
-val genNativeSources by tasks.registering(GenNativeSourcesTask::class) {
-	sourceDir = sourceSets.main.map { it.java.sourceDirectories.first() }
-}
-
-val copyNatives by tasks.registering(Copy::class)
-
-val compileNatives by tasks.registering(CompileNativesTask::class) {
-	sourceDir = file("src/main/cpp")
-	bridgeDir = genNativeSources.flatMap { it.bridgeDir }
-	outputDir = layout.buildDirectory.dir("natives")
-
-	finalizedBy(copyNatives)
-}
-
-val nativesProvider: Provider<Directory> = provider { project.findProperty("prebuilt_natives") as String? }
-	.map { layout.projectDirectory.dir(it) }
-	.orElse(compileNatives.flatMap { it.outputDir })
-
-copyNatives {
-	inputs.files(nativesProvider)
-
-	from(nativesProvider)
-
-	into(loom.runs.named("client").map { layout.projectDirectory.dir(it.runDir).dir("cnmcu/natives/${version}") })
-}
+val nativesProvider: Provider<FileTree> = provider { project.findProperty("prebuilt_natives") as String? }
+	.map<FileTree> { fileTree(it) }
+	.orElse(nativesDependencies.map { it.asFileTree })
 
 tasks.processResources {
 	inputs.files(nativesProvider)
@@ -123,7 +108,7 @@ tasks.processResources {
     }
 
     from(nativesProvider) {
-        into("com/elmfer/cnmcu/config")
+		into("com/elmfer/cnmcu/natives")
     }
 }
 
@@ -133,7 +118,7 @@ tasks.jar {
 
 tasks.shadowJar {
 	from(client.map { it.output })
-	configurations = clientShade.map { listOf(it) }
+	configurations = clientShade.zip(shade, ::Pair).map { listOf(it.first, it.second) }
 	archiveClassifier = "dev"
 	destinationDirectory = layout.buildDirectory.dir("devlibs")
 }

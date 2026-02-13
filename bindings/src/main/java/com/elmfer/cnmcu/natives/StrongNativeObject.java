@@ -1,4 +1,4 @@
-package com.elmfer.cnmcu.cpp;
+package com.elmfer.cnmcu.natives;
 
 /**
  * This class is used to store the native pointer of a native object.

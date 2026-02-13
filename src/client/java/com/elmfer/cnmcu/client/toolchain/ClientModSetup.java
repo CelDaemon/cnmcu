@@ -1,7 +1,7 @@
 package com.elmfer.cnmcu.client.toolchain;
 
 import com.elmfer.cnmcu.config.ModSetup;
-import com.elmfer.cnmcu.cpp.NativesLoader;
+import com.elmfer.cnmcu.natives.NativesLoader;
 import org.lwjgl.system.Platform;
 
 import java.io.IOException;

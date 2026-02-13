@@ -1,6 +1,6 @@
 package com.elmfer.cnmcu.client.config;
 
-import com.elmfer.cnmcu.cpp.NativesLoader;
+import com.elmfer.cnmcu.natives.NativesLoader;
 
 import java.nio.file.Path;
 import java.util.HashMap;

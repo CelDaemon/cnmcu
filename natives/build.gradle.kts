@@ -4,10 +4,6 @@ plugins {
     `lifecycle-base`
 }
 
-val runtimeElements by configurations.registering {
-    isCanBeResolved = true
-}
-
 val a = layout.projectDirectory.dir("generated")
 
 abstract class Cmake : DefaultTask() {
@@ -76,4 +72,10 @@ val compile by tasks.registering(Cmake::class) {
 
 tasks.assemble {
     dependsOn(compile)
+}
+
+val default by configurations.registering
+
+artifacts {
+    add(default.name, compile)
 }

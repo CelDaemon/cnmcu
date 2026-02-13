@@ -1,13 +1,11 @@
 package com.elmfer.cnmcu.config;
 
 import com.elmfer.cnmcu.CNMCU;
-import com.elmfer.cnmcu.cpp.NativesLoader;
 import com.elmfer.cnmcu.util.HTTPSFetcher;
 import com.google.gson.JsonArray;
 import net.minecraft.server.packs.resources.ResourceManager;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -23,14 +21,6 @@ public final class ModSetup {
     private ModSetup() {
     }
 
-    public static void createDirectories() {
-        try {
-            Files.createDirectories(NativesLoader.NATIVES_PATH);
-        } catch (IOException e) {
-            LOGGER.error("Failed to create directories", e);
-        }
-    }
-
     public static void copyDefaultImGuiConfig(@NotNull ResourceManager resourceLoader) {
         if (Files.exists(IMGUI_CONFIG_PATH))
             return;
@@ -43,11 +33,6 @@ public final class ModSetup {
         } catch (Exception e) {
             LOGGER.error("Failed to write default imgui config file", e);
         }
-    }
-
-    public static void downloadNatives() {
-        ensureInstallNatives(NativesLoader.NATIVES_PATH.resolve(NativesLoader.resolveNative()),
-                NativesLoader.resolveNative());
     }
 
     public static byte[] getGitHubAsset(String assetNameTarget) {
@@ -108,25 +93,6 @@ public final class ModSetup {
             githubAssets = fetcher.jsonContent().getAsJsonObject().get("assets").getAsJsonArray();
         } catch (Exception e) {
             throw new RuntimeException("Failed to parse assets from GitHub!", e);
-        }
-    }
-
-    private static void ensureInstallNatives(Path localPath, Path assetPath) {
-        if (Files.exists(localPath)) {
-            LOGGER.debug("Natives is already installed! Skipping extract...");
-            return;
-        }
-
-        LOGGER.info("Natives are not installed! Extracting...");
-
-        try(var inputStream = ModSetup.class.getResourceAsStream(assetPath.toString())) {
-            if(inputStream == null)
-                throw new RuntimeException("Asset: '%s' was not found".formatted(assetPath));
-
-            Files.createDirectories(localPath.getParent());
-            Files.copy(inputStream, localPath);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
     }
 

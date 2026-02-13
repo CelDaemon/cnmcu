@@ -1,7 +1,6 @@
 package com.elmfer.cnmcu.mcu.cpu;
 
-import com.elmfer.cnmcu.cpp.WeakNativeObject;
-
+import com.elmfer.cnmcu.natives.WeakNativeObject;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 

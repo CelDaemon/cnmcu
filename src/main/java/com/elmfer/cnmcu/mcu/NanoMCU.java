@@ -1,14 +1,9 @@
 package com.elmfer.cnmcu.mcu;
 
-import com.elmfer.cnmcu.cpp.StrongNativeObject;
 import com.elmfer.cnmcu.mcu.cpu.MOS6502;
-import com.elmfer.cnmcu.mcu.modules.CNEL;
+import com.elmfer.cnmcu.mcu.modules.*;
 import com.elmfer.cnmcu.mcu.modules.CNEL.EventType;
-import com.elmfer.cnmcu.mcu.modules.CNGPIO;
-import com.elmfer.cnmcu.mcu.modules.CNRAM;
-import com.elmfer.cnmcu.mcu.modules.CNROM;
-import com.elmfer.cnmcu.mcu.modules.CNUART;
-
+import com.elmfer.cnmcu.natives.StrongNativeObject;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.Direction;

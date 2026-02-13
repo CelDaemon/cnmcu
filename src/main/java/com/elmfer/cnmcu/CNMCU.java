@@ -2,9 +2,8 @@ package com.elmfer.cnmcu;
 
 import com.elmfer.cnmcu.blockentities.BlockEntities;
 import com.elmfer.cnmcu.blocks.Blocks;
-import com.elmfer.cnmcu.config.ModSetup;
-import com.elmfer.cnmcu.cpp.NativesLoader;
 import com.elmfer.cnmcu.menu.Menus;
+import com.elmfer.cnmcu.natives.NativesLoader;
 import com.elmfer.cnmcu.network.Networking;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
@@ -33,9 +32,7 @@ public class CNMCU implements ModInitializer {
 
     @Override
     public void onInitialize() {
-
-        ModSetup.createDirectories();
-        ModSetup.downloadNatives();
+        NativesLoader.extractNatives();
 
         NativesLoader.loadNatives();
 
