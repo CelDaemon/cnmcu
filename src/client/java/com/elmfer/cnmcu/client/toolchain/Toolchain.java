@@ -1,7 +1,7 @@
 package com.elmfer.cnmcu.client.toolchain;
 
 
-import com.elmfer.cnmcu.CNMCU;
+import com.elmfer.cnmcu.Initialiser;
 import com.elmfer.cnmcu.client.config.ToolchainConfig;
 import imgui.ImGui;
 import imgui.type.ImString;
@@ -10,7 +10,7 @@ import java.nio.file.Path;
 
 public class Toolchain {
 
-	public static final Path TOOLCHAIN_PATH = CNMCU.DATA_PATH
+    public static final Path TOOLCHAIN_PATH = Initialiser.DATA_PATH
             .resolve("toolchain");
     public static final Path BUILD_PATH = TOOLCHAIN_PATH.resolve("build");
 

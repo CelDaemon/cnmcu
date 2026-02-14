@@ -12,7 +12,7 @@ import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Set;
 
-import static com.elmfer.cnmcu.CNMCU.LOGGER;
+import static com.elmfer.cnmcu.common.Common.LOGGER;
 
 public class ClientModSetup {
     private ClientModSetup() {

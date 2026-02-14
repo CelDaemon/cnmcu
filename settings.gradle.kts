@@ -19,6 +19,6 @@ plugins {
     id("net.fabricmc.fabric-loom-remap") apply false
 }
 
-include("natives", "bindings")
+include("natives", "bindings", "common")
 
 rootProject.name = "cnmcu"

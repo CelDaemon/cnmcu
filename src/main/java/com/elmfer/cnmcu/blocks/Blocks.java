@@ -1,6 +1,6 @@
 package com.elmfer.cnmcu.blocks;
 
-import com.elmfer.cnmcu.CNMCU;
+import com.elmfer.cnmcu.common.Common;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -21,7 +21,7 @@ public class Blocks {
     public static final NanoBlock NANO_BLOCK = register("nano", NanoBlock::new,
             BlockBehaviour.Properties.of().instabreak().sound(SoundType.STONE).pushReaction(PushReaction.DESTROY)
     );
-    public static final ResourceKey<CreativeModeTab> CNMCU_TAB_KEY = ResourceKey.create(BuiltInRegistries.CREATIVE_MODE_TAB.key(), CNMCU.id("cnmcu"));
+    public static final ResourceKey<CreativeModeTab> CNMCU_TAB_KEY = ResourceKey.create(BuiltInRegistries.CREATIVE_MODE_TAB.key(), Common.id(Common.MOD_ID));
 
     static {
         register(
@@ -36,9 +36,9 @@ public class Blocks {
 
 
     public static <T extends Block> T register(String name, Function<BlockBehaviour.Properties, T> blockFactory, BlockBehaviour.Properties blockSettings) {
-        var blockKey = ResourceKey.create(BuiltInRegistries.BLOCK.key(), CNMCU.id(name));
+        var blockKey = ResourceKey.create(BuiltInRegistries.BLOCK.key(), Common.id(name));
         var block = blockFactory.apply(blockSettings.setId(blockKey));
-        var itemKey = ResourceKey.create(BuiltInRegistries.ITEM.key(), CNMCU.id(name));
+        var itemKey = ResourceKey.create(BuiltInRegistries.ITEM.key(), Common.id(name));
         var blockItem = new BlockItem(block, new Item.Properties().setId(itemKey).useBlockDescriptionPrefix());
         Registry.register(BuiltInRegistries.ITEM, itemKey, blockItem);
         Registry.register(BuiltInRegistries.BLOCK, blockKey, block);

@@ -1,5 +1,6 @@
 package com.elmfer.cnmcu;
 
+import com.elmfer.cnmcu.common.Common;
 import com.elmfer.cnmcu.natives.NanoMCU;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.Registry;
@@ -13,7 +14,7 @@ public class DataComponents {
     public static final DataComponentType<String> CODE = register("code", builder -> builder.persistent(Codec.STRING).cacheEncoding());
     public static final DataComponentType<NanoMCU.State> MCU = register("mcu", builder -> builder.persistent(NanoMCU.State.CODEC).cacheEncoding());
     public static <T> DataComponentType<T> register(String name, UnaryOperator<DataComponentType.Builder<T>> componentFactory) {
-        var componentKey = ResourceKey.create(BuiltInRegistries.DATA_COMPONENT_TYPE.key(), CNMCU.id(name));
+        var componentKey = ResourceKey.create(BuiltInRegistries.DATA_COMPONENT_TYPE.key(), Common.id(name));
 
         var componentType = componentFactory.apply(DataComponentType.builder()).build();
         Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, componentKey, componentType);

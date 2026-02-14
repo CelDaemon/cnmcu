@@ -19,10 +19,10 @@
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-            "com.elmfer.cnmcu.CNMCU"
+			"com.elmfer.cnmcu.Initialiser"
 		],
 		"client": [
-			"com.elmfer.cnmcu.client.CNMCUClient"
+			"com.elmfer.cnmcu.client.ClientInitialiser"
 		],
 		"fabric-datagen": [
 			"com.elmfer.cnmcu.client.datagen.CNMCUDataGenerator"

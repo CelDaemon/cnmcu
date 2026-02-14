@@ -12,7 +12,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldTerrainRenderContext;
 import net.minecraft.client.Minecraft;
 
-import static com.elmfer.cnmcu.client.CNMCUClient.CONFIG;
+import static com.elmfer.cnmcu.client.ClientInitialiser.CONFIG;
 
 public class EventHandler {
 

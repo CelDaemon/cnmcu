@@ -2,38 +2,33 @@ package com.elmfer.cnmcu;
 
 import com.elmfer.cnmcu.blockentities.BlockEntities;
 import com.elmfer.cnmcu.blocks.Blocks;
+import com.elmfer.cnmcu.common.Common;
 import com.elmfer.cnmcu.menu.Menus;
 import com.elmfer.cnmcu.natives.NativesLoader;
 import com.elmfer.cnmcu.network.Networking;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.resources.Identifier;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.lang.ref.Cleaner;
 import java.nio.file.Path;
 
-public class CNMCU implements ModInitializer {
+public class Initialiser implements ModInitializer {
 
-    public static final String MOD_ID = "cnmcu";
-    public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
     public static final String MOD_NAME;
     public static final String MOD_VERSION;
+    public static final Path DATA_PATH = FabricLoader.getInstance().getGameDir().resolve(Common.MOD_ID);
+    public static final Cleaner CLEANER = Cleaner.create();
+
     static {
-        var metadata = FabricLoader.getInstance().getModContainer(MOD_ID).orElseThrow().getMetadata();
+        var metadata = FabricLoader.getInstance().getModContainer(Common.MOD_ID).orElseThrow().getMetadata();
         MOD_VERSION = metadata.getVersion().getFriendlyString();
         MOD_NAME = metadata.getName();
     }
-    public static final Cleaner CLEANER = Cleaner.create();
-    public static final Path DATA_PATH = FabricLoader.getInstance().getGameDir().resolve(MOD_ID);
 
 
 
     @Override
     public void onInitialize() {
-        NativesLoader.extractNatives();
-
         NativesLoader.loadNatives();
 
         Blocks.init();
@@ -44,7 +39,4 @@ public class CNMCU implements ModInitializer {
         Networking.register();
     }
 
-    public static Identifier id(String path) {
-        return Identifier.fromNamespaceAndPath(MOD_ID, path);
-    }
 }

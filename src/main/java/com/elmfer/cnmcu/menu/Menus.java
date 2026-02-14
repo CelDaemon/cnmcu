@@ -1,7 +1,6 @@
 package com.elmfer.cnmcu.menu;
 
-import com.elmfer.cnmcu.CNMCU;
-
+import com.elmfer.cnmcu.common.Common;
 import io.netty.buffer.ByteBuf;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerType;
 import net.minecraft.core.Registry;
@@ -16,7 +15,7 @@ public class Menus {
     private static <T extends AbstractContainerMenu, D> MenuType<T> register(
             String name, ExtendedScreenHandlerType.ExtendedFactory<T, D> factory,
             StreamCodec<ByteBuf, D> packetCodec) {
-        var id = CNMCU.id(name);
+        var id = Common.id(name);
         var type = new ExtendedScreenHandlerType<>(factory, packetCodec);
         Registry.register(BuiltInRegistries.MENU, id, type);
 

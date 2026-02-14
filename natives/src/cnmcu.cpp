@@ -41,13 +41,13 @@ void init(JavaVM* vm)
 
     GET_ENV(env, vm);
 
-    jclass CNMCU;
-    jfieldID CNMCU_LOGGER_id;
+    jclass Common;
+    jfieldID Common_LOGGER_id;
 
-    // CNMCU.LOGGER
-    GET_CLASS(CNMCU, "com/elmfer/cnmcu/CNMCU");
-    GET_STATIC_FIELD_ID(CNMCU_LOGGER_id, CNMCU, "LOGGER", "Lorg/slf4j/Logger;");
-    LOGGER = env->GetStaticObjectField(CNMCU, CNMCU_LOGGER_id);
+    // Common.LOGGER
+    GET_CLASS(Common, "com/elmfer/cnmcu/common/Common");
+    GET_STATIC_FIELD_ID(Common_LOGGER_id, Common, "LOGGER", "Lorg/slf4j/Logger;");
+    LOGGER = env->GetStaticObjectField(Common, Common_LOGGER_id);
     LOGGER = env->NewGlobalRef(LOGGER);
 
     // Logger.info

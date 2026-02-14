@@ -1,7 +1,6 @@
 package com.elmfer.cnmcu.network;
 
-import com.elmfer.cnmcu.CNMCU;
-
+import com.elmfer.cnmcu.common.Common;
 import com.elmfer.cnmcu.menu.IDEMenu;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.FriendlyByteBuf;
@@ -11,12 +10,12 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 
-import static com.elmfer.cnmcu.CNMCU.LOGGER;
+import static com.elmfer.cnmcu.common.Common.LOGGER;
 
 public record IDEScreenSaveCodePayload(
         int containerId,
         String code) implements CustomPacketPayload {
-    public static final Identifier RAW_ID = CNMCU.id("ide_screen_save_code");
+    public static final Identifier RAW_ID = Common.id("ide_screen_save_code");
     public static final CustomPacketPayload.Type<IDEScreenSaveCodePayload> TYPE = new CustomPacketPayload.Type<>(RAW_ID);
     public static final StreamCodec<FriendlyByteBuf, IDEScreenSaveCodePayload> CODEC = StreamCodec.composite(
             ByteBufCodecs.CONTAINER_ID, IDEScreenSaveCodePayload::containerId,

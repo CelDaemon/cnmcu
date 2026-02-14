@@ -1,6 +1,6 @@
 package com.elmfer.cnmcu.network;
 
-import com.elmfer.cnmcu.CNMCU;
+import com.elmfer.cnmcu.common.Common;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -13,7 +13,7 @@ public record UploadROMResponsePayload(
         int bytesUploaded,
         String message) implements CustomPacketPayload {
 
-    public static final Identifier RAW_ID = CNMCU.id(
+    public static final Identifier RAW_ID = Common.id(
             "upload_rom_response");
     public static final CustomPacketPayload.Type<UploadROMResponsePayload> ID = new CustomPacketPayload.Type<>(RAW_ID);
     public static final StreamCodec<FriendlyByteBuf, UploadROMResponsePayload> CODEC = StreamCodec.composite(

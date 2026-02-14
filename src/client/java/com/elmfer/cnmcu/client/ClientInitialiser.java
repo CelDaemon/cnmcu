@@ -9,7 +9,7 @@ import com.elmfer.cnmcu.menu.Menus;
 import net.fabricmc.api.ClientModInitializer;
 import net.minecraft.client.gui.screens.MenuScreens;
 
-public class CNMCUClient implements ClientModInitializer {
+public class ClientInitialiser implements ClientModInitializer {
     public static final Config CONFIG = new Config();
     public static final Toolchain TOOLCHAIN = new Toolchain(CONFIG.getToolchainConfig());
 

@@ -1,7 +1,7 @@
 package com.elmfer.cnmcu.blockentities;
 
-import com.elmfer.cnmcu.CNMCU;
 import com.elmfer.cnmcu.DataComponents;
+import com.elmfer.cnmcu.Initialiser;
 import com.elmfer.cnmcu.blocks.NanoBlock;
 import com.elmfer.cnmcu.menu.IDEMenu;
 import com.elmfer.cnmcu.natives.NanoMCU;
@@ -35,7 +35,7 @@ public class NanoBlockEntity extends BlockEntity implements ExtendedScreenHandle
 
         var mcu = this.mcu;
 
-        CNMCU.CLEANER.register(this, mcu::delete);
+        Initialiser.CLEANER.register(this, mcu::delete);
     }
 
     public static void serverTick(@NotNull Level ignoredLevel, @NotNull BlockPos ignoredPos, @NotNull BlockState ignoredState, @NotNull NanoBlockEntity blockEntity) {

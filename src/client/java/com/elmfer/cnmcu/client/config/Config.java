@@ -1,7 +1,7 @@
 package com.elmfer.cnmcu.client.config;
 
-import com.elmfer.cnmcu.CNMCU;
 import com.elmfer.cnmcu.client.toolchain.Sketches;
+import com.elmfer.cnmcu.common.Common;
 import com.google.gson.FormattingStyle;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
@@ -19,10 +19,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
 
-import static com.elmfer.cnmcu.CNMCU.LOGGER;
+import static com.elmfer.cnmcu.common.Common.LOGGER;
 
 public class Config {
-    public static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir().resolve(CNMCU.MOD_ID + ".json");
+    public static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir().resolve(Common.MOD_ID + ".json");
     private final ToolchainConfig toolchainConfig = new ToolchainConfig();
     private CompletableFuture<Void> writingFuture = CompletableFuture.completedFuture(null);
     private boolean hexRegisters;

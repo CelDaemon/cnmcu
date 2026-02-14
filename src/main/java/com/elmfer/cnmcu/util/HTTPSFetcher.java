@@ -1,6 +1,14 @@
 package com.elmfer.cnmcu.util;
 
-import java.io.*;
+import com.elmfer.cnmcu.common.Common;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
+import javax.net.ssl.HttpsURLConnection;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -8,13 +16,6 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.net.ssl.HttpsURLConnection;
-
-import com.elmfer.cnmcu.CNMCU;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
 public class HTTPSFetcher {
     private FetcherWorker worker;
@@ -26,7 +27,7 @@ public class HTTPSFetcher {
         try {
             worker = new FetcherWorker(this, URI.create(url).toURL());
         } catch (MalformedURLException e) {
-            CNMCU.LOGGER.error("Failed to parse url: {}", url, e);
+            Common.LOGGER.error("Failed to parse url: {}", url, e);
         }
     }
 
@@ -46,7 +47,7 @@ public class HTTPSFetcher {
         try {
             worker.join();
         } catch (InterruptedException e) {
-            CNMCU.LOGGER.error("Completion was interrupted", e);
+            Common.LOGGER.error("Completion was interrupted", e);
         }
     }
     
@@ -131,7 +132,7 @@ public class HTTPSFetcher {
             } catch (IOException e) {
                 statusCode = 0;
                 status = String.format("Fetch Failed: %s", e);
-                CNMCU.LOGGER.error("Fetch failed", e);
+                Common.LOGGER.error("Fetch failed", e);
             }
         }
     }

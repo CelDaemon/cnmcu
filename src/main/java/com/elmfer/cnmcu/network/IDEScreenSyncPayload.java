@@ -1,7 +1,7 @@
 package com.elmfer.cnmcu.network;
 
-import com.elmfer.cnmcu.CNMCU;
 import com.elmfer.cnmcu.blockentities.NanoBlockEntity;
+import com.elmfer.cnmcu.common.Common;
 import com.elmfer.cnmcu.natives.NanoMCU;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -17,7 +17,7 @@ public record IDEScreenSyncPayload(
         CPUStatus cpuStatus,
         BusStatus busStatus,
         byte[] memory) implements CustomPacketPayload {
-    public static final Identifier RAW_ID = CNMCU.id("ide_screen_sync");
+    public static final Identifier RAW_ID = Common.id("ide_screen_sync");
     public static final CustomPacketPayload.Type<IDEScreenSyncPayload> ID = new CustomPacketPayload.Type<>(RAW_ID);
     public static final StreamCodec<FriendlyByteBuf, IDEScreenSyncPayload> CODEC = StreamCodec.composite(
             ByteBufCodecs.STRING_UTF8, IDEScreenSyncPayload::code,

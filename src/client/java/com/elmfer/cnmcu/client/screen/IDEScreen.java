@@ -42,8 +42,8 @@ import java.util.OptionalInt;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import static com.elmfer.cnmcu.client.CNMCUClient.CONFIG;
-import static com.elmfer.cnmcu.client.CNMCUClient.TOOLCHAIN;
+import static com.elmfer.cnmcu.client.ClientInitialiser.CONFIG;
+import static com.elmfer.cnmcu.client.ClientInitialiser.TOOLCHAIN;
 import static com.elmfer.cnmcu.client.EventHandler.IMGUI;
 import static com.elmfer.cnmcu.client.EventHandler.IMGUI_IO;
 

@@ -12,7 +12,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 
-import static com.elmfer.cnmcu.CNMCU.LOGGER;
+import static com.elmfer.cnmcu.common.Common.LOGGER;
 
 public class BuildProcess {
     private final StringBuffer output;

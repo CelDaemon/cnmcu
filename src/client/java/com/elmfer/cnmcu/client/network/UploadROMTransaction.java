@@ -7,7 +7,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static com.elmfer.cnmcu.CNMCU.LOGGER;
+import static com.elmfer.cnmcu.common.Common.LOGGER;
 
 public class UploadROMTransaction {
     private static final ConcurrentHashMap<Integer, CompletableFuture<UploadROMResponsePayload>> TRANSACTIONS = new ConcurrentHashMap<>();

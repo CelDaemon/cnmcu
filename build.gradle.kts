@@ -82,10 +82,12 @@ dependencies {
 	clientShade("io.github.spair:imgui-java-natives-macos:$imguiVersion")
 
 	shade(project(":bindings", "namedElements"))
+	shade(project(":common", "namedElements"))
 
 	natives(project(":natives"))
 
 	sources(project(":bindings", "sourcesElements"))
+	sources(project(":common", "sourcesElements"))
 }
 
 tasks.withType<JavaCompile>().configureEach {

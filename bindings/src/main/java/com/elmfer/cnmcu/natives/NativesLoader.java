@@ -1,5 +1,6 @@
 package com.elmfer.cnmcu.natives;
 
+import com.elmfer.cnmcu.common.Common;
 import org.apache.commons.io.file.PathUtils;
 import org.lwjgl.system.Platform;
 
@@ -23,11 +24,11 @@ public final class NativesLoader {
             ARCHITECTURE.name().toLowerCase(Locale.ROOT)
     );
     public static final Path EXTRACTED_PATH;
-    private static final Path NATIVE = Path.of(System.mapLibraryName("cnmcu"));
+    private static final Path NATIVE = Path.of(System.mapLibraryName(Common.MOD_ID));
 
     static {
         try {
-            EXTRACTED_PATH = Files.createTempDirectory("cnmcu");
+            EXTRACTED_PATH = Files.createTempDirectory(Common.MOD_ID);
             Runtime.getRuntime().addShutdownHook(new Thread(NativesLoader::shutdown));
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -52,15 +53,15 @@ public final class NativesLoader {
         }
     }
 
-    public static void extractNatives() {
+    private static void extractNatives() {
+        Common.LOGGER.debug("Extracting natives");
         extractNative(NATIVE);
-
     }
 
     public static void loadNatives() {
-        CNMCUNatives.LOGGER.debug("Loading native library...");
-
-        var nativePath = EXTRACTED_PATH.resolve(resolveNative());
+        extractNatives();
+        final var nativePath = resolveNative();
+        Common.LOGGER.debug("Loading native {}", nativePath);
 
         try {
             System.load(nativePath.toString());

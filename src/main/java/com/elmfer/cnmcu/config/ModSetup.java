@@ -1,6 +1,7 @@
 package com.elmfer.cnmcu.config;
 
-import com.elmfer.cnmcu.CNMCU;
+import com.elmfer.cnmcu.Initialiser;
+import com.elmfer.cnmcu.common.Common;
 import com.elmfer.cnmcu.util.HTTPSFetcher;
 import com.google.gson.JsonArray;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -9,10 +10,10 @@ import org.jetbrains.annotations.NotNull;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static com.elmfer.cnmcu.CNMCU.LOGGER;
+import static com.elmfer.cnmcu.common.Common.LOGGER;
 
 public final class ModSetup {
-    public static final Path IMGUI_CONFIG_PATH = CNMCU.DATA_PATH.resolve("imgui.ini");
+    public static final Path IMGUI_CONFIG_PATH = Initialiser.DATA_PATH.resolve("imgui.ini");
 
     private static final String GITHUB_REPO_URL = "https://api.github.com/repos/elmfrain/cnmcu";
 
@@ -25,7 +26,7 @@ public final class ModSetup {
         if (Files.exists(IMGUI_CONFIG_PATH))
             return;
 
-        final var resource = resourceLoader.getResource(CNMCU.id("setup/imgui.ini"))
+        final var resource = resourceLoader.getResource(Common.id("setup/imgui.ini"))
                 .orElseThrow();
 
         try(final var stream = resource.open()) {
