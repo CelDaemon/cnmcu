@@ -66,7 +66,7 @@ else()
   endif()
 endif()
 
-string(TOLOWER "${CMAKE_HOST_SYSTEM_NAME}" TARGET_OS)
+string(TOLOWER "${CMAKE_SYSTEM_NAME}" TARGET_OS)
 
 if("${TARGET_OS}" STREQUAL "darwin")
   set(TARGET_OS "macos")
