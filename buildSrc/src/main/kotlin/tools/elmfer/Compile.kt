@@ -3,6 +3,8 @@ package tools.elmfer
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.ProjectLayout
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
@@ -21,6 +23,9 @@ abstract class Compile : DefaultTask() {
     @get:OutputDirectory
     abstract val outputDirectory: DirectoryProperty
 
+    @get:Input
+    abstract val configuration: Property<String>
+
     @get:Inject
     abstract val exec: ExecOperations
 
@@ -33,6 +38,7 @@ abstract class Compile : DefaultTask() {
     init {
         sourceDirectory.convention(layout.projectDirectory.dir("src"))
         outputDirectory.convention(layout.buildDirectory.dir("bin"))
+        configuration.convention("Release")
     }
 
     @TaskAction
@@ -47,24 +53,30 @@ abstract class Compile : DefaultTask() {
             args(
                 "-S", sourceDirectory,
                 "-B", temporaryDir,
-                "-DGENERATED_SOURCES_DIR=${generatedDirectory.asFile.absolutePath}"
+                "-DGENERATED_SOURCES_DIR=${generatedDirectory.asFile.absolutePath}",
+                "-DCMAKE_BUILD_TYPE=${configuration.get()}"
             )
+            println(args)
         }
 
         exec.exec {
             executable = "cmake"
             args(
                 "--build", temporaryDir,
-                "--parallel", 4
+                "--parallel", 4,
+                "--config", configuration.get()
             )
+            println(args)
         }
 
         exec.exec {
             executable = "cmake"
             args(
                 "--install", temporaryDir,
-                "--prefix", outputDirectory
+                "--prefix", outputDirectory,
+                "--config", configuration.get()
             )
+            println(args)
         }
     }
 }
