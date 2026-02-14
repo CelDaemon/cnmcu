@@ -14,9 +14,23 @@ plugins {
 version = "$modVersion+$minecraftVersion"
 group = mavenGroup
 
-val clientShade by configurations.registering
-val shade by configurations.registering
-val nativesDependencies by configurations.registering
+val clientShade by configurations.registering {
+	isCanBeConsumed = false
+	isCanBeResolved = true
+}
+val shade by configurations.registering {
+	isCanBeConsumed = false
+	isCanBeResolved = true
+}
+val natives by configurations.registering {
+	isCanBeConsumed = false
+	isCanBeResolved = true
+}
+
+val sources by configurations.registering {
+	isCanBeConsumed = false
+	isCanBeResolved = true
+}
 
 loom.splitEnvironmentSourceSets()
 
@@ -69,7 +83,9 @@ dependencies {
 
 	shade(project(":bindings", "namedElements"))
 
-	nativesDependencies(project(":natives"))
+	natives(project(":natives"))
+
+	sources(project(":bindings", "sourcesElements"))
 }
 
 tasks.withType<JavaCompile>().configureEach {
@@ -89,12 +105,11 @@ tasks.jar {
 	}
 }
 
-val nativesProvider: Provider<FileTree> = provider { project.findProperty("prebuilt_natives") as String? }
-	.map<FileTree> { fileTree(it) }
-	.orElse(nativesDependencies.map { it.asFileTree })
+val nativesProvider: Provider<FileCollection> = provider { project.findProperty("prebuilt_natives") as String? }
+	.map<FileCollection> { files(it) }
+	.orElse(natives.map { it.incoming.files })
 
 tasks.processResources {
-	inputs.files(nativesProvider)
 	inputs.property("version", version)
 	inputs.property("minecraft_version", minecraftVersion)
 	inputs.property("loader_version", loaderVersion)
@@ -125,6 +140,7 @@ tasks.shadowJar {
 
 tasks.named<Jar>("sourcesJar") {
 	archiveClassifier = "dev-sources"
+	from(sources.map { it.incoming.files })
 }
 
 tasks.remapJar {

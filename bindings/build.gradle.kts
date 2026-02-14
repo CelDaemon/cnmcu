@@ -15,9 +15,12 @@ val generateNativesSources by tasks.registering(GenerateSources::class)
 
 val nativesSourcesElements by configurations.registering {
     isCanBeConsumed = true
+    isCanBeResolved = false
 }
 
 java {
+    withSourcesJar()
+
     sourceCompatibility = JavaVersion.VERSION_21
     targetCompatibility = JavaVersion.VERSION_21
 }
