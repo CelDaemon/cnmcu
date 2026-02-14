@@ -42,22 +42,6 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_INCLUDES})
 
 target_link_libraries(${PROJECT_NAME} ${PROJECT_LIBRARIES})
 
-# force off-tree build
-if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
-  message(FATAL_ERROR "CMake generation is not allowed within the source directory!
-  Remove the CMakeCache.txt file and try again from another folder, e.g.:
-    mkdir build && cd build
-    cmake ..
-  ")
-endif()
-
-# default to Release build
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Release CACHE STRING
-      "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel."
-      FORCE)
-endif()
-
 # Determine target cpu architecture and set TARGET_ARCH
 
 string(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" SYSTEM_PROCESSOR)
@@ -83,6 +67,10 @@ else()
 endif()
 
 string(TOLOWER "${CMAKE_HOST_SYSTEM_NAME}" TARGET_OS)
+
+if("${TARGET_OS}" STREQUAL "darwin")
+  set(TARGET_OS "macos")
+endif()
 
 set(TARGET_DIR "${TARGET_OS}/${TARGET_ARCH}")
 

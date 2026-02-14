@@ -56,7 +56,6 @@ abstract class Compile : DefaultTask() {
                 "-DGENERATED_SOURCES_DIR=${generatedDirectory.asFile.absolutePath}",
                 "-DCMAKE_BUILD_TYPE=${configuration.get()}"
             )
-            println(args)
         }
 
         exec.exec {
@@ -66,7 +65,6 @@ abstract class Compile : DefaultTask() {
                 "--parallel", 4,
                 "--config", configuration.get()
             )
-            println(args)
         }
 
         exec.exec {
@@ -76,7 +74,6 @@ abstract class Compile : DefaultTask() {
                 "--prefix", outputDirectory,
                 "--config", configuration.get()
             )
-            println(args)
         }
     }
 }
