@@ -19,7 +19,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v5
 
       - name: Build project
-        run: ./gradlew --no-daemon build
+        run: ./gradlew --no-daemon :build
 
       - name: Upload artifact
         uses: actions/upload-artifact@v6

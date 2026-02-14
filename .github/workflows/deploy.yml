@@ -30,7 +30,7 @@ jobs:
           merge-multiple: true
 
       - name: Build project
-        run: ./gradlew --no-daemon -P prebuilt_natives=prebuilt build
+        run: ./gradlew --no-daemon -P prebuilt_natives=prebuilt :build
 
       - name: Upload artifact
         uses: actions/upload-artifact@v6
