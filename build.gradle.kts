@@ -150,8 +150,10 @@ tasks.shadowJar {
 
 tasks.named<Jar>("sourcesJar") {
 	archiveClassifier = "dev-sources"
-	inputs.files(sources)
-	from(sources.map { it.map { zip -> zipTree(zip) } })
+	from(
+		sources.flatMap { it.elements }
+			.map { it.map { file -> zipTree(file) } }
+	)
 }
 
 tasks.remapJar {
