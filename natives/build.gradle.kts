@@ -10,9 +10,7 @@ val generatedSources by configurations.registering {
 }
 
 val compile by tasks.registering(Compile::class) {
-    inputs.files(generatedSources.map { it.incoming.files })
-
-    generatedDirectory = generatedSources.map { it.singleFile }.get()
+    generatedDirectory = generatedSources.flatMap { it.elements }.map { it.first().asFile }
 }
 
 tasks.assemble {
