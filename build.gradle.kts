@@ -30,6 +30,10 @@ val natives by configurations.registering {
 val sources by configurations.registering {
 	isCanBeConsumed = false
 	isCanBeResolved = true
+
+	attributes {
+		attribute(Category.CATEGORY_ATTRIBUTE, objects.named(Category::class, Category.DOCUMENTATION))
+	}
 }
 
 loom.splitEnvironmentSourceSets()
@@ -46,9 +50,13 @@ configurations.implementation {
 
 loom {
 	mods {
-		register("cnmcu") {
+		register(project.name) {
 			sourceSet(sourceSets.main.get())
 			sourceSet(client.get())
+			sourceSet(SourceSet.MAIN_SOURCE_SET_NAME, projects.common)
+			sourceSet(SourceSet.MAIN_SOURCE_SET_NAME, projects.bindings)
+			configuration(shade.get())
+			configuration(clientShade.get())
 		}
 	}
 
@@ -84,10 +92,10 @@ dependencies {
 	shade(project(":bindings", "namedElements"))
 	shade(project(":common", "namedElements"))
 
-	natives(project(":natives"))
+	natives(projects.natives)
 
-	sources(project(":bindings", "sourcesElements"))
-	sources(project(":common", "sourcesElements"))
+	sources(projects.bindings)
+	sources(projects.common)
 }
 
 tasks.withType<JavaCompile>().configureEach {
@@ -142,7 +150,8 @@ tasks.shadowJar {
 
 tasks.named<Jar>("sourcesJar") {
 	archiveClassifier = "dev-sources"
-	from(sources.map { it.incoming.files })
+	inputs.files(sources)
+	from(sources.map { it.map { zip -> zipTree(zip) } })
 }
 
 tasks.remapJar {

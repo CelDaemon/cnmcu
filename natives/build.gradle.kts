@@ -23,7 +23,10 @@ dependencies {
     generatedSources(project(":bindings", "nativesSourcesElements"))
 }
 
-val default by configurations.registering
+val default by configurations.registering {
+    isCanBeConsumed = true
+    isCanBeResolved = false
+}
 
 artifacts {
     add(default.name, compile)

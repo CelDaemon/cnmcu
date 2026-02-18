@@ -19,6 +19,8 @@ plugins {
     id("net.fabricmc.fabric-loom-remap") apply false
 }
 
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+
 include("natives", "bindings", "common")
 
 rootProject.name = "cnmcu"
