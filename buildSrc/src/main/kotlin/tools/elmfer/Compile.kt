@@ -39,6 +39,9 @@ abstract class Compile : DefaultTask() {
         sourceDirectory.convention(layout.projectDirectory.dir("src"))
         outputDirectory.convention(layout.buildDirectory.dir("bin"))
         configuration.convention("Release")
+
+        group = "build"
+        description = "Compiles native source files using CMake."
     }
 
     @TaskAction

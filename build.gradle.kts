@@ -1,18 +1,13 @@
-val modVersion: String by project
 val minecraftVersion: String by project
-val mavenGroup: String by project
 val archivesBaseName: String by project
 val loaderVersion: String by project
 val fabricVersion: String by project
 val imguiVersion: String by project
 
 plugins {
-	id("net.fabricmc.fabric-loom-remap")
+	id("cnmcu-java-conventions")
 	id("com.gradleup.shadow")
 }
-
-version = "$modVersion+$minecraftVersion"
-group = mavenGroup
 
 val clientShade by configurations.registering {
 	isCanBeConsumed = false
@@ -74,12 +69,6 @@ repositories {
 	mavenCentral()
 }
 dependencies {
-	minecraft("com.mojang:minecraft:$minecraftVersion")
-	mappings(loom.officialMojangMappings())
-	modImplementation("net.fabricmc:fabric-loader:$loaderVersion")
-
-	modImplementation("net.fabricmc.fabric-api:fabric-api:$fabricVersion")
-
 	clientShade("io.github.spair:imgui-java-binding:$imguiVersion")
 	clientShade("io.github.spair:imgui-java-lwjgl3:$imguiVersion") {
 		exclude(group = "org.lwjgl") // Do not include transitive LWJGL3 dependency.
