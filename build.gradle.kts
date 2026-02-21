@@ -78,13 +78,14 @@ dependencies {
 	clientShade("io.github.spair:imgui-java-natives-linux:$imguiVersion")
 	clientShade("io.github.spair:imgui-java-natives-macos:$imguiVersion")
 
-	shade(project(":bindings", "namedElements"))
-	shade(project(":common", "namedElements"))
+	sequenceOf(projects.bindings, projects.common).forEach {
+		shade(it) {
+			targetConfiguration = "namedElements"
+		}
+		sources(it)
+	}
 
 	natives(projects.natives)
-
-	sources(projects.bindings)
-	sources(projects.common)
 }
 
 tasks.withType<JavaCompile>().configureEach {
