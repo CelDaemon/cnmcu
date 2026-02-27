@@ -1,3 +1,6 @@
+import net.fabricmc.loom.task.RemapSourcesJarTask
+import net.fabricmc.loom.task.RemapTaskConfiguration
+
 plugins {
     id("cnmcu-base-conventions")
     id("net.fabricmc.fabric-loom-remap")
@@ -24,4 +27,17 @@ java {
 
 tasks.withType<JavaCompile>().configureEach {
     options.release = 21
+}
+
+
+tasks.named<RemapSourcesJarTask>(RemapTaskConfiguration.REMAP_SOURCES_JAR_TASK_NAME) {
+    archiveClassifier = "dev-sources"
+}
+
+tasks.runClientRenderDoc {
+    renderDocExecutable = file("/usr/bin/renderdoccmd")
+}
+
+tasks.startRenderDocUI {
+    renderDocExecutable = file("/usr/bin/qrenderdoc")
 }

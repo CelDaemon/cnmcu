@@ -88,17 +88,6 @@ dependencies {
 	natives(projects.natives)
 }
 
-tasks.withType<JavaCompile>().configureEach {
-	options.release = 21
-}
-
-java {
-	withSourcesJar()
-
-	sourceCompatibility = JavaVersion.VERSION_21
-	targetCompatibility = JavaVersion.VERSION_21
-}
-
 tasks.jar {
 	from("LICENSE") {
 		rename { "${it}_$archivesBaseName" }
@@ -138,8 +127,7 @@ tasks.shadowJar {
 	destinationDirectory = layout.buildDirectory.dir("devlibs")
 }
 
-tasks.named<Jar>("sourcesJar") {
-	archiveClassifier = "dev-sources"
+tasks.sourcesJar {
 	from(
 		sources.flatMap { it.elements }
 			.map { it.map { file -> zipTree(file) } }
