@@ -1,5 +1,4 @@
 import net.fabricmc.loom.util.Constants
-import tools.elmfer.GenerateSources
 
 plugins {
     id("cnmcu-java-conventions")
@@ -13,7 +12,9 @@ val nativesSourcesElements by configurations.registering {
 }
 
 dependencies {
-    implementation(project(":common", Constants.Configurations.NAMED_ELEMENTS))
+    implementation(projects.common) {
+        targetConfiguration = Constants.Configurations.NAMED_ELEMENTS
+    }
 }
 
 artifacts {
