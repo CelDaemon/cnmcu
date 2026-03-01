@@ -2,20 +2,15 @@ import net.fabricmc.loom.task.RemapSourcesJarTask
 import net.fabricmc.loom.task.RemapTaskConfiguration
 
 plugins {
-    id("cnmcu-base-conventions")
     id("net.fabricmc.fabric-loom-remap")
 }
-
-val minecraftVersion: String by project
-val loaderVersion: String by project
-val fabricVersion: String by project
+val libs = versionCatalogs.named("libs")
 
 dependencies {
-    minecraft("com.mojang:minecraft:$minecraftVersion")
+    minecraft(libs.findLibrary("minecraft").get())
     mappings(loom.officialMojangMappings())
-    modImplementation("net.fabricmc:fabric-loader:$loaderVersion")
-
-    modImplementation("net.fabricmc.fabric-api:fabric-api:$fabricVersion")
+    modImplementation(libs.findLibrary("fabric-loader").get())
+    modImplementation(libs.findLibrary("fabric-api").get())
 }
 
 java {
@@ -32,12 +27,4 @@ tasks.withType<JavaCompile>().configureEach {
 
 tasks.named<RemapSourcesJarTask>(RemapTaskConfiguration.REMAP_SOURCES_JAR_TASK_NAME) {
     archiveClassifier = "dev-sources"
-}
-
-tasks.runClientRenderDoc {
-    renderDocExecutable = file("/usr/bin/renderdoccmd")
-}
-
-tasks.startRenderDocUI {
-    renderDocExecutable = file("/usr/bin/qrenderdoc")
 }

@@ -1,0 +1,19 @@
+[versions]
+fabric-loom = { strictly = "1.15-SNAPSHOT" }
+imgui = { strictly = "1.88.0" }
+
+[libraries]
+minecraft = { group = "com.mojang", name = "minecraft", version = "1.21.11" }
+fabric-loader = { group = "net.fabricmc", name = "fabric-loader", version = "0.18.4" }
+fabric-api = { group = "net.fabricmc.fabric-api", name = "fabric-api", version = "0.140.2+1.21.11" }
+fabric-loom = { group = "net.fabricmc.fabric-loom-remap", name = "net.fabricmc.fabric-loom-remap.gradle.plugin", version.ref = "fabric-loom" }
+jnigen = { group = "com.badlogicgames.jnigen", name = "jnigen-core", version = "3.1.1" }
+
+imgui = { group = "io.github.spair", name = "imgui-java-binding", version.ref = "imgui" }
+imgui-lwjgl3 = { group = "io.github.spair", name = "imgui-java-lwjgl3", version.ref = "imgui" }
+imgui-natives-windows = { group = "io.github.spair", name = "imgui-java-natives-windows", version.ref = "imgui" }
+imgui-natives-linux = { group = "io.github.spair", name = "imgui-java-natives-linux", version.ref = "imgui" }
+imgui-natives-macos = { group = "io.github.spair", name = "imgui-java-natives-macos", version.ref = "imgui" }
+
+[plugins]
+shadow = { id = "com.gradleup.shadow", version = "9.3.0" }

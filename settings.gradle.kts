@@ -1,10 +1,4 @@
 pluginManagement {
-	val loomVersion: String by settings
-	val shadowVersion: String by settings
-	plugins {
-		id("net.fabricmc.fabric-loom-remap") version loomVersion
-		id("com.gradleup.shadow") version shadowVersion
-	}
 	repositories {
 		maven {
 			name = "Fabric"
@@ -15,10 +9,6 @@ pluginManagement {
 	}
 
 	includeBuild("build-logic")
-}
-
-plugins {
-    id("net.fabricmc.fabric-loom-remap") apply false
 }
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")

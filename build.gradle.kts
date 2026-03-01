@@ -1,13 +1,10 @@
-val minecraftVersion: String by project
-val archivesBaseName: String by project
-val loaderVersion: String by project
-val fabricVersion: String by project
-val imguiVersion: String by project
-
 plugins {
 	id("cnmcu-java-conventions")
-	id("com.gradleup.shadow")
+	alias(libs.plugins.shadow)
 }
+
+group = "com.elmfer.cnmcu"
+version = "0.0.10-alpha+${libs.minecraft.get().version}"
 
 val clientShade by configurations.registering {
 	isCanBeConsumed = false
@@ -69,14 +66,13 @@ repositories {
 	mavenCentral()
 }
 dependencies {
-	clientShade("io.github.spair:imgui-java-binding:$imguiVersion")
-	clientShade("io.github.spair:imgui-java-lwjgl3:$imguiVersion") {
-		exclude(group = "org.lwjgl") // Do not include transitive LWJGL3 dependency.
+	clientShade(libs.imgui)
+	clientShade(libs.imgui.lwjgl3) {
+		exclude(group = "org.lwjgl")
 	}
-
-	clientShade("io.github.spair:imgui-java-natives-windows:$imguiVersion")
-	clientShade("io.github.spair:imgui-java-natives-linux:$imguiVersion")
-	clientShade("io.github.spair:imgui-java-natives-macos:$imguiVersion")
+	libs.imgui.natives.let { sequenceOf(it.windows, it.linux, it.macos) }.forEach {
+		clientShade(it)
+	}
 
 	sequenceOf(projects.bindings, projects.common).forEach {
 		shade(it) {
@@ -90,7 +86,7 @@ dependencies {
 
 tasks.jar {
 	from("LICENSE") {
-		rename { "${it}_$archivesBaseName" }
+		rename { "${it}_${project.name}" }
 	}
 }
 
@@ -100,14 +96,14 @@ val nativesProvider: Provider<FileCollection> = provider { project.findProperty(
 
 tasks.processResources {
 	inputs.property("version", version)
-	inputs.property("minecraft_version", minecraftVersion)
-	inputs.property("loader_version", loaderVersion)
+	inputs.property("minecraft_version", libs.minecraft.map { it.version })
+	inputs.property("loader_version", libs.fabric.loader.map { it.version })
 
 	filesMatching("fabric.mod.json") {
         expand(
             "version" to version,
-            "minecraft_version" to minecraftVersion,
-            "loader_version" to loaderVersion
+			"minecraft_version" to libs.minecraft.get().version as String,
+			"loader_version" to libs.fabric.loader.get().version as String
         )
     }
 

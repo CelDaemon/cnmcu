@@ -13,11 +13,8 @@ repositories {
 }
 
 dependencies {
-    val loomVersion: String by project
-    val jnigenVersion: String by project
-
-    implementation("net.fabricmc.fabric-loom-remap:net.fabricmc.fabric-loom-remap.gradle.plugin:$loomVersion")
-    implementation("com.badlogicgames.jnigen:jnigen-core:$jnigenVersion")
+    implementation(libs.fabric.loom)
+    implementation(libs.jnigen)
 
     constraints {
         implementation("ch.qos.logback:logback-classic") {
