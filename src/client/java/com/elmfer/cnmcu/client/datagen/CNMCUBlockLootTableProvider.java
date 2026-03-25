@@ -2,8 +2,8 @@ package com.elmfer.cnmcu.client.datagen;
 
 import com.elmfer.cnmcu.DataComponents;
 import com.elmfer.cnmcu.blocks.Blocks;
-import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
-import net.fabricmc.fabric.api.datagen.v1.provider.FabricBlockLootTableProvider;
+import net.fabricmc.fabric.api.datagen.v1.FabricPackOutput;
+import net.fabricmc.fabric.api.datagen.v1.provider.FabricBlockLootSubProvider;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
@@ -14,9 +14,9 @@ import net.minecraft.world.level.storage.loot.predicates.ExplosionCondition;
 
 import java.util.concurrent.CompletableFuture;
 
-public class CNMCUBlockLootTableProvider extends FabricBlockLootTableProvider {
+public class CNMCUBlockLootTableProvider extends FabricBlockLootSubProvider {
 
-    protected CNMCUBlockLootTableProvider(FabricDataOutput dataOutput, CompletableFuture<HolderLookup.Provider> registryLookup) {
+    protected CNMCUBlockLootTableProvider(FabricPackOutput dataOutput, CompletableFuture<HolderLookup.Provider> registryLookup) {
         super(dataOutput, registryLookup);
     }
 

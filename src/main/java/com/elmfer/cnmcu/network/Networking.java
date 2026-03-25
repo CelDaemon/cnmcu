@@ -6,11 +6,11 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 public class Networking {
 
     public static void register() {
-        var s2c = PayloadTypeRegistry.playS2C();
+        var s2c = PayloadTypeRegistry.clientboundPlay();
         s2c.register(IDEScreenSyncPayload.ID, IDEScreenSyncPayload.CODEC);
         s2c.register(UploadROMResponsePayload.ID, UploadROMResponsePayload.CODEC);
 
-        var c2s = PayloadTypeRegistry.playC2S();
+        var c2s = PayloadTypeRegistry.serverboundPlay();
         c2s.register(IDEScreenSaveCodePayload.TYPE, IDEScreenSaveCodePayload.CODEC);
         c2s.register(UploadROMRequestPayload.ID, UploadROMRequestPayload.CODEC);
         c2s.register(IDEScreenMCUControlPayload.ID, IDEScreenMCUControlPayload.CODEC);

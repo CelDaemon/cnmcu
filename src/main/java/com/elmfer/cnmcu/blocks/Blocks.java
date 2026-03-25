@@ -1,7 +1,7 @@
 package com.elmfer.cnmcu.blocks;
 
 import com.elmfer.cnmcu.common.Common;
-import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
+import net.fabricmc.fabric.api.creativetab.v1.FabricCreativeModeTab;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -26,7 +26,7 @@ public class Blocks {
     static {
         register(
                 CNMCU_TAB_KEY,
-                FabricItemGroup.builder()
+                FabricCreativeModeTab.builder()
                         .icon(() -> new ItemStack(NANO_BLOCK))
                         .displayItems((params, output) -> {
                             output.accept(NANO_BLOCK);

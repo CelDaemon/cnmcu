@@ -6,7 +6,7 @@ import com.elmfer.cnmcu.blocks.NanoBlock;
 import com.elmfer.cnmcu.menu.IDEMenu;
 import com.elmfer.cnmcu.natives.NanoMCU;
 import com.elmfer.cnmcu.util.DirectionUtil;
-import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
+import net.fabricmc.fabric.api.menu.v1.ExtendedMenuProvider;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponentGetter;
@@ -25,7 +25,7 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.NotNull;
 
-public class NanoBlockEntity extends BlockEntity implements ExtendedScreenHandlerFactory<IDEMenu.OpenData> {
+public class NanoBlockEntity extends BlockEntity implements ExtendedMenuProvider<IDEMenu.OpenData> {
     
     public final NanoMCU mcu = new NanoMCU();
     private String code = "";

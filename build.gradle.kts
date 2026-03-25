@@ -110,10 +110,6 @@ tasks.processResources {
     }
 }
 
-tasks.jar {
-	enabled = false
-}
-
 tasks.shadowJar {
 	from(client.map { it.output })
 	configurations = clientShade.zip(shade, ::Pair).map { listOf(it.first, it.second) }

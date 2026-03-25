@@ -1,7 +1,6 @@
 package com.elmfer.cnmcu.client.screen;
 
 import com.elmfer.cnmcu.client.EventHandler;
-import com.elmfer.cnmcu.client.mixin.GuiGraphicsAccessor;
 import com.elmfer.cnmcu.client.network.UploadROMTransaction;
 import com.elmfer.cnmcu.client.toolchain.BuildProcess;
 import com.elmfer.cnmcu.client.toolchain.Sketches;
@@ -16,6 +15,7 @@ import com.elmfer.cnmcu.network.UploadROMResponsePayload;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.resource.RenderTargetDescriptor;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.textures.AddressMode;
 import com.mojang.blaze3d.textures.FilterMode;
 import imgui.ImGui;
 import imgui.extension.imguifiledialog.ImGuiFileDialog;
@@ -23,10 +23,9 @@ import imgui.extension.memedit.MemoryEditor;
 import imgui.extension.texteditor.TextEditor;
 import imgui.flag.*;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.input.KeyEvent;
-import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import org.jetbrains.annotations.NotNull;
@@ -118,7 +117,7 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
     }
 
     @Override
-    public void render(@NotNull GuiGraphics gui, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(GuiGraphicsExtractor gui, int mouseX, int mouseY, float delta) {
         ImGui.setCurrentContext(IMGUI);
 
         ImGui.newFrame();
@@ -151,9 +150,20 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
             EventHandler.IMGUI_GL3.renderDrawData(ImGui.getDrawData());
         }
 
-        ((GuiGraphicsAccessor) gui).cnmcu$submitBlit(RenderPipelines.GUI_TEXTURED, renderTarget.getColorTextureView(),
-                RenderSystem.getSamplerCache().getClampToEdge(FilterMode.NEAREST),
-                0, 0, width, height, .0f, 1.0f, 1.f, 0.f, -1);
+        gui.blit(
+                renderTarget.getColorTextureView(),
+                RenderSystem.getSamplerCache()
+                        .getSampler(
+                                AddressMode.REPEAT,
+                                AddressMode.REPEAT,
+                                FilterMode.NEAREST,
+                                FilterMode.LINEAR,
+                                false),
+                0, 0, width, height,
+                0, 1, 1, 0
+        );
+
+        super.extractRenderState(gui, mouseX, mouseY, delta);
     }
 
     @Override
@@ -534,7 +544,7 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
     }
 
     @Override
-    protected void renderBg(@NotNull GuiGraphics guiGraphics, float f, int i, int j) {
+    public void extractTransparentBackground(GuiGraphicsExtractor graphics) {
 
     }
 

@@ -8,8 +8,8 @@ import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
 import imgui.internal.ImGuiContext;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldTerrainRenderContext;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelTerrainRenderContext;
 import net.minecraft.client.Minecraft;
 
 import static com.elmfer.cnmcu.client.ClientInitialiser.CONFIG;
@@ -24,10 +24,10 @@ public class EventHandler {
     public static void register() {
         ClientLifecycleEvents.CLIENT_STARTED.register(EventHandler::onClientStarted);
         ClientLifecycleEvents.CLIENT_STOPPING.register(EventHandler::onClientStopping);
-        WorldRenderEvents.START_MAIN.register(EventHandler::onStartRenderWorld);
+        LevelRenderEvents.START_MAIN.register(EventHandler::onStartRenderLevel);
     }
 
-    private static void onStartRenderWorld(WorldTerrainRenderContext context) {
+    private static void onStartRenderLevel(LevelTerrainRenderContext context) {
         IMGUI_GLFW.newFrame();
         IMGUI_GL3.newFrame();
     }
