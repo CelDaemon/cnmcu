@@ -1,30 +1,21 @@
-import net.fabricmc.loom.task.RemapSourcesJarTask
-import net.fabricmc.loom.task.RemapTaskConfiguration
-
 plugins {
-    id("net.fabricmc.fabric-loom-remap")
+    id("net.fabricmc.fabric-loom")
 }
 val libs = versionCatalogs.named("libs")
 
 dependencies {
     minecraft(libs.findLibrary("minecraft").get())
-    mappings(loom.officialMojangMappings())
-    modImplementation(libs.findLibrary("fabric-loader").get())
-    modImplementation(libs.findLibrary("fabric-api").get())
+    implementation(libs.findLibrary("fabric-loader").get())
+    implementation(libs.findLibrary("fabric-api").get())
 }
 
 java {
     withSourcesJar()
 
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
 }
 
 tasks.withType<JavaCompile>().configureEach {
-    options.release = 21
-}
-
-
-tasks.named<RemapSourcesJarTask>(RemapTaskConfiguration.REMAP_SOURCES_JAR_TASK_NAME) {
-    archiveClassifier = "dev-sources"
+    options.release = 25
 }

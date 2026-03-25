@@ -1,5 +1,3 @@
-import net.fabricmc.loom.util.Constants
-
 plugins {
     id("cnmcu-java-conventions")
 }
@@ -12,9 +10,7 @@ val nativesSourcesElements by configurations.registering {
 }
 
 dependencies {
-    implementation(projects.common) {
-        targetConfiguration = Constants.Configurations.NAMED_ELEMENTS
-    }
+    implementation(projects.common)
 }
 
 artifacts {

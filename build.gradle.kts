@@ -75,9 +75,7 @@ dependencies {
 	}
 
 	sequenceOf(projects.bindings, projects.common).forEach {
-		shade(it) {
-			targetConfiguration = "namedElements"
-		}
+		shade(it)
 		sources(it)
 	}
 
@@ -119,8 +117,7 @@ tasks.jar {
 tasks.shadowJar {
 	from(client.map { it.output })
 	configurations = clientShade.zip(shade, ::Pair).map { listOf(it.first, it.second) }
-	archiveClassifier = "dev"
-	destinationDirectory = layout.buildDirectory.dir("devlibs")
+	archiveClassifier = null
 }
 
 tasks.sourcesJar {
@@ -128,8 +125,4 @@ tasks.sourcesJar {
 		sources.flatMap { it.elements }
 			.map { it.map { file -> zipTree(file) } }
 	)
-}
-
-tasks.remapJar {
-	inputFile = tasks.shadowJar.flatMap { it.archiveFile }
 }
