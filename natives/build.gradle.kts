@@ -16,7 +16,9 @@ tasks.assemble {
 }
 
 dependencies {
-    generatedSources(project(":bindings", "nativesSourcesElements"))
+    generatedSources(projects.bindings) {
+        targetConfiguration = "nativesSourcesElements"
+    }
 }
 
 val default by configurations.registering {
