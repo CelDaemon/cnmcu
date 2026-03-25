@@ -113,7 +113,6 @@ tasks.processResources {
 tasks.shadowJar {
 	from(client.map { it.output })
 	configurations = clientShade.zip(shade, ::Pair).map { listOf(it.first, it.second) }
-	archiveClassifier = null
 }
 
 tasks.sourcesJar {
