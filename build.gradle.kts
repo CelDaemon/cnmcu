@@ -6,17 +6,18 @@ plugins {
 group = "com.elmfer.cnmcu"
 version = "0.0.10-alpha+${libs.minecraft.get().version}"
 
-val clientShade by configurations.registering {
-	isCanBeConsumed = false
-	isCanBeResolved = true
-}
-val shade by configurations.registering {
-	isCanBeConsumed = false
-	isCanBeResolved = true
-}
+loom.splitEnvironmentSourceSets()
+
+val client by sourceSets.existing
+
 val natives by configurations.registering {
 	isCanBeConsumed = false
 	isCanBeResolved = true
+}
+
+val submodules by configurations.registering {
+	isCanBeConsumed = false
+	isCanBeResolved = false
 }
 
 val sources by configurations.registering {
@@ -26,18 +27,27 @@ val sources by configurations.registering {
 	attributes {
 		attribute(Category.CATEGORY_ATTRIBUTE, objects.named(Category::class, Category.DOCUMENTATION))
 	}
+
+	extendsFrom(submodules.get())
 }
 
-loom.splitEnvironmentSourceSets()
+val clientShade by configurations.registering {
+	isCanBeConsumed = false
+	isCanBeResolved = false
+}
 
-val client by sourceSets.existing
+val shade by configurations.registering {
+	isCanBeConsumed = false
+	isCanBeResolved = true
+	extendsFrom(submodules.get(), clientShade.get())
+}
 
-configurations.named("clientImplementation") {
+val clientImplementation by configurations.existing {
 	extendsFrom(clientShade.get())
 }
 
 configurations.implementation {
-	extendsFrom(shade.get())
+	extendsFrom(submodules.get())
 }
 
 loom {
@@ -48,7 +58,6 @@ loom {
 			sourceSet(SourceSet.MAIN_SOURCE_SET_NAME, projects.common)
 			sourceSet(SourceSet.MAIN_SOURCE_SET_NAME, projects.bindings)
 			configuration(shade.get())
-			configuration(clientShade.get())
 		}
 	}
 
@@ -74,9 +83,11 @@ dependencies {
 		clientShade(it)
 	}
 
-	sequenceOf(projects.bindings, projects.common).forEach {
-		shade(it)
-		sources(it)
+	submodules(projects.bindings) {
+		isTransitive = false
+	}
+	submodules(projects.common) {
+		isTransitive = false
 	}
 
 	natives(projects.natives)
@@ -112,7 +123,7 @@ tasks.processResources {
 
 tasks.shadowJar {
 	from(client.map { it.output })
-	configurations = clientShade.zip(shade, ::Pair).map { listOf(it.first, it.second) }
+	configurations = shade.map { listOf(it) }
 }
 
 tasks.sourcesJar {

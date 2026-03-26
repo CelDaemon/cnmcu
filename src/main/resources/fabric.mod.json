@@ -33,11 +33,5 @@
 		"minecraft": "~${minecraft_version}",
 		"java": ">=25",
 		"fabric-api": "*"
-	},
-	"mixins": [
-		{
-			"environment": "client",
-			"config": "cnmcu.client.mixin.json"
-		}
-	]
+	}
 }

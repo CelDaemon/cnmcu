@@ -157,13 +157,11 @@ public class IDEScreen extends AbstractContainerScreen<IDEMenu> {
                                 AddressMode.REPEAT,
                                 AddressMode.REPEAT,
                                 FilterMode.NEAREST,
-                                FilterMode.LINEAR,
+                                FilterMode.NEAREST,
                                 false),
                 0, 0, width, height,
                 0, 1, 1, 0
         );
-
-        super.extractRenderState(gui, mouseX, mouseY, delta);
     }
 
     @Override
