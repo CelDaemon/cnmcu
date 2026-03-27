@@ -63,7 +63,6 @@ abstract class Compile : DefaultTask() {
             executable = "cmake"
             args(
                 "--build", temporaryDir,
-                "--parallel", 4,
                 "--config", configuration.get()
             )
         }
