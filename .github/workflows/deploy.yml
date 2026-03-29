@@ -57,15 +57,12 @@ jobs:
         with:
           distribution: temurin
           java-version: 25
-      - name: Download java on Windows ARM
+      - name: Setup java on Windows ARM
         if: matrix.os == 'windows-11-arm'
-        run: curl -L https://aka.ms/download-jdk/microsoft-jdk-25.0.2-windows-aarch64.zip -o jdk.zip
-      - name: Extract java
-        if: matrix.os == 'windows-11-arm'
-        run: Expand-Archive -DestinationPath $(Get-Location) jdk.zip
-      - name: Add java to path
-        if: matrix.os == 'windows-11-arm'
-        run: echo "JAVA_HOME=$(Resolve-Path jdk-25.0.2+10)" >> "$ENV:GITHUB_ENV"
+        run: |
+          Invoke-WebRequest -OutFile jdk.zip https://aka.ms/download-jdk/microsoft-jdk-25.0.2-windows-aarch64.zip
+          Expand-Archive -DestinationPath $(Get-Location) jdk.zip
+          "JAVA_HOME=$(Resolve-Path jdk-25.0.2+10)" >> $ENV:GITHUB_ENV
 
       - name: Setup gradle
         uses: gradle/actions/setup-gradle@v5
