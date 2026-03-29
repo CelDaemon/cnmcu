@@ -61,8 +61,14 @@ jobs:
         if: matrix.os == 'windows-11-arm'
         run: |
           Invoke-WebRequest -OutFile jdk.zip https://aka.ms/download-jdk/microsoft-jdk-25.0.2-windows-aarch64.zip
-          Expand-Archive -DestinationPath $(Get-Location) jdk.zip
-          "JAVA_HOME=$(Resolve-Path jdk-25.0.2+10)" >> $ENV:GITHUB_ENV
+      #          Expand-Archive -DestinationPath $(Get-Location) jdk.zip
+      #          "JAVA_HOME=$(Resolve-Path jdk-25.0.2+10)" >> $ENV:GITHUB_ENV
+      - name: Setup java on Windows ARM
+        if: matrix.os == 'windows-11-arm'
+        uses: actions/setup-java@v5
+        with:
+          distribution: local
+          jdkFile: jdk.zip
 
       - name: Setup gradle
         uses: gradle/actions/setup-gradle@v5
