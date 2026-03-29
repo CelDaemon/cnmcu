@@ -12,8 +12,8 @@ jobs:
       - name: Setup java
         uses: actions/setup-java@v5
         with:
-          distribution: microsoft
-          java-version: 25.0.2
+          distribution: temurin
+          java-version: 25
 
       - name: Setup gradle
         uses: gradle/actions/setup-gradle@v5
