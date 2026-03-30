@@ -57,12 +57,16 @@ jobs:
         with:
           distribution: temurin
           java-version: 25
-      - name: Setup java on Windows ARM
+      - name: Retrieve Windows ARM java from cache
+        id: java-cache
         if: matrix.os == 'windows-11-arm'
-        run: |
-          Invoke-WebRequest -OutFile jdk.zip https://aka.ms/download-jdk/microsoft-jdk-25.0.2-windows-aarch64.zip
-      #          Expand-Archive -DestinationPath $(Get-Location) jdk.zip
-      #          "JAVA_HOME=$(Resolve-Path jdk-25.0.2+10)" >> $ENV:GITHUB_ENV
+        uses: actions/cache@v5
+        with:
+          key: win-arm-java-25
+          path: jdk.zip
+      - name: Setup java on Windows ARM
+        if: matrix.os == 'windows-11-arm' && steps.java-cache.outputs.cache-hit != 'true'
+        run: Invoke-WebRequest -OutFile jdk.zip https://aka.ms/download-jdk/microsoft-jdk-25.0.2-windows-aarch64.zip
       - name: Setup java on Windows ARM
         if: matrix.os == 'windows-11-arm'
         uses: actions/setup-java@v5
