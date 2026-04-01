@@ -1,11 +1,11 @@
 [versions]
-fabric-loom = { strictly = "1.15-SNAPSHOT" }
+fabric-loom = { strictly = "1.16.0-alpha.16" }
 imgui = { strictly = "1.88.0" }
 
 [libraries]
-minecraft = { group = "com.mojang", name = "minecraft", version = "26.1" }
-fabric-loader = { group = "net.fabricmc", name = "fabric-loader", version = "0.18.4" }
-fabric-api = { group = "net.fabricmc.fabric-api", name = "fabric-api", version = "0.144.0+26.1" }
+minecraft = { group = "com.mojang", name = "minecraft", version = "26.1.1" }
+fabric-loader = { group = "net.fabricmc", name = "fabric-loader", version = "0.18.5" }
+fabric-api = { group = "net.fabricmc.fabric-api", name = "fabric-api", version = "0.145.2+26.1.1" }
 fabric-loom = { group = "net.fabricmc.fabric-loom", name = "net.fabricmc.fabric-loom.gradle.plugin", version.ref = "fabric-loom" }
 jnigen = { group = "com.badlogicgames.jnigen", name = "jnigen-core", version = "3.1.1" }
 
