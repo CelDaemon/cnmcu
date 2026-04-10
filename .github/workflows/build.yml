@@ -16,13 +16,13 @@ jobs:
           java-version: 25
 
       - name: Setup gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v6
 
       - name: Build project
         run: ./gradlew --no-daemon :build
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           path: |
             build/libs/

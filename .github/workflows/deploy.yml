@@ -20,10 +20,10 @@ jobs:
           java-version: 25
 
       - name: Setup gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v6
 
       - name: Download natives
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           path: prebuilt
           pattern: natives-*
@@ -33,7 +33,7 @@ jobs:
         run: ./gradlew --no-daemon -P prebuilt_natives=prebuilt :build
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           path: |
             build/libs/
@@ -76,13 +76,13 @@ jobs:
           java-version: 25
 
       - name: Setup gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v6
 
       - name: Build natives
         run: ./gradlew --no-daemon :natives:assemble
 
       - name: Upload natives
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           path: natives/build/bin/*
           name: natives-${{ matrix.os }}
